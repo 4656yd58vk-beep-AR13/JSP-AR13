@@ -394,6 +394,9 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
     <div class="section">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div class="section-title" style="margin-bottom:0">JSP de ma section</div>
+        <select class="form-ctrl sa-only" id="filter-caserne-jsps" style="display:none;width:150px;font-size:12px;padding:6px 10px">
+          <option value="">Toutes casernes</option>
+        </select>
       </div>
       <div style="margin-bottom:14px">
         <input class="form-ctrl" id="jsps-search" placeholder="🔍 Rechercher un JSP…">
@@ -633,6 +636,12 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
         </div>
         <div class="ig-item form-group"><label class="form-label">Section</label><input class="form-ctrl" id="nm-section" placeholder="Ex : Section A"></div>
       </div>
+      <div class="form-group sa-only" id="nm-caserne-row" style="display:none">
+        <label class="form-label">Caserne</label>
+        <input class="form-ctrl" id="nm-caserne" placeholder="Ex : CSP La Ferté-Bernard">
+      </div>
+      <div class="ig">
+      </div>
       <div class="ig">
         <div class="ig-item form-group"><label class="form-label">Date naissance</label><input class="form-ctrl" type="date" id="nm-ddn"></div>
         <div class="ig-item form-group"><label class="form-label">Date entrée</label><input class="form-ctrl" type="date" id="nm-entree"></div>
@@ -731,6 +740,7 @@ const db = supabase.createClient(SUPA_URL, SUPA_KEY);
 // ══════════════════════════════════════════════════════════
 let user = null;
 let seances = [], cours = [], docs = [], jsps = [];
+let userCaserne = null; // caserne de l'utilisateur connecté
 let appelData = {}; // { utilisateur_id: true/false }
 let curSeanceId = null, curCoursId = null, curJspId = null, curProgJspId = null, curProgCoursId = null;
 let seanceFilter = 'all', coursFilter = 'all', docFilter = 'all';
@@ -769,8 +779,10 @@ function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 function showErr(id,msg){ const e=document.getElementById(id); e.textContent=msg; e.style.display='block'; }
 function hideErr(id){ const e=document.getElementById(id); if(e) e.style.display='none'; }
 function togglePw(id,btn){ const el=document.getElementById(id); const show=el.type==='password'; el.type=show?'text':'password'; var iEl=btn.querySelector('i,span'); if(iEl) iEl.textContent=show?'🙈':'👁'; }
-function isMonitor(){ return user && (user.role==='moniteur'||user.role==='responsable'); }
-function isAdmin(){ return user && user.role==='responsable'; }
+function isMonitor(){ return user && (user.role==='moniteur'||user.role==='responsable'||user.super_admin); }
+function isAdmin(){ return user && (user.role==='responsable'||user.super_admin); }
+function isSuperAdmin(){ return user && user.super_admin; }
+function getCaserne(){ return isSuperAdmin() ? null : (user.caserne||null); }
 
 function showPage(id){
   ['pg-login','pg-app'].forEach(function(p){
@@ -843,10 +855,17 @@ async function initApp(){
   // Afficher/masquer items selon rôle
   document.querySelectorAll('.monitor-only').forEach(el=>el.style.display=isMonitor()?'flex':'none');
   document.querySelectorAll('.admin-only').forEach(el=>el.style.display=isAdmin()?'flex':'none');
+  document.querySelectorAll('.sa-only').forEach(el=>el.style.display=isSuperAdmin()?'flex':'none');
   // Header
-  document.getElementById('h-sub').textContent=(ROLE_LABELS[user.role]||user.role)+' · '+(user.section||'CSP LFB');
+  userCaserne = user.caserne||null;
+  var roleLbl = user.super_admin ? 'Super Admin' : (ROLE_LABELS[user.role]||user.role);
+  document.getElementById('h-sub').textContent=roleLbl+' · '+(user.caserne||'CSP LFB');
+  // Badge super admin
+  var badgeWrap = document.getElementById('h-badge-wrap');
+  if(badgeWrap) badgeWrap.innerHTML = user.super_admin ? '<span class="header-badge">SA</span>' : '';
   // Charger tout
   await Promise.all([loadAllSeances(), loadAllCours(), loadAllDocs(), loadAllJsps()]);
+  if(isSuperAdmin()) await populateCaserneFilters();
   switchTab('sc-home');
 }
 
@@ -866,9 +885,24 @@ async function loadAllSeances(){
   const nsSel=document.getElementById('ns-cours');
   if(nsSel) nsSel.innerHTML='<option value="">— Aucun —</option>'+((await db.from('cours').select('id,titre').order('titre')).data||[]).map(c=>`<option value="${c.id}">${c.titre}</option>`).join('');
 }
-async function loadAllCours(){ const {data}=await db.from('cours').select('*').order('categorie,titre'); cours=data||[]; }
-async function loadAllDocs(){ const {data}=await db.from('documents').select('*').order('created_at',{ascending:false}); docs=data||[]; }
-async function loadAllJsps(){ const {data}=await db.from('utilisateurs').select('*').order('nom'); jsps=data||[]; }
+async function loadAllCours(){
+  var q = db.from('cours').select('*').order('categorie,titre');
+  if(!isSuperAdmin() && userCaserne) q = q.or('caserne.eq.'+userCaserne+',caserne.is.null');
+  const {data}=await q;
+  cours=data||[];
+}
+async function loadAllDocs(){
+  var q = db.from('documents').select('*').order('created_at',{ascending:false});
+  if(!isSuperAdmin() && userCaserne) q = q.or('caserne.eq.'+userCaserne+',caserne.is.null');
+  const {data}=await q;
+  docs=data||[];
+}
+async function loadAllJsps(){
+  var q = db.from('utilisateurs').select('*').order('nom');
+  if(!isSuperAdmin() && userCaserne) q = q.eq('caserne', userCaserne);
+  const {data}=await q;
+  jsps=data||[];
+}
 
 // ══════════════════════════════════════════════════════════
 // ACCUEIL
@@ -877,7 +911,7 @@ async function renderHome(){
   const name=[user.grade?( GRADE_LABELS[user.grade]||user.grade):'',user.prenom,user.nom].filter(Boolean);
   document.getElementById('home-grade').textContent=(GRADE_LABELS[user.grade]||user.grade||'').toUpperCase();
   document.getElementById('home-name').textContent=[user.prenom,user.nom].filter(Boolean).join(' ')||'Mat. '+user.matricule;
-  document.getElementById('home-section').textContent=user.section||'CSP La Ferté-Bernard';
+  document.getElementById('home-section').textContent=(user.caserne||'CSP La Ferté-Bernard')+(user.section?' · '+user.section:'');
   // Stats hero
   const [presRes,progRes]=await Promise.all([
     db.from('presences').select('*').eq('utilisateur_id',user.id).eq('present',true),
@@ -885,21 +919,22 @@ async function renderHome(){
   ]);
   const nbPres=(presRes.data||[]).length;
   const nbValidés=(progRes.data||[]).length;
-  document.getElementById('home-stats').innerHTML=`
-    <div class="hero-stat"><strong>${nbPres}</strong><span>Présences</span></div>
-    <div class="hero-stat"><strong>${nbValidés}</strong><span>Cours validés</span></div>`;
-  // Modules
-  const modules=[
-    {ico:'📅',lbl:'Séances',sub:'Planning et présences',tab:'sc-seances'},
-    {ico:'📚',lbl:'Cours',sub:'Catalogue des cours',tab:'sc-cours'},
-    {ico:'📁',lbl:'Documents',sub:'Ressources partagées',tab:'sc-docs'},
-    {ico:'📊',lbl:'Progression',sub:'Mes résultats',tab:'sc-progression'},
-  ];
+  // Super admin : stats globales
+  var statsHtml = '';
+  if(isSuperAdmin()){
+    const {data:allJsps}=await db.from('utilisateurs').select('id').eq('role','jsp');
+    const {data:allSeances}=await db.from('seances').select('id');
+    statsHtml = '<div class="hero-stat"><strong>'+(allJsps||[]).length+'</strong><span>JSP total</span></div>'+
+                '<div class="hero-stat"><strong>'+(allSeances||[]).length+'</strong><span>Séances</span></div>';
+  } else {
+    statsHtml = '<div class="hero-stat"><strong>'+nbPres+'</strong><span>Présences</span></div>'+
+                '<div class="hero-stat"><strong>'+nbValidés+'</strong><span>Cours validés</span></div>';
+  }
   if(isMonitor()){
-    modules.push({ico:'✅',lbl:'Appel',sub:'Enregistrer les présences',tab:'sc-appel'});
     modules.push({ico:'👥',lbl:'Mes JSP',sub:'Suivi individuel',tab:'sc-jsps'});
   }
   if(isAdmin()) modules.push({ico:'⚙️',lbl:'Admin',sub:'Gestion complète',tab:'sc-admin'});
+  document.getElementById('home-stats').innerHTML=statsHtml;
   document.getElementById('home-grid').innerHTML=modules.map(m=>`
     <div class="module-card" onclick="switchTab('${m.tab}')">
       <div class="module-card-icon">${m.ico}</div>
@@ -938,9 +973,31 @@ async function renderHome(){
   }
 }
 
+
+// ══════════════════════════════════════════════════════════
+// SUPER ADMIN — gestion multi-casernes
+// ══════════════════════════════════════════════════════════
+async function populateCaserneFilters(){
+  if(!isSuperAdmin()) return;
+  // Récupérer toutes les casernes distinctes
+  const {data}=await db.from('utilisateurs').select('caserne').not('caserne','is',null);
+  const casernes=[...new Set((data||[]).map(u=>u.caserne).filter(Boolean))].sort();
+  const opts='<option value="">Toutes casernes</option>'+casernes.map(c=>`<option value="${c}">${c}</option>`).join('');
+  ['filter-caserne-jsps','filter-caserne-seances'].forEach(id=>{
+    var el=document.getElementById(id);
+    if(el){ el.innerHTML=opts; el.style.display=''; }
+  });
+  var nmCasRow=document.getElementById('nm-caserne-row');
+  if(nmCasRow) nmCasRow.style.display='block';
+}
+
 // ══════════════════════════════════════════════════════════
 // SÉANCES
 // ══════════════════════════════════════════════════════════
+function loadSeancesFiltered(caserne){
+  const list=seances.filter(s=>(seanceFilter==='all'||s.statut===seanceFilter)&&(!caserne||s.caserne===caserne));
+  renderSeancesList(list);
+}
 function loadSeances(){
   const list=seanceFilter==='all'?seances:seances.filter(s=>s.statut===seanceFilter);
   const el=document.getElementById('l-seances');
@@ -1012,7 +1069,7 @@ async function createSeance(){
   const date=document.getElementById('ns-date').value;
   if(!titre||!date){ showErr('ns-err','Titre et date obligatoires.'); return; }
   const {error}=await db.from('seances').insert({
-    titre, date_seance:date, createur_id:user.id,
+    titre, date_seance:date, createur_id:user.id, caserne:userCaserne||null,
     cours_id:document.getElementById('ns-cours').value||null,
     heure_debut:document.getElementById('ns-debut').value||null,
     heure_fin:document.getElementById('ns-fin').value||null,
@@ -1077,7 +1134,7 @@ async function createCours(){
   const titre=document.getElementById('nc-titre').value.trim();
   if(!titre){ toast('Titre obligatoire'); return; }
   const {error}=await db.from('cours').insert({
-    titre, createur_id:user.id,
+    titre, createur_id:user.id, caserne:userCaserne||null,
     categorie:document.getElementById('nc-cat').value,
     duree_minutes:parseInt(document.getElementById('nc-duree').value)||null,
     objectifs:document.getElementById('nc-obj').value.trim()||null,
@@ -1120,7 +1177,7 @@ async function createDoc(){
   if(upErr){ showErr('nd-err','Erreur upload : '+upErr.message); return; }
   const {data:pub}=db.storage.from('jsp-files').getPublicUrl(path);
   const {error}=await db.from('documents').insert({
-    titre, createur_id:user.id,
+    titre, createur_id:user.id, caserne:userCaserne||null,
     categorie:document.getElementById('nd-cat').value,
     description:document.getElementById('nd-desc').value.trim()||null,
     fichier_url:pub.publicUrl, fichier_nom:file.name,
@@ -1247,8 +1304,8 @@ async function saveAppel(){
 // ══════════════════════════════════════════════════════════
 // MES JSP
 // ══════════════════════════════════════════════════════════
-function loadJsps(search=''){
-  const list=jsps.filter(j=>j.role==='jsp'&&(!search||(j.prenom+' '+j.nom+' '+j.matricule).toLowerCase().includes(search.toLowerCase())));
+function loadJsps(search='', caserneFilter=''){
+  const list=jsps.filter(j=>j.role==='jsp'&&(!search||(j.prenom+' '+j.nom+' '+j.matricule).toLowerCase().includes(search.toLowerCase()))&&(!caserneFilter||j.caserne===caserneFilter));
   const el=document.getElementById('l-jsps');
   if(!list.length){ el.innerHTML=`<div class="empty"><span style="font-style:normal">👥</span><p>Aucun JSP</p></div>`; return; }
   const sorted=[...list].sort((a,b)=>(a.nom||'').localeCompare(b.nom||''));
@@ -1395,6 +1452,7 @@ async function createMembre(){
   const mdpHash=hash(mat+'2026');
   const {error}=await db.from('utilisateurs').insert({
     matricule:mat, prenom, nom,
+    caserne: isSuperAdmin() ? (document.getElementById('nm-caserne')?.value||null) : (userCaserne||null),
     role:document.getElementById('nm-role').value,
     grade:document.getElementById('nm-grade').value,
     section:document.getElementById('nm-section').value.trim()||null,
@@ -1532,6 +1590,10 @@ document.addEventListener('DOMContentLoaded', function(){
 
   // Recherche JSP
   document.getElementById('jsps-search').addEventListener('input', e=>loadJsps(e.target.value));
+  var fcJsps=document.getElementById('filter-caserne-jsps');
+  if(fcJsps) fcJsps.addEventListener('change', function(){ loadJsps('', this.value); });
+  var fcSeances=document.getElementById('filter-caserne-seances');
+  if(fcSeances) fcSeances.addEventListener('change', function(){ loadSeancesFiltered(this.value); });
 });
 </script>
 </body>
