@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="JSP LFB">
+<meta name="theme-color" content="#1a56a0">
+<title>JSP — CSP La Ferté-Bernard</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+:root{
+  --blue:#1a56a0;--blue-dark:#123d7a;--blue-light:#dbeafe;
+  --green:#059669;--green-light:#d1fae5;
+  --amber:#d97706;--amber-light:#fef3c7;
+  --red:#dc2626;--red-light:#fee2e2;
+  --purple:#7c3aed;--purple-light:#ede9fe;
+  --border:#e5e7eb;--text:#111827;--text2:#6b7280;
+  --bg:#fff;--bg2:#f9fafb;--radius:14px;--radius-sm:10px
+}
+.app{max-width:430px;margin:0 auto;min-height:100vh;background:var(--bg);display:flex;flex-direction:column;box-shadow:0 0 40px rgba(0,0,0,0.08)}
+
+/* AUTH */
+.auth{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 24px;background:linear-gradient(160deg,var(--blue) 0%,var(--blue-dark) 100%)}
+.auth-logo{width:80px;height:80px;background:#fff;border-radius:20px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:40px;box-shadow:0 8px 32px rgba(0,0,0,0.2)}
+.auth-title{font-size:26px;font-weight:800;color:#fff;margin-bottom:4px;letter-spacing:-0.5px}
+.auth-sub{font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:32px}
+.auth-card{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.15)}
+.auth-card-title{font-size:17px;font-weight:700;color:var(--text);margin-bottom:16px}
+
+/* FORMS */
+.form-group{margin-bottom:14px}
+.form-label{font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:5px}
+.form-ctrl{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:15px;background:#fff;color:var(--text);font-family:inherit;-webkit-appearance:none;transition:border-color 0.15s}
+.form-ctrl:focus{outline:none;border-color:var(--blue)}
+select.form-ctrl{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:34px}
+textarea.form-ctrl{resize:none;line-height:1.5}
+
+/* BUTTONS */
+.btn{width:100%;padding:13px 18px;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;transition:opacity 0.15s}
+.btn:disabled{opacity:0.5}
+.btn-blue{background:var(--blue);color:#fff;box-shadow:0 4px 14px rgba(26,86,160,0.35)}
+.btn-green{background:var(--green);color:#fff;box-shadow:0 4px 14px rgba(5,150,105,0.3)}
+.btn-ghost{background:var(--bg2);color:var(--text);border:1.5px solid var(--border)}
+.btn-red{background:var(--red);color:#fff}
+.btn-sm{padding:8px 14px;font-size:13px;width:auto}
+
+/* HEADER */
+.header{background:var(--blue);padding:max(env(safe-area-inset-top),14px) 16px 12px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100}
+.header-logo{width:36px;height:36px;background:rgba(255,255,255,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;flex-shrink:0}
+.header-info{flex:1;min-width:0}
+.header-title{color:#fff;font-size:15px;font-weight:700}
+.header-sub{color:rgba(255,255,255,0.7);font-size:11px;margin-top:1px}
+.header-badge{background:rgba(255,255,255,0.2);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+
+/* DRAWER */
+#drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;opacity:0;pointer-events:none;transition:opacity 0.25s}
+#drawer-overlay.open{opacity:1;pointer-events:all}
+#drawer{position:fixed;top:0;left:0;width:280px;height:100vh;background:#fff;z-index:201;transform:translateX(-100%);transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;overflow:hidden;box-shadow:4px 0 24px rgba(0,0,0,0.15)}
+#drawer.open{transform:translateX(0)}
+#drawer-head{background:var(--blue);padding:max(env(safe-area-inset-top),44px) 16px 16px}
+#drawer-avatar{width:48px;height:48px;background:rgba(255,255,255,0.2);border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;font-size:22px}
+#drawer-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0;padding:8px 0}
+#drawer-footer{padding:8px 0 max(env(safe-area-inset-bottom),12px);border-top:1px solid var(--border);flex-shrink:0}
+.drawer-section{font-size:10px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;padding:12px 18px 4px}
+.drawer-item{display:flex;align-items:center;gap:12px;padding:12px 18px;cursor:pointer;border:none;background:none;width:100%;font-family:inherit;font-size:14px;color:var(--text);text-align:left;border-left:3px solid transparent}
+.drawer-item:active{background:var(--bg2)}
+.drawer-item.active{color:var(--blue);font-weight:700;border-left-color:var(--blue);background:linear-gradient(90deg,rgba(26,86,160,0.08) 0%,transparent 100%)}
+.drawer-item i{font-size:20px;width:24px;flex-shrink:0;color:var(--text2)}
+.drawer-item.active i{color:var(--blue)}
+.drawer-sep{height:1px;background:var(--border);margin:6px 16px}
+
+/* SCREENS */
+.screen{display:none;flex:1;padding-bottom:80px}
+.screen.active{display:block}
+
+/* SECTIONS */
+.section{padding:16px}
+.section-title{font-size:10px;font-weight:800;color:var(--text2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px}
+
+/* CARDS */
+.card{background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,var(--blue),var(--blue-dark));margin:16px;border-radius:var(--radius);padding:20px;color:#fff;position:relative;overflow:hidden}
+.hero::after{content:'🛡️';position:absolute;right:-8px;bottom:-10px;font-size:80px;opacity:0.1}
+.hero-grade{font-size:10px;opacity:0.7;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px}
+.hero-name{font-size:22px;font-weight:800;margin-bottom:4px;letter-spacing:-0.3px}
+.hero-sub{font-size:12px;opacity:0.75}
+.hero-stats{display:flex;gap:20px;margin-top:14px}
+.hero-stat strong{display:block;font-size:22px;font-weight:800}
+.hero-stat span{font-size:11px;opacity:0.75}
+
+/* GRID MODULES */
+.module-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 16px}
+.module-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:transform 0.15s;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
+.module-card:active{transform:scale(0.96)}
+.module-card-icon{font-size:30px;margin-bottom:10px}
+.module-card-label{font-size:13px;font-weight:700;color:var(--text)}
+.module-card-sub{font-size:11px;color:var(--text2);margin-top:2px}
+.module-card.highlight{border-color:var(--blue);background:linear-gradient(135deg,#eff6ff 0%,#fff 100%)}
+.module-badge{background:var(--blue);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;float:right;margin-top:-2px}
+
+/* LISTE ROWS */
+.row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1.5px solid var(--border);cursor:pointer}
+.row:last-child{border-bottom:none}
+.row:active{opacity:0.7}
+.row-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.row-info{flex:1;min-width:0}
+.row-name{font-size:14px;font-weight:700;color:var(--text)}
+.row-detail{font-size:12px;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row-meta{text-align:right;flex-shrink:0}
+
+/* BADGES */
+.badge{display:inline-flex;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.02em}
+.badge-blue{background:var(--blue-light);color:var(--blue)}
+.badge-green{background:var(--green-light);color:var(--green)}
+.badge-amber{background:var(--amber-light);color:var(--amber)}
+.badge-red{background:var(--red-light);color:var(--red)}
+.badge-purple{background:var(--purple-light);color:var(--purple)}
+.badge-gray{background:var(--bg2);color:var(--text2)}
+
+/* CHIPS */
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px}
+.chip{padding:6px 14px;border-radius:20px;font-size:13px;border:1.5px solid var(--border);background:#fff;color:var(--text2);cursor:pointer;font-family:inherit;white-space:nowrap;font-weight:500}
+.chip.active{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:700}
+
+/* PROGRESS */
+.prog-bar{height:6px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-top:6px}
+.prog-fill{height:100%;background:var(--blue);border-radius:3px;transition:width 0.4s}
+.prog-fill.green{background:var(--green)}
+.prog-fill.amber{background:var(--amber)}
+
+/* PRESENCE DOT */
+.pres-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.pres-dot.present{background:var(--green)}
+.pres-dot.absent{background:var(--red)}
+.pres-dot.unknown{background:var(--border)}
+
+/* TOGGLE */
+.toggle-switch{position:relative;display:inline-block;width:46px;height:26px}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;cursor:pointer;inset:0;background:var(--border);border-radius:26px;transition:.3s}
+.toggle-slider:before{position:absolute;content:"";height:20px;width:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+input:checked+.toggle-slider{background:var(--blue)}
+input:checked+.toggle-slider:before{transform:translateX(20px)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:20px 20px 0 0;padding:0 16px max(env(safe-area-inset-bottom),24px);width:100%;max-width:430px;max-height:92vh;overflow-y:auto}
+.modal-handle{width:38px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0}
+.modal-inner{padding:18px 0}
+.modal-title{font-size:17px;font-weight:800;color:var(--text);margin-bottom:3px}
+.modal-sub{font-size:13px;color:var(--text2);margin-bottom:18px}
+
+/* TOAST */
+.toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#1f2937;color:#fff;padding:12px 22px;border-radius:30px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity 0.25s;pointer-events:none;white-space:nowrap;box-shadow:0 6px 24px rgba(0,0,0,0.25)}
+.toast.show{opacity:1}
+
+/* LOADER / EMPTY */
+.loader{text-align:center;padding:32px 16px;color:var(--text2)}
+.loader i{font-size:28px;display:block;margin-bottom:8px;opacity:0.4;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:40px 16px;color:var(--text2)}
+.empty i{font-size:44px;margin-bottom:12px;display:block;opacity:0.25}
+.empty p{font-size:14px;font-weight:600;margin-bottom:4px;color:var(--text)}
+.empty small{font-size:12px}
+
+/* ERROR BOX */
+.err-box{font-size:13px;color:#991b1b;background:#fee2e2;padding:10px 12px;border-radius:var(--radius-sm);margin-bottom:12px;display:none;border-left:3px solid var(--red)}
+
+/* ACTION ROW */
+.action-row{display:flex;gap:8px;margin-top:8px}
+.btn-ok{flex:1;padding:12px;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit}
+.btn-ko{flex:1;padding:12px;background:#fff;color:var(--red);border:1.5px solid var(--red);border-radius:var(--radius-sm);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit}
+
+/* STAT GRID */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px}
+.stat-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
+.stat-num{font-size:30px;font-weight:800;line-height:1}
+.stat-label{font-size:11px;color:var(--text2);margin-top:4px;font-weight:500}
+
+/* SUBNAV */
+.subnav{background:var(--bg2);border-bottom:1.5px solid var(--border);padding:0 16px;display:none}
+.subnav.active{display:block}
+.subnav-inner{display:flex;gap:6px;padding:8px 0;overflow-x:auto;scrollbar-width:none}
+
+/* APPEL */
+.appel-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1.5px solid var(--border)}
+.appel-row:last-child{border-bottom:none}
+.appel-btns{display:flex;gap:6px;flex-shrink:0}
+.appel-btn{width:36px;height:36px;border:none;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all 0.15s}
+.appel-btn.present{background:var(--green-light);color:var(--green)}
+.appel-btn.absent{background:var(--red-light);color:var(--red)}
+.appel-btn.inactive{background:var(--bg2);color:var(--text2)}
+
+/* BREVET BADGE */
+.brevet{background:var(--purple-light);color:var(--purple);font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;display:inline-block;margin:3px}
+
+/* INFO GRID */
+.ig{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.ig-item label{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:3px}
+.ig-item span{font-size:14px;font-weight:600;color:var(--text)}
+
+/* RETURN BTN */
+#btn-return{position:fixed;bottom:32px;right:16px;z-index:250;background:var(--blue);color:#fff;border:none;border-radius:30px;padding:10px 18px;display:none;align-items:center;gap:6px;cursor:pointer;box-shadow:0 4px 16px rgba(26,86,160,0.4);font-family:inherit;font-size:12px;font-weight:700}
+#btn-return.show{display:flex}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ LOGIN ═══════════════ -->
+<div id="pg-login" class="app" style="display:none">
+  <div class="auth">
+    <div class="auth-logo">🛡️</div>
+    <div class="auth-title">JSP LFB</div>
+    <div class="auth-sub">Jeunes Sapeurs-Pompiers — CSP La Ferté-Bernard</div>
+    <div class="auth-card">
+      <div class="auth-card-title">Connexion</div>
+      <div class="err-box" id="login-err"></div>
+      <div class="form-group">
+        <label class="form-label">Matricule</label>
+        <input class="form-ctrl" id="l-mat" placeholder="Ex : 1001" inputmode="numeric" autocomplete="off" style="font-size:18px;letter-spacing:0.1em">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mot de passe</label>
+        <div style="position:relative">
+          <input class="form-ctrl" id="l-pw" type="password" placeholder="Votre mot de passe" style="font-size:16px">
+          <button type="button" onclick="togglePw('l-pw',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);font-size:19px;padding:4px"><i class="ti ti-eye"></i></button>
+        </div>
+      </div>
+      <button class="btn btn-blue" id="btn-login" style="margin-top:4px"><i class="ti ti-login"></i>Se connecter</button>
+      <div style="height:10px"></div>
+      <button class="btn btn-ghost" id="btn-goto-newpw" style="font-size:13px"><i class="ti ti-key"></i>Première connexion</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ PREMIÈRE CONNEXION ═══════════════ -->
+<div id="pg-newpw" class="app" style="display:none">
+  <div class="auth">
+    <div class="auth-logo">🔑</div>
+    <div class="auth-title">Première connexion</div>
+    <div class="auth-sub">Créez votre mot de passe personnel</div>
+    <div class="auth-card">
+      <div class="err-box" id="newpw-err"></div>
+      <div class="form-group">
+        <label class="form-label">Matricule</label>
+        <input class="form-ctrl" id="fp-mat" placeholder="Ex : 1001" inputmode="numeric" style="font-size:18px">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mot de passe provisoire</label>
+        <div style="position:relative">
+          <input class="form-ctrl" id="fp-tmp" type="password" placeholder="Matricule + 2026">
+          <button type="button" onclick="togglePw('fp-tmp',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);font-size:19px;padding:4px"><i class="ti ti-eye"></i></button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nouveau mot de passe</label>
+        <div style="position:relative">
+          <input class="form-ctrl" id="fp-new1" type="password" placeholder="Min. 6 caractères">
+          <button type="button" onclick="togglePw('fp-new1',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);font-size:19px;padding:4px"><i class="ti ti-eye"></i></button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirmer</label>
+        <div style="position:relative">
+          <input class="form-ctrl" id="fp-new2" type="password" placeholder="Répéter le mot de passe">
+          <button type="button" onclick="togglePw('fp-new2',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);font-size:19px;padding:4px"><i class="ti ti-eye"></i></button>
+        </div>
+      </div>
+      <button class="btn btn-blue" id="btn-set-pw"><i class="ti ti-check"></i>Créer mon mot de passe</button>
+      <div style="height:10px"></div>
+      <button class="btn btn-ghost" id="btn-back-login" style="font-size:13px"><i class="ti ti-arrow-left"></i>Retour</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ APP ═══════════════ -->
+<div id="pg-app" class="app" style="display:none">
+
+  <!-- DRAWER OVERLAY -->
+  <div id="drawer-overlay"></div>
+
+  <!-- DRAWER -->
+  <div id="drawer">
+    <div id="drawer-head">
+      <div id="drawer-avatar">🛡️</div>
+      <div style="color:#fff;font-weight:800;font-size:16px" id="d-name">JSP LFB</div>
+      <div style="color:rgba(255,255,255,0.7);font-size:12px;margin-top:2px" id="d-role">—</div>
+    </div>
+    <div id="drawer-scroll">
+      <div class="drawer-section">Modules</div>
+      <button class="drawer-item" data-tab="sc-home"><i class="ti ti-home"></i><span>Accueil</span></button>
+      <button class="drawer-item" data-tab="sc-seances"><i class="ti ti-calendar-event"></i><span>Séances</span></button>
+      <button class="drawer-item" data-tab="sc-cours"><i class="ti ti-book"></i><span>Cours</span></button>
+      <button class="drawer-item" data-tab="sc-docs"><i class="ti ti-folder"></i><span>Documents</span></button>
+      <button class="drawer-item" data-tab="sc-progression"><i class="ti ti-chart-bar"></i><span>Ma progression</span></button>
+      <div class="drawer-sep"></div>
+      <div class="drawer-section">Administration</div>
+      <button class="drawer-item monitor-only" data-tab="sc-appel" style="display:none"><i class="ti ti-clipboard-list"></i><span>Faire l'appel</span></button>
+      <button class="drawer-item monitor-only" data-tab="sc-jsps" style="display:none"><i class="ti ti-users"></i><span>Mes JSP</span></button>
+      <button class="drawer-item admin-only" data-tab="sc-admin" style="display:none"><i class="ti ti-settings"></i><span>Administration</span></button>
+      <div class="drawer-sep"></div>
+      <div class="drawer-section">Compte</div>
+      <button class="drawer-item" data-tab="sc-profil"><i class="ti ti-user-circle"></i><span>Mon profil</span></button>
+    </div>
+    <div id="drawer-footer">
+      <button class="drawer-item" id="btn-drawer-logout" style="color:var(--red)">
+        <i class="ti ti-logout" style="color:var(--red)"></i><span>Se déconnecter</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-logo" id="btn-drawer-open">🛡️</div>
+    <div class="header-info">
+      <div class="header-title" id="h-title">JSP LFB</div>
+      <div class="header-sub" id="h-sub">CSP La Ferté-Bernard</div>
+    </div>
+    <div id="h-badge-wrap"></div>
+  </div>
+
+  <!-- ── ACCUEIL ── -->
+  <div class="screen" id="sc-home">
+    <div class="hero" id="home-hero">
+      <div class="hero-grade" id="home-grade">—</div>
+      <div class="hero-name" id="home-name">Bienvenue</div>
+      <div class="hero-sub" id="home-section">CSP La Ferté-Bernard</div>
+      <div class="hero-stats" id="home-stats"></div>
+    </div>
+    <div class="module-grid" id="home-grid"></div>
+    <div class="section">
+      <div class="section-title">Prochaine séance</div>
+      <div id="home-next-seance"><div class="loader"><i class="ti ti-loader"></i>Chargement…</div></div>
+      <div style="height:8px"></div>
+      <div class="section-title">Activité récente</div>
+      <div id="home-activite"><div class="loader"><i class="ti ti-loader"></i>Chargement…</div></div>
+    </div>
+  </div>
+
+  <!-- ── SÉANCES ── -->
+  <div class="screen" id="sc-seances">
+    <div class="section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="section-title" style="margin-bottom:0">Planning des séances</div>
+        <button class="btn btn-blue btn-sm monitor-only" id="btn-new-seance" style="display:none"><i class="ti ti-plus"></i>Créer</button>
+      </div>
+      <div class="chips" style="margin-bottom:14px">
+        <button class="chip active" data-sfilter="all">Toutes</button>
+        <button class="chip" data-sfilter="planifiee">À venir</button>
+        <button class="chip" data-sfilter="terminee">Terminées</button>
+        <button class="chip" data-sfilter="annulee">Annulées</button>
+      </div>
+      <div id="l-seances"><div class="loader"><i class="ti ti-loader"></i>Chargement…</div></div>
+    </div>
+  </div>
+
+  <!-- ── COURS ── -->
+  <div class="screen" id="sc-cours">
+    <div class="section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="section-title" style="margin-bottom:0">Catalogue des cours</div>
+        <button class="btn btn-blue btn-sm monitor-only" id="btn-new-cours" style="display:none"><i class="ti ti-plus"></i>Créer</button>
+      </div>
+      <div class="chips" style="margin-bottom:14px">
+        <button class="chip active" data-cfilter="all">Tous</button>
+        <button class="chip" data-cfilter="secourisme">🚑 Secourisme</button>
+        <button class="chip" data-cfilter="incendie">🔥 Incendie</button>
+        <button class="chip" data-cfilter="sport">💪 Sport</button>
+        <button class="chip" data-cfilter="citoyennete">🎖️ Citoyenneté</button>
+        <button class="chip" data-cfilter="technique">🔧 Technique</button>
+        <button class="chip" data-cfilter="autre">📋 Autre</button>
+      </div>
+      <div id="l-cours"><div class="loader"><i class="ti ti-loader"></i>Chargement…</div></div>
+    </div>
+  </div>
+
+  <!-- ── DOCUMENTS ── -->
+  <div class="screen" id="sc-docs">
+    <div class="section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="section-title" style="margin-bottom:0">Documents</div>
+        <button class="btn btn-blue btn-sm monitor-only" id="btn-new-doc" style="display:none"><i class="ti ti-upload"></i>Ajouter</button>
+      </div>
+      <div class="chips" style="margin-bottom:14px">
+        <button class="chip active" data-dfilter="all">Tous</button>
+        <button class="chip" data-dfilter="cours">📚 Cours</button>
+        <button class="chip" data-dfilter="reglement">📜 Règlement</button>
+        <button class="chip" data-dfilter="administratif">📋 Administratif</button>
+        <button class="chip" data-dfilter="autre">📁 Autre</button>
+      </div>
+      <div id="l-docs"><div class="loader"><i class="ti ti-loader"></i>Chargement…</div></div>
+    </div>
+  </div>
+
+  <!-- ── MA PROGRESSION ── -->
+  <div class="screen" id="sc-progression">
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-num" id="prog-presences" style="color:var(--blue)">—</div><div class="stat-label">Présences</div></div>
+      <div class="stat-card"><div class="stat-num" id="prog-cours-ok" style="color:var(--green)">—</div><div class="stat-label">Cours validés</div></div>
+    </div>
+    <div class="section" style="padding-top:0">
+      <div class="section-title">Mes brevets</div>
+      <div id="prog-brevets"><div class="empty"><i class="ti ti-award"></i><p>Aucun brevet</p></div></div>
+      <div style="height:14px"></div>
+      <div class="section-title">Progression par cours</div>
+      <div id="prog-liste"><div class="loader"><i class="ti ti-loader"></i>Chargement…</div></div>
+    </div>
+  </div>
+
+  <!-- ── APPEL (moniteur+) ── -->
+  <div class="screen" id="sc-appel">
+    <div class="section">
+      <div class="section-title">Sélectionner une séance</div>
+      <select class="form-ctrl" id="appel-select-seance" style="margin-bottom:14px">
+        <option value="">— Choisir une séance —</option>
+      </select>
+      <div id="appel-info" style="display:none" class="card" style="margin-bottom:14px"></div>
+      <div class="section-title">Liste des JSP</div>
+      <div id="l-appel"><div class="empty"><i class="ti ti-clipboard-list"></i><p>Sélectionnez une séance</p></div></div>
+      <div id="appel-actions" style="display:none;margin-top:14px">
+        <button class="btn btn-green" id="btn-save-appel"><i class="ti ti-device-floppy"></i>Enregistrer l'appel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MES JSP (moniteur+) ── -->
+  <div class="screen" id="sc-jsps">
+    <div class="section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="section-title" style="margin-bottom:0">JSP de ma section</div>
+      </div>
+      <div style="margin-bottom:14px">
+        <input class="form-ctrl" id="jsps-search" placeholder="🔍 Rechercher un JSP…">
+      </div>
+      <div id="l-jsps"><div class="loader"><i class="ti ti-loader"></i>Chargement…</div></div>
+    </div>
+  </div>
+
+  <!-- ── ADMIN ── -->
+  <div class="screen" id="sc-admin">
+    <div class="section">
+      <div class="section-title">Administration</div>
+      <div class="card" style="padding:0 14px">
+        <div class="row" id="admin-btn-membres">
+          <div class="row-icon" style="background:#eff6ff;font-size:22px">👥</div>
+          <div class="row-info"><div class="row-name">Gérer les membres</div><div class="row-detail">Ajouter, modifier, droits</div></div>
+          <i class="ti ti-chevron-right" style="color:var(--text2)"></i>
+        </div>
+        <div class="row" id="admin-btn-cours">
+          <div class="row-icon" style="background:#f0fdf4;font-size:22px">📚</div>
+          <div class="row-info"><div class="row-name">Gérer les cours</div><div class="row-detail">Créer, modifier, supprimer</div></div>
+          <i class="ti ti-chevron-right" style="color:var(--text2)"></i>
+        </div>
+        <div class="row" id="admin-btn-seances">
+          <div class="row-icon" style="background:#fdf4ff;font-size:22px">📅</div>
+          <div class="row-info"><div class="row-name">Gérer les séances</div><div class="row-detail">Planning et appel</div></div>
+          <i class="ti ti-chevron-right" style="color:var(--text2)"></i>
+        </div>
+        <div class="row" id="admin-btn-brevets">
+          <div class="row-icon" style="background:#fefce8;font-size:22px">🏅</div>
+          <div class="row-info"><div class="row-name">Attribuer des brevets</div><div class="row-detail">Brevets et certifications</div></div>
+          <i class="ti ti-chevron-right" style="color:var(--text2)"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sous-panel membres -->
+    <div id="admin-membres" style="display:none">
+      <div class="section">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <button class="btn btn-ghost btn-sm" onclick="showAdminPanel(null)"><i class="ti ti-arrow-left"></i>Retour</button>
+          <button class="btn btn-blue btn-sm" id="btn-add-membre"><i class="ti ti-user-plus"></i>Ajouter</button>
+        </div>
+        <div id="l-admin-membres"><div class="loader"><i class="ti ti-loader"></i>Chargement…</div></div>
+      </div>
+    </div>
+
+    <!-- Sous-panel brevets -->
+    <div id="admin-brevets" style="display:none">
+      <div class="section">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <button class="btn btn-ghost btn-sm" onclick="showAdminPanel(null)"><i class="ti ti-arrow-left"></i>Retour</button>
+          <button class="btn btn-blue btn-sm" id="btn-add-brevet"><i class="ti ti-plus"></i>Attribuer</button>
+        </div>
+        <div id="l-admin-brevets"><div class="loader"><i class="ti ti-loader"></i>Chargement…</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PROFIL ── -->
+  <div class="screen" id="sc-profil">
+    <div style="background:linear-gradient(135deg,var(--blue),var(--blue-dark));padding:32px 16px 24px;text-align:center">
+      <div style="width:70px;height:70px;background:rgba(255,255,255,0.2);border-radius:18px;display:inline-flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:12px">🛡️</div>
+      <div style="font-size:20px;font-weight:800;color:#fff" id="profil-name">—</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.75);margin-top:4px" id="profil-grade">—</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.6);margin-top:2px" id="profil-mat">—</div>
+    </div>
+    <div class="section">
+      <div class="ig">
+        <div class="ig-item"><label>Section</label><span id="profil-section">—</span></div>
+        <div class="ig-item"><label>Rôle</label><span id="profil-role">—</span></div>
+        <div class="ig-item"><label>Entrée JSP</label><span id="profil-entree">—</span></div>
+        <div class="ig-item"><label>Date naissance</label><span id="profil-ddn">—</span></div>
+      </div>
+      <div class="section-title">Coordonnées parents</div>
+      <div class="card" id="profil-parents" style="font-size:13px;color:var(--text2)">—</div>
+      <div style="height:14px"></div>
+      <button class="btn btn-ghost" id="btn-changepw"><i class="ti ti-lock"></i>Changer mon mot de passe</button>
+    </div>
+  </div>
+
+</div><!-- /pg-app -->
+
+<!-- BOUTON RETOUR (vue simulée) -->
+<button id="btn-return"><i class="ti ti-arrow-back-up"></i>Retour admin</button>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ════════════ MODALES ════════════ -->
+
+<!-- Détail séance -->
+<div class="modal-overlay" id="m-seance">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-inner">
+      <div class="modal-title" id="ms-titre">Séance</div>
+      <div class="modal-sub" id="ms-date">—</div>
+      <div class="ig">
+        <div class="ig-item"><label>Horaires</label><span id="ms-horaires">—</span></div>
+        <div class="ig-item"><label>Lieu</label><span id="ms-lieu">—</span></div>
+        <div class="ig-item"><label>Cours associé</label><span id="ms-cours">—</span></div>
+        <div class="ig-item"><label>Statut</label><span id="ms-statut">—</span></div>
+      </div>
+      <div id="ms-desc" style="font-size:13px;color:var(--text2);margin-bottom:14px"></div>
+      <div id="ms-ma-presence" style="margin-bottom:14px"></div>
+      <div id="ms-actions"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Détail cours -->
+<div class="modal-overlay" id="m-cours">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-inner">
+      <div style="text-align:center;font-size:40px;margin-bottom:8px" id="mc-ico">📚</div>
+      <div class="modal-title" id="mc-titre">Cours</div>
+      <div class="modal-sub" id="mc-cat">—</div>
+      <div class="ig">
+        <div class="ig-item"><label>Durée</label><span id="mc-duree">—</span></div>
+        <div class="ig-item"><label>Niveau</label><span id="mc-niveau">—</span></div>
+      </div>
+      <div id="mc-ma-prog" style="margin-bottom:14px"></div>
+      <div class="form-group"><label class="form-label">Objectifs</label><div id="mc-obj" style="font-size:13px;color:var(--text2)"></div></div>
+      <div class="form-group"><label class="form-label">Contenu</label><div id="mc-contenu" style="font-size:13px;color:var(--text2)"></div></div>
+      <div id="mc-actions-moniteur"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Nouvelle séance -->
+<div class="modal-overlay" id="m-new-seance">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-inner">
+      <div class="modal-title">Nouvelle séance</div>
+      <div class="err-box" id="ns-err"></div>
+      <div class="form-group"><label class="form-label">Titre *</label><input class="form-ctrl" id="ns-titre" placeholder="Ex : Séance secourisme PSC1"></div>
+      <div class="form-group"><label class="form-label">Date *</label><input class="form-ctrl" type="date" id="ns-date"></div>
+      <div class="ig">
+        <div class="ig-item form-group"><label class="form-label">Début</label><input class="form-ctrl" type="time" id="ns-debut"></div>
+        <div class="ig-item form-group"><label class="form-label">Fin</label><input class="form-ctrl" type="time" id="ns-fin"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Lieu</label><input class="form-ctrl" id="ns-lieu" placeholder="Ex : Caserne CSP LFB"></div>
+      <div class="form-group"><label class="form-label">Cours associé</label><select class="form-ctrl" id="ns-cours"><option value="">— Aucun —</option></select></div>
+      <div class="form-group"><label class="form-label">Description</label><textarea class="form-ctrl" id="ns-desc" rows="2"></textarea></div>
+      <button class="btn btn-blue" id="btn-create-seance"><i class="ti ti-calendar-plus"></i>Planifier</button>
+    </div>
+  </div>
+</div>
+
+<!-- Nouveau cours -->
+<div class="modal-overlay" id="m-new-cours">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-inner">
+      <div class="modal-title">Nouveau cours</div>
+      <div class="form-group"><label class="form-label">Titre *</label><input class="form-ctrl" id="nc-titre" placeholder="Ex : Introduction au secourisme"></div>
+      <div class="ig">
+        <div class="ig-item form-group">
+          <label class="form-label">Catégorie</label>
+          <select class="form-ctrl" id="nc-cat">
+            <option value="secourisme">🚑 Secourisme</option>
+            <option value="incendie">🔥 Incendie</option>
+            <option value="sport">💪 Sport</option>
+            <option value="citoyennete">🎖️ Citoyenneté</option>
+            <option value="technique">🔧 Technique</option>
+            <option value="autre">📋 Autre</option>
+          </select>
+        </div>
+        <div class="ig-item form-group"><label class="form-label">Durée (min)</label><input class="form-ctrl" type="number" id="nc-duree" placeholder="60" min="15"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Objectifs</label><textarea class="form-ctrl" id="nc-obj" rows="2"></textarea></div>
+      <div class="form-group"><label class="form-label">Contenu</label><textarea class="form-ctrl" id="nc-contenu" rows="3"></textarea></div>
+      <button class="btn btn-blue" id="btn-create-cours"><i class="ti ti-check"></i>Créer le cours</button>
+    </div>
+  </div>
+</div>
+
+<!-- Nouveau doc -->
+<div class="modal-overlay" id="m-new-doc">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-inner">
+      <div class="modal-title">Ajouter un document</div>
+      <div class="err-box" id="nd-err"></div>
+      <div class="form-group"><label class="form-label">Titre *</label><input class="form-ctrl" id="nd-titre" placeholder="Ex : Règlement intérieur JSP"></div>
+      <div class="form-group">
+        <label class="form-label">Catégorie</label>
+        <select class="form-ctrl" id="nd-cat">
+          <option value="cours">📚 Cours</option>
+          <option value="reglement">📜 Règlement</option>
+          <option value="administratif">📋 Administratif</option>
+          <option value="autre">📁 Autre</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Description</label><input class="form-ctrl" id="nd-desc" placeholder="Optionnel"></div>
+      <div class="form-group"><label class="form-label">Fichier *</label><input class="form-ctrl" type="file" id="nd-fichier" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.png"></div>
+      <button class="btn btn-blue" id="btn-create-doc"><i class="ti ti-upload"></i>Publier</button>
+    </div>
+  </div>
+</div>
+
+<!-- Nouveau membre -->
+<div class="modal-overlay" id="m-new-membre">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-inner">
+      <div class="modal-title">Ajouter un membre</div>
+      <div class="err-box" id="nm-err"></div>
+      <div class="ig">
+        <div class="ig-item form-group"><label class="form-label">Prénom *</label><input class="form-ctrl" id="nm-prenom"></div>
+        <div class="ig-item form-group"><label class="form-label">Nom *</label><input class="form-ctrl" id="nm-nom"></div>
+      </div>
+      <div class="ig">
+        <div class="ig-item form-group"><label class="form-label">Matricule *</label><input class="form-ctrl" id="nm-mat" inputmode="numeric"></div>
+        <div class="ig-item form-group">
+          <label class="form-label">Rôle</label>
+          <select class="form-ctrl" id="nm-role">
+            <option value="jsp">JSP</option>
+            <option value="moniteur">Moniteur</option>
+            <option value="responsable">Responsable</option>
+          </select>
+        </div>
+      </div>
+      <div class="ig">
+        <div class="ig-item form-group">
+          <label class="form-label">Grade JSP</label>
+          <select class="form-ctrl" id="nm-grade">
+            <option value="JSP1">JSP 1</option>
+            <option value="JSP2">JSP 2</option>
+            <option value="JSP3">JSP 3</option>
+            <option value="JSP4">JSP 4</option>
+            <option value="Moniteur">Moniteur</option>
+          </select>
+        </div>
+        <div class="ig-item form-group"><label class="form-label">Section</label><input class="form-ctrl" id="nm-section" placeholder="Ex : Section A"></div>
+      </div>
+      <div class="ig">
+        <div class="ig-item form-group"><label class="form-label">Date naissance</label><input class="form-ctrl" type="date" id="nm-ddn"></div>
+        <div class="ig-item form-group"><label class="form-label">Date entrée</label><input class="form-ctrl" type="date" id="nm-entree"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Contact parent (nom)</label><input class="form-ctrl" id="nm-parent-nom"></div>
+      <div class="form-group"><label class="form-label">Contact parent (tél)</label><input class="form-ctrl" id="nm-parent-tel" type="tel"></div>
+      <button class="btn btn-blue" id="btn-create-membre"><i class="ti ti-user-plus"></i>Créer le compte</button>
+    </div>
+  </div>
+</div>
+
+<!-- Attribuer brevet -->
+<div class="modal-overlay" id="m-new-brevet">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-inner">
+      <div class="modal-title">Attribuer un brevet</div>
+      <div class="form-group"><label class="form-label">JSP *</label><select class="form-ctrl" id="nb-jsp"><option value="">— Sélectionner —</option></select></div>
+      <div class="form-group"><label class="form-label">Intitulé du brevet *</label><input class="form-ctrl" id="nb-intitule" placeholder="Ex : BAPSC 1ère étoile"></div>
+      <div class="ig">
+        <div class="ig-item form-group"><label class="form-label">Date d'obtention</label><input class="form-ctrl" type="date" id="nb-date"></div>
+        <div class="ig-item form-group"><label class="form-label">Délivré par</label><input class="form-ctrl" id="nb-par" placeholder="Ex : SDIS 72"></div>
+      </div>
+      <button class="btn btn-blue" id="btn-save-brevet"><i class="ti ti-award"></i>Attribuer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Changer mot de passe -->
+<div class="modal-overlay" id="m-changepw">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-inner">
+      <div class="modal-title">Changer mon mot de passe</div>
+      <div class="err-box" id="cpw-err"></div>
+      <div class="form-group"><label class="form-label">Mot de passe actuel</label><div style="position:relative"><input class="form-ctrl" id="cpw-old" type="password"><button type="button" onclick="togglePw('cpw-old',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);font-size:19px;padding:4px"><i class="ti ti-eye"></i></button></div></div>
+      <div class="form-group"><label class="form-label">Nouveau mot de passe</label><div style="position:relative"><input class="form-ctrl" id="cpw-1" type="password" placeholder="Min. 6 caractères"><button type="button" onclick="togglePw('cpw-1',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);font-size:19px;padding:4px"><i class="ti ti-eye"></i></button></div></div>
+      <div class="form-group"><label class="form-label">Confirmer</label><div style="position:relative"><input class="form-ctrl" id="cpw-2" type="password"><button type="button" onclick="togglePw('cpw-2',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);font-size:19px;padding:4px"><i class="ti ti-eye"></i></button></div></div>
+      <button class="btn btn-blue" id="btn-save-pw"><i class="ti ti-lock"></i>Mettre à jour</button>
+    </div>
+  </div>
+</div>
+
+<!-- Détail JSP (moniteur) -->
+<div class="modal-overlay" id="m-jsp-detail">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-inner">
+      <div class="modal-title" id="jd-name">JSP</div>
+      <div class="modal-sub" id="jd-grade">—</div>
+      <div class="ig">
+        <div class="ig-item"><label>Matricule</label><span id="jd-mat">—</span></div>
+        <div class="ig-item"><label>Section</label><span id="jd-section">—</span></div>
+        <div class="ig-item"><label>Naissance</label><span id="jd-ddn">—</span></div>
+        <div class="ig-item"><label>Entrée JSP</label><span id="jd-entree">—</span></div>
+      </div>
+      <div class="form-group"><label class="form-label">Contact parent</label><div id="jd-parent" style="font-size:13px;color:var(--text2)">—</div></div>
+      <div class="form-group"><label class="form-label">Présences</label><div id="jd-presences" style="font-size:15px;font-weight:700;color:var(--blue)">—</div></div>
+      <div class="form-group"><label class="form-label">Brevets</label><div id="jd-brevets"></div></div>
+      <div class="form-group"><label class="form-label">Progression</label><div id="jd-progression"></div></div>
+      <div class="action-row" id="jd-actions"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Valider progression -->
+<div class="modal-overlay" id="m-valider-prog">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-inner">
+      <div class="modal-title">Valider la progression</div>
+      <div class="modal-sub" id="vp-info">—</div>
+      <div class="form-group">
+        <label class="form-label">Statut</label>
+        <select class="form-ctrl" id="vp-statut">
+          <option value="en_cours">En cours</option>
+          <option value="valide">Validé ✓</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Note /20 (optionnel)</label><input class="form-ctrl" type="number" id="vp-note" min="0" max="20" step="0.5"></div>
+      <button class="btn btn-green" id="btn-save-prog"><i class="ti ti-check"></i>Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// CONFIG SUPABASE — À REMPLACER PAR TES VRAIES CLÉS
+// ══════════════════════════════════════════════════════════
+const SUPA_URL = 'https://qpeywbblofnvfkqldstw.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwZXl3YmJsb2ZudmZrcWxkc3R3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwMjMwNjMsImV4cCI6MjEwNjU5OTA2M30.f5mb5Uv1dVBhy8DWe7fjyGffe5TD8TOeJkrtG2DoqME';
+const db = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+// ══════════════════════════════════════════════════════════
+// ÉTAT GLOBAL
+// ══════════════════════════════════════════════════════════
+let user = null;
+let seances = [], cours = [], docs = [], jsps = [];
+let appelData = {}; // { utilisateur_id: true/false }
+let curSeanceId = null, curCoursId = null, curJspId = null, curProgJspId = null, curProgCoursId = null;
+let seanceFilter = 'all', coursFilter = 'all', docFilter = 'all';
+
+const ROLE_LABELS = { jsp:'JSP', moniteur:'Moniteur', responsable:'Responsable JSP' };
+const GRADE_LABELS = { JSP1:'JSP 1ère année', JSP2:'JSP 2ème année', JSP3:'JSP 3ème année', JSP4:'JSP 4ème année', Moniteur:'Moniteur' };
+const CAT_CFG = {
+  secourisme: {ico:'🚑', lbl:'Secourisme', bg:'#fee2e2', col:'#991b1b'},
+  incendie:   {ico:'🔥', lbl:'Incendie',   bg:'#fef3c7', col:'#92400e'},
+  sport:      {ico:'💪', lbl:'Sport',       bg:'#d1fae5', col:'#065f46'},
+  citoyennete:{ico:'🎖️', lbl:'Citoyenneté',bg:'#ede9fe', col:'#4c1d95'},
+  technique:  {ico:'🔧', lbl:'Technique',  bg:'#dbeafe', col:'#1e40af'},
+  autre:      {ico:'📋', lbl:'Autre',       bg:'#f3f4f6', col:'#374151'},
+};
+const DOC_CFG = { cours:'📚', reglement:'📜', administratif:'📋', autre:'📁' };
+const STATUT_SEANCE = {
+  planifiee: {lbl:'Planifiée', cls:'badge-blue'},
+  terminee:  {lbl:'Terminée',  cls:'badge-green'},
+  annulee:   {lbl:'Annulée',   cls:'badge-red'},
+};
+const STATUT_PROG = {
+  non_commence: {lbl:'Non commencé', cls:'badge-gray'},
+  en_cours:     {lbl:'En cours',     cls:'badge-amber'},
+  valide:       {lbl:'Validé ✓',     cls:'badge-green'},
+};
+
+// ══════════════════════════════════════════════════════════
+// UTILITAIRES
+// ══════════════════════════════════════════════════════════
+function hash(s){ let h=0; for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;} return h.toString(36); }
+function fmt(d){ return d ? new Date(d).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}) : '—'; }
+function fmtDate(d){ return d ? new Date(d).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) : '—'; }
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),3500); }
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function showErr(id,msg){ const e=document.getElementById(id); e.textContent=msg; e.style.display='block'; }
+function hideErr(id){ const e=document.getElementById(id); if(e) e.style.display='none'; }
+function togglePw(id,btn){ const el=document.getElementById(id); const show=el.type==='password'; el.type=show?'text':'password'; btn.querySelector('i').className=show?'ti ti-eye-off':'ti ti-eye'; }
+function isMonitor(){ return user && (user.role==='moniteur'||user.role==='responsable'); }
+function isAdmin(){ return user && user.role==='responsable'; }
+
+function showPage(id){
+  ['pg-login','pg-newpw','pg-app'].forEach(p=>{ document.getElementById(p).style.display = p===id?'flex':'none'; if(p===id) document.getElementById(p).style.flexDirection='column'; });
+}
+function switchTab(tabId){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('[data-tab]').forEach(b=>b.classList.remove('active'));
+  const el=document.getElementById(tabId); if(el) el.classList.add('active');
+  const btn=document.querySelector(`[data-tab="${tabId}"]`); if(btn) btn.classList.add('active');
+  const titles={
+    'sc-home':'Accueil','sc-seances':'Séances','sc-cours':'Cours','sc-docs':'Documents',
+    'sc-progression':'Ma progression','sc-appel':'Faire l\'appel','sc-jsps':'Mes JSP',
+    'sc-admin':'Administration','sc-profil':'Mon profil',
+  };
+  document.getElementById('h-title').textContent = titles[tabId]||'JSP LFB';
+  window.scrollTo({top:0,behavior:'instant'});
+  closeDrawer();
+  // Charger les données selon l'onglet
+  if(tabId==='sc-home') renderHome();
+  if(tabId==='sc-seances') loadSeances();
+  if(tabId==='sc-cours') loadCours();
+  if(tabId==='sc-docs') loadDocs();
+  if(tabId==='sc-progression') loadProgression();
+  if(tabId==='sc-appel') loadAppel();
+  if(tabId==='sc-jsps') loadJsps();
+  if(tabId==='sc-admin') { showAdminPanel(null); }
+  if(tabId==='sc-profil') loadProfil();
+}
+function openDrawer(){ document.getElementById('drawer').classList.add('open'); document.getElementById('drawer-overlay').classList.add('open'); }
+function closeDrawer(){ document.getElementById('drawer').classList.remove('open'); document.getElementById('drawer-overlay').classList.remove('open'); }
+
+// ══════════════════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════════════════
+async function doLogin(){
+  const mat=document.getElementById('l-mat').value.trim();
+  const pw=document.getElementById('l-pw').value;
+  const btn=document.getElementById('btn-login');
+  hideErr('login-err');
+  if(!mat||!pw){ showErr('login-err','Remplissez tous les champs.'); return; }
+  btn.disabled=true; btn.innerHTML='<i class="ti ti-loader"></i>Connexion…';
+  try{
+    const {data,error}=await db.from('utilisateurs').select('*').eq('matricule',mat).single();
+    if(error||!data){ showErr('login-err','Matricule introuvable.'); return; }
+    if(hash(pw)!==data.mot_de_passe){ showErr('login-err','Mot de passe incorrect.'); return; }
+    user=data;
+    localStorage.setItem('jsp_mat',mat);
+    await initApp();
+  } catch(e){ showErr('login-err','Erreur de connexion.'); }
+  finally{ btn.disabled=false; btn.innerHTML='<i class="ti ti-login"></i>Se connecter'; }
+}
+
+async function doFirstLogin(){
+  const mat=document.getElementById('fp-mat').value.trim();
+  const tmp=document.getElementById('fp-tmp').value;
+  const n1=document.getElementById('fp-new1').value;
+  const n2=document.getElementById('fp-new2').value;
+  hideErr('newpw-err');
+  if(!mat||!tmp||!n1||!n2){ showErr('newpw-err','Tous les champs sont obligatoires.'); return; }
+  if(n1.length<6){ showErr('newpw-err','Minimum 6 caractères.'); return; }
+  if(n1!==n2){ showErr('newpw-err','Les mots de passe ne correspondent pas.'); return; }
+  const {data}=await db.from('utilisateurs').select('*').eq('matricule',mat).single();
+  if(!data){ showErr('newpw-err','Matricule introuvable.'); return; }
+  if(hash(tmp)!==data.mot_de_passe){ showErr('newpw-err','Mot de passe provisoire incorrect.'); return; }
+  const {error}=await db.from('utilisateurs').update({mot_de_passe:hash(n1),premiere_connexion:false}).eq('id',data.id);
+  if(error){ showErr('newpw-err','Erreur lors de la sauvegarde.'); return; }
+  user={...data,mot_de_passe:hash(n1),premiere_connexion:false};
+  localStorage.setItem('jsp_mat',mat);
+  await initApp();
+}
+
+function doLogout(){
+  user=null; seances=[]; cours=[]; docs=[]; jsps=[];
+  showPage('pg-login');
+}
+
+async function initApp(){
+  showPage('pg-app');
+  // Drawer — infos utilisateur
+  const name=[user.prenom,user.nom].filter(Boolean).join(' ')||'Mat. '+user.matricule;
+  document.getElementById('d-name').textContent=name;
+  document.getElementById('d-role').textContent=ROLE_LABELS[user.role]||user.role;
+  // Afficher/masquer items selon rôle
+  document.querySelectorAll('.monitor-only').forEach(el=>el.style.display=isMonitor()?'flex':'none');
+  document.querySelectorAll('.admin-only').forEach(el=>el.style.display=isAdmin()?'flex':'none');
+  // Header
+  document.getElementById('h-sub').textContent=(ROLE_LABELS[user.role]||user.role)+' · '+(user.section||'CSP LFB');
+  // Charger tout
+  await Promise.all([loadAllSeances(), loadAllCours(), loadAllDocs(), loadAllJsps()]);
+  switchTab('sc-home');
+}
+
+// ══════════════════════════════════════════════════════════
+// CHARGEMENT DES DONNÉES
+// ══════════════════════════════════════════════════════════
+async function loadAllSeances(){
+  const {data}=await db.from('seances').select('*,cours(titre,categorie)').order('date_seance',{ascending:true});
+  seances=data||[];
+  // Remplir le select appel
+  const sel=document.getElementById('appel-select-seance');
+  if(sel){
+    const upcoming=seances.filter(s=>s.statut!=='annulee');
+    sel.innerHTML='<option value="">— Choisir une séance —</option>'+upcoming.map(s=>`<option value="${s.id}">${s.titre} — ${fmt(s.date_seance)}</option>`).join('');
+  }
+  // Remplir le select nouvelle séance
+  const nsSel=document.getElementById('ns-cours');
+  if(nsSel) nsSel.innerHTML='<option value="">— Aucun —</option>'+((await db.from('cours').select('id,titre').order('titre')).data||[]).map(c=>`<option value="${c.id}">${c.titre}</option>`).join('');
+}
+async function loadAllCours(){ const {data}=await db.from('cours').select('*').order('categorie,titre'); cours=data||[]; }
+async function loadAllDocs(){ const {data}=await db.from('documents').select('*').order('created_at',{ascending:false}); docs=data||[]; }
+async function loadAllJsps(){ const {data}=await db.from('utilisateurs').select('*').order('nom'); jsps=data||[]; }
+
+// ══════════════════════════════════════════════════════════
+// ACCUEIL
+// ══════════════════════════════════════════════════════════
+async function renderHome(){
+  const name=[user.grade?( GRADE_LABELS[user.grade]||user.grade):'',user.prenom,user.nom].filter(Boolean);
+  document.getElementById('home-grade').textContent=(GRADE_LABELS[user.grade]||user.grade||'').toUpperCase();
+  document.getElementById('home-name').textContent=[user.prenom,user.nom].filter(Boolean).join(' ')||'Mat. '+user.matricule;
+  document.getElementById('home-section').textContent=user.section||'CSP La Ferté-Bernard';
+  // Stats hero
+  const [presRes,progRes]=await Promise.all([
+    db.from('presences').select('*').eq('utilisateur_id',user.id).eq('present',true),
+    db.from('progression').select('*').eq('utilisateur_id',user.id).eq('statut','valide'),
+  ]);
+  const nbPres=(presRes.data||[]).length;
+  const nbValidés=(progRes.data||[]).length;
+  document.getElementById('home-stats').innerHTML=`
+    <div class="hero-stat"><strong>${nbPres}</strong><span>Présences</span></div>
+    <div class="hero-stat"><strong>${nbValidés}</strong><span>Cours validés</span></div>`;
+  // Modules
+  const modules=[
+    {ico:'📅',lbl:'Séances',sub:'Planning et présences',tab:'sc-seances'},
+    {ico:'📚',lbl:'Cours',sub:'Catalogue des cours',tab:'sc-cours'},
+    {ico:'📁',lbl:'Documents',sub:'Ressources partagées',tab:'sc-docs'},
+    {ico:'📊',lbl:'Progression',sub:'Mes résultats',tab:'sc-progression'},
+  ];
+  if(isMonitor()){
+    modules.push({ico:'✅',lbl:'Appel',sub:'Enregistrer les présences',tab:'sc-appel'});
+    modules.push({ico:'👥',lbl:'Mes JSP',sub:'Suivi individuel',tab:'sc-jsps'});
+  }
+  if(isAdmin()) modules.push({ico:'⚙️',lbl:'Admin',sub:'Gestion complète',tab:'sc-admin'});
+  document.getElementById('home-grid').innerHTML=modules.map(m=>`
+    <div class="module-card" onclick="switchTab('${m.tab}')">
+      <div class="module-card-icon">${m.ico}</div>
+      <div class="module-card-label">${m.lbl}</div>
+      <div class="module-card-sub">${m.sub}</div>
+    </div>`).join('');
+  // Prochaine séance
+  const now=new Date().toISOString().split('T')[0];
+  const next=seances.filter(s=>s.date_seance>=now&&s.statut==='planifiee')[0];
+  const nextEl=document.getElementById('home-next-seance');
+  if(next){
+    nextEl.innerHTML=`<div class="card" style="cursor:pointer;border-left:4px solid var(--blue)" onclick="openSeanceDetail('${next.id}')">
+      <div style="font-size:12px;color:var(--text2);text-transform:uppercase;font-weight:700;letter-spacing:0.06em;margin-bottom:6px">Prochaine séance</div>
+      <div style="font-size:16px;font-weight:800">${next.titre}</div>
+      <div style="font-size:13px;color:var(--text2);margin-top:4px">${fmtDate(next.date_seance)}${next.heure_debut?' · '+next.heure_debut.slice(0,5):''}</div>
+      ${next.lieu?`<div style="font-size:12px;color:var(--text2);margin-top:2px">📍 ${next.lieu}</div>`:''}
+    </div>`;
+  } else {
+    nextEl.innerHTML=`<div style="text-align:center;padding:20px;color:var(--text2);font-size:13px">Aucune séance planifiée</div>`;
+  }
+  // Activité récente — dernières présences
+  const {data:recPres}=await db.from('presences').select('*,seances(titre,date_seance)').eq('utilisateur_id',user.id).order('created_at',{ascending:false}).limit(3);
+  const actEl=document.getElementById('home-activite');
+  if(recPres&&recPres.length){
+    actEl.innerHTML=`<div class="card" style="padding:0 14px">${recPres.map(p=>`
+      <div class="row">
+        <div class="pres-dot ${p.present?'present':'absent'}" style="width:12px;height:12px"></div>
+        <div class="row-info">
+          <div class="row-name">${p.seances?.titre||'—'}</div>
+          <div class="row-detail">${fmt(p.seances?.date_seance)}</div>
+        </div>
+        <span class="badge ${p.present?'badge-green':'badge-red'}">${p.present?'Présent':'Absent'}</span>
+      </div>`).join('')}</div>`;
+  } else {
+    actEl.innerHTML=`<div style="text-align:center;padding:16px;color:var(--text2);font-size:13px">Aucune présence enregistrée</div>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// SÉANCES
+// ══════════════════════════════════════════════════════════
+function loadSeances(){
+  const list=seanceFilter==='all'?seances:seances.filter(s=>s.statut===seanceFilter);
+  const el=document.getElementById('l-seances');
+  if(!list.length){ el.innerHTML=`<div class="empty"><i class="ti ti-calendar-event"></i><p>Aucune séance</p></div>`; return; }
+  const today=new Date().toISOString().split('T')[0];
+  const grouped={};
+  list.forEach(s=>{ const m=s.date_seance.slice(0,7); if(!grouped[m])grouped[m]=[]; grouped[m].push(s); });
+  el.innerHTML=Object.keys(grouped).sort().map(m=>{
+    const label=new Date(m+'-01').toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+    return `<div class="section-title" style="margin-top:8px;text-transform:capitalize">${label}</div>
+      <div class="card" style="padding:0 14px">${grouped[m].map(s=>{
+        const sc=STATUT_SEANCE[s.statut]||{lbl:s.statut,cls:'badge-gray'};
+        const cat=s.cours?(CAT_CFG[s.cours.categorie]||{ico:'📅'}):{ico:'📅'};
+        const isPast=s.date_seance<today;
+        return `<div class="row" onclick="openSeanceDetail('${s.id}')" style="opacity:${isPast&&s.statut==='planifiee'?'0.5':'1'}">
+          <div class="row-icon" style="background:#eff6ff;font-size:22px">${cat.ico}</div>
+          <div class="row-info">
+            <div class="row-name">${s.titre}</div>
+            <div class="row-detail">${new Date(s.date_seance).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'})}${s.heure_debut?' · '+s.heure_debut.slice(0,5):''}</div>
+          </div>
+          <span class="badge ${sc.cls}">${sc.lbl}</span>
+        </div>`;
+      }).join('')}</div>`;
+  }).join('');
+}
+
+async function openSeanceDetail(id){
+  curSeanceId=id;
+  const s=seances.find(x=>x.id===id); if(!s) return;
+  document.getElementById('ms-titre').textContent=s.titre;
+  document.getElementById('ms-date').textContent=fmtDate(s.date_seance);
+  document.getElementById('ms-horaires').textContent=s.heure_debut?s.heure_debut.slice(0,5)+(s.heure_fin?' → '+s.heure_fin.slice(0,5):''):'—';
+  document.getElementById('ms-lieu').textContent=s.lieu||'—';
+  document.getElementById('ms-cours').textContent=s.cours?s.cours.titre:'—';
+  const sc=STATUT_SEANCE[s.statut]||{lbl:s.statut,cls:'badge-gray'};
+  document.getElementById('ms-statut').innerHTML=`<span class="badge ${sc.cls}">${sc.lbl}</span>`;
+  document.getElementById('ms-desc').textContent=s.description||'';
+  // Ma présence
+  const {data:pres}=await db.from('presences').select('*').eq('seance_id',id).eq('utilisateur_id',user.id).maybeSingle();
+  const presEl=document.getElementById('ms-ma-presence');
+  if(pres){ presEl.innerHTML=`<div style="background:var(--bg2);padding:10px;border-radius:10px;font-size:13px">Ma présence : <strong style="color:${pres.present?'var(--green)':'var(--red)'}">${pres.present?'✅ Présent':'❌ Absent'}</strong></div>`; }
+  else { presEl.innerHTML=`<div style="background:var(--bg2);padding:10px;border-radius:10px;font-size:13px;color:var(--text2)">Présence non enregistrée</div>`; }
+  // Actions moniteur
+  const actEl=document.getElementById('ms-actions');
+  actEl.innerHTML='';
+  if(isMonitor()&&s.statut==='planifiee'){
+    const btn=document.createElement('button');
+    btn.className='btn btn-blue'; btn.innerHTML='<i class="ti ti-clipboard-list"></i>Faire l\'appel pour cette séance';
+    btn.onclick=()=>{ closeModal('m-seance'); document.getElementById('appel-select-seance').value=id; switchTab('sc-appel'); loadAppelForSeance(id); };
+    actEl.appendChild(btn);
+    if(isAdmin()){
+      const btn2=document.createElement('button');
+      btn2.className='btn btn-ghost'; btn2.style.marginTop='8px'; btn2.innerHTML='<i class="ti ti-x"></i>Annuler la séance';
+      btn2.onclick=()=>annulerSeance(id);
+      actEl.appendChild(btn2);
+    }
+  }
+  openModal('m-seance');
+}
+
+async function annulerSeance(id){
+  if(!confirm('Annuler cette séance ?')) return;
+  await db.from('seances').update({statut:'annulee'}).eq('id',id);
+  closeModal('m-seance'); toast('Séance annulée'); await loadAllSeances(); loadSeances();
+}
+
+async function createSeance(){
+  const titre=document.getElementById('ns-titre').value.trim();
+  const date=document.getElementById('ns-date').value;
+  if(!titre||!date){ showErr('ns-err','Titre et date obligatoires.'); return; }
+  const {error}=await db.from('seances').insert({
+    titre, date_seance:date, createur_id:user.id,
+    cours_id:document.getElementById('ns-cours').value||null,
+    heure_debut:document.getElementById('ns-debut').value||null,
+    heure_fin:document.getElementById('ns-fin').value||null,
+    lieu:document.getElementById('ns-lieu').value.trim()||null,
+    description:document.getElementById('ns-desc').value.trim()||null,
+    statut:'planifiee'
+  });
+  if(error){ showErr('ns-err','Erreur : '+error.message); return; }
+  closeModal('m-new-seance'); toast('Séance planifiée ✓'); await loadAllSeances(); loadSeances();
+}
+
+// ══════════════════════════════════════════════════════════
+// COURS
+// ══════════════════════════════════════════════════════════
+function loadCours(){
+  const list=coursFilter==='all'?cours:cours.filter(c=>c.categorie===coursFilter);
+  const el=document.getElementById('l-cours');
+  if(!list.length){ el.innerHTML=`<div class="empty"><i class="ti ti-book"></i><p>Aucun cours</p></div>`; return; }
+  el.innerHTML=`<div class="card" style="padding:0 14px">${list.map(c=>{
+    const cat=CAT_CFG[c.categorie]||{ico:'📋',lbl:c.categorie,bg:'#f3f4f6',col:'#374151'};
+    return `<div class="row" onclick="openCoursDetail('${c.id}')">
+      <div class="row-icon" style="background:${cat.bg};font-size:22px">${cat.ico}</div>
+      <div class="row-info">
+        <div class="row-name">${c.titre}</div>
+        <div class="row-detail">${cat.lbl}${c.duree_minutes?' · '+c.duree_minutes+' min':''}</div>
+      </div>
+      <i class="ti ti-chevron-right" style="color:var(--text2)"></i>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+async function openCoursDetail(id){
+  curCoursId=id;
+  const c=cours.find(x=>x.id===id); if(!c) return;
+  const cat=CAT_CFG[c.categorie]||{ico:'📋',lbl:c.categorie};
+  document.getElementById('mc-ico').textContent=cat.ico;
+  document.getElementById('mc-titre').textContent=c.titre;
+  document.getElementById('mc-cat').textContent=cat.lbl;
+  document.getElementById('mc-duree').textContent=c.duree_minutes?c.duree_minutes+' min':'—';
+  document.getElementById('mc-niveau').textContent=c.niveau==='avance'?'Avancé':'Tous niveaux';
+  document.getElementById('mc-obj').textContent=c.objectifs||'—';
+  document.getElementById('mc-contenu').textContent=c.contenu||'—';
+  // Ma progression
+  const {data:prog}=await db.from('progression').select('*').eq('utilisateur_id',user.id).eq('cours_id',id).maybeSingle();
+  const progEl=document.getElementById('mc-ma-prog');
+  const sp=STATUT_PROG[prog?.statut||'non_commence'];
+  progEl.innerHTML=`<div style="background:var(--bg2);padding:10px;border-radius:10px;font-size:13px">Ma progression : <strong><span class="badge ${sp.cls}">${sp.lbl}</span></strong>${prog?.note!==null&&prog?.note!==undefined?' · <strong>'+prog.note+'/20</strong>':''}</div>`;
+  // Actions moniteur — valider progression
+  const actEl=document.getElementById('mc-actions-moniteur');
+  actEl.innerHTML='';
+  if(isMonitor()){
+    const btn=document.createElement('button');
+    btn.className='btn btn-ghost'; btn.style.marginTop='8px';
+    btn.innerHTML='<i class="ti ti-check"></i>Valider la progression d\'un JSP';
+    btn.onclick=()=>{ closeModal('m-cours'); openValiderProg(null, id); };
+    actEl.appendChild(btn);
+  }
+  openModal('m-cours');
+}
+
+async function createCours(){
+  const titre=document.getElementById('nc-titre').value.trim();
+  if(!titre){ toast('Titre obligatoire'); return; }
+  const {error}=await db.from('cours').insert({
+    titre, createur_id:user.id,
+    categorie:document.getElementById('nc-cat').value,
+    duree_minutes:parseInt(document.getElementById('nc-duree').value)||null,
+    objectifs:document.getElementById('nc-obj').value.trim()||null,
+    contenu:document.getElementById('nc-contenu').value.trim()||null,
+  });
+  if(error){ toast('Erreur : '+error.message); return; }
+  closeModal('m-new-cours'); toast('Cours créé ✓'); await loadAllCours(); loadCours();
+  // Mettre à jour le select séances
+  const nsSel=document.getElementById('ns-cours');
+  if(nsSel) nsSel.innerHTML='<option value="">— Aucun —</option>'+cours.map(c=>`<option value="${c.id}">${c.titre}</option>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+// DOCUMENTS
+// ══════════════════════════════════════════════════════════
+function loadDocs(){
+  const list=docFilter==='all'?docs:docs.filter(d=>d.categorie===docFilter);
+  const el=document.getElementById('l-docs');
+  if(!list.length){ el.innerHTML=`<div class="empty"><i class="ti ti-folder"></i><p>Aucun document</p></div>`; return; }
+  el.innerHTML=`<div class="card" style="padding:0 14px">${list.map(d=>`
+    <a href="${d.fichier_url||'#'}" target="_blank" class="row" style="text-decoration:none;color:inherit">
+      <div class="row-icon" style="background:var(--bg2);font-size:22px">${DOC_CFG[d.categorie]||'📁'}</div>
+      <div class="row-info">
+        <div class="row-name">${d.titre}</div>
+        <div class="row-detail">${d.description||''}${d.fichier_nom?' · '+d.fichier_nom:''}</div>
+      </div>
+      <i class="ti ti-download" style="color:var(--text2)"></i>
+    </a>`).join('')}</div>`;
+}
+
+async function createDoc(){
+  const titre=document.getElementById('nd-titre').value.trim();
+  const fichierInput=document.getElementById('nd-fichier');
+  hideErr('nd-err');
+  if(!titre){ showErr('nd-err','Titre obligatoire'); return; }
+  if(!fichierInput.files[0]){ showErr('nd-err','Fichier obligatoire'); return; }
+  const file=fichierInput.files[0];
+  const path='docs/'+Date.now()+'-'+file.name;
+  const {error:upErr}=await db.storage.from('jsp-files').upload(path,file);
+  if(upErr){ showErr('nd-err','Erreur upload : '+upErr.message); return; }
+  const {data:pub}=db.storage.from('jsp-files').getPublicUrl(path);
+  const {error}=await db.from('documents').insert({
+    titre, createur_id:user.id,
+    categorie:document.getElementById('nd-cat').value,
+    description:document.getElementById('nd-desc').value.trim()||null,
+    fichier_url:pub.publicUrl, fichier_nom:file.name,
+  });
+  if(error){ showErr('nd-err','Erreur : '+error.message); return; }
+  closeModal('m-new-doc'); toast('Document publié ✓'); await loadAllDocs(); loadDocs();
+}
+
+// ══════════════════════════════════════════════════════════
+// PROGRESSION
+// ══════════════════════════════════════════════════════════
+async function loadProgression(){
+  const [presRes,progRes,brevRes]=await Promise.all([
+    db.from('presences').select('*').eq('utilisateur_id',user.id).eq('present',true),
+    db.from('progression').select('*,cours(titre,categorie)').eq('utilisateur_id',user.id),
+    db.from('brevets').select('*').eq('utilisateur_id',user.id).order('date_obtention',{ascending:false}),
+  ]);
+  document.getElementById('prog-presences').textContent=(presRes.data||[]).length;
+  const valides=(progRes.data||[]).filter(p=>p.statut==='valide');
+  document.getElementById('prog-cours-ok').textContent=valides.length;
+  // Brevets
+  const brevEl=document.getElementById('prog-brevets');
+  const brevs=brevRes.data||[];
+  brevEl.innerHTML=brevs.length
+    ? `<div>${brevs.map(b=>`<span class="brevet">🏅 ${b.intitule}${b.date_obtention?' ('+fmt(b.date_obtention)+')':''}</span>`).join('')}</div>`
+    : `<div class="empty"><i class="ti ti-award"></i><p>Aucun brevet</p></div>`;
+  // Progression cours
+  const progEl=document.getElementById('prog-liste');
+  const progs=progRes.data||[];
+  if(!progs.length&&!cours.length){ progEl.innerHTML=`<div class="empty"><i class="ti ti-chart-bar"></i><p>Aucun cours disponible</p></div>`; return; }
+  // Afficher tous les cours avec statut
+  const progMap={};
+  progs.forEach(p=>{ if(p.cours_id) progMap[p.cours_id]=p; });
+  progEl.innerHTML=`<div class="card" style="padding:14px;display:flex;flex-direction:column;gap:14px">${cours.map(c=>{
+    const p=progMap[c.id];
+    const sp=STATUT_PROG[p?.statut||'non_commence'];
+    const cat=CAT_CFG[c.categorie]||{ico:'📋'};
+    const pct=p?.statut==='valide'?100:p?.statut==='en_cours'?50:0;
+    const fillClass=p?.statut==='valide'?'green':p?.statut==='en_cours'?'amber':'';
+    return `<div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="font-size:13px;font-weight:700">${cat.ico} ${c.titre}</div>
+        <span class="badge ${sp.cls}">${sp.lbl}</span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill ${fillClass}" style="width:${pct}%"></div></div>
+      ${p?.note!==null&&p?.note!==undefined?`<div style="font-size:11px;color:var(--text2);margin-top:3px">Note : ${p.note}/20</div>`:''}
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// ══════════════════════════════════════════════════════════
+// APPEL
+// ══════════════════════════════════════════════════════════
+async function loadAppel(){
+  const selId=document.getElementById('appel-select-seance').value;
+  if(selId) await loadAppelForSeance(selId);
+}
+
+async function loadAppelForSeance(seanceId){
+  if(!seanceId) return;
+  const s=seances.find(x=>x.id===seanceId);
+  const infoEl=document.getElementById('appel-info');
+  if(s){
+    infoEl.style.display='block';
+    infoEl.innerHTML=`<div style="font-size:14px;font-weight:700">${s.titre}</div><div style="font-size:12px;color:var(--text2);margin-top:2px">${fmtDate(s.date_seance)}${s.heure_debut?' · '+s.heure_debut.slice(0,5):''}</div>`;
+  }
+  // Présences existantes
+  const {data:pres}=await db.from('presences').select('*').eq('seance_id',seanceId);
+  appelData={};
+  (pres||[]).forEach(p=>{ appelData[p.utilisateur_id]=p.present; });
+  // Liste JSP uniquement
+  const jspList=jsps.filter(j=>j.role==='jsp');
+  const el=document.getElementById('l-appel');
+  if(!jspList.length){ el.innerHTML=`<div class="empty"><i class="ti ti-users"></i><p>Aucun JSP enregistré</p></div>`; return; }
+  const GRADES_ORDER=['JSP1','JSP2','JSP3','JSP4'];
+  const sorted=[...jspList].sort((a,b)=>GRADES_ORDER.indexOf(a.grade)-GRADES_ORDER.indexOf(b.grade)||( a.nom||'').localeCompare(b.nom||''));
+  el.innerHTML=`<div class="card" style="padding:0 14px">${sorted.map(j=>{
+    const name=[j.prenom,j.nom].filter(Boolean).join(' ')||'Mat. '+j.matricule;
+    const state=appelData[j.id]; // true | false | undefined
+    return `<div class="appel-row" data-uid="${j.id}">
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:700">${name}</div>
+        <div style="font-size:11px;color:var(--text2)">${GRADE_LABELS[j.grade]||j.grade||''}</div>
+      </div>
+      <div class="appel-btns">
+        <button class="appel-btn ${state===true?'present':'inactive'}" data-uid="${j.id}" data-val="true" onclick="setAppel('${j.id}',true,this)">✓</button>
+        <button class="appel-btn ${state===false?'absent':'inactive'}" data-uid="${j.id}" data-val="false" onclick="setAppel('${j.id}',false,this)">✗</button>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+  document.getElementById('appel-actions').style.display='block';
+}
+
+function setAppel(uid, val, btn){
+  appelData[uid]=val;
+  const row=document.querySelector(`.appel-row[data-uid="${uid}"]`);
+  if(!row) return;
+  row.querySelectorAll('.appel-btn').forEach(b=>b.className='appel-btn inactive');
+  btn.className=`appel-btn ${val?'present':'absent'}`;
+}
+
+async function saveAppel(){
+  const seanceId=document.getElementById('appel-select-seance').value;
+  if(!seanceId){ toast('Sélectionnez une séance'); return; }
+  const entries=Object.entries(appelData);
+  if(!entries.length){ toast('Aucune présence saisie'); return; }
+  const btn=document.getElementById('btn-save-appel');
+  btn.disabled=true; btn.innerHTML='<i class="ti ti-loader"></i>Enregistrement…';
+  const upserts=entries.map(([uid,present])=>({seance_id:seanceId,utilisateur_id:uid,present}));
+  const {error}=await db.from('presences').upsert(upserts,{onConflict:'seance_id,utilisateur_id'});
+  btn.disabled=false; btn.innerHTML='<i class="ti ti-device-floppy"></i>Enregistrer l\'appel';
+  if(error){ toast('Erreur : '+error.message); return; }
+  // Marquer la séance comme terminée
+  await db.from('seances').update({statut:'terminee'}).eq('id',seanceId);
+  await loadAllSeances();
+  toast(`Appel enregistré ✓ (${upserts.length} JSP)`);
+  appelData={};
+  document.getElementById('appel-select-seance').value='';
+  document.getElementById('appel-info').style.display='none';
+  document.getElementById('l-appel').innerHTML=`<div class="empty"><i class="ti ti-check"></i><p>Appel enregistré !</p></div>`;
+  document.getElementById('appel-actions').style.display='none';
+}
+
+// ══════════════════════════════════════════════════════════
+// MES JSP
+// ══════════════════════════════════════════════════════════
+function loadJsps(search=''){
+  const list=jsps.filter(j=>j.role==='jsp'&&(!search||(j.prenom+' '+j.nom+' '+j.matricule).toLowerCase().includes(search.toLowerCase())));
+  const el=document.getElementById('l-jsps');
+  if(!list.length){ el.innerHTML=`<div class="empty"><i class="ti ti-users"></i><p>Aucun JSP</p></div>`; return; }
+  const sorted=[...list].sort((a,b)=>(a.nom||'').localeCompare(b.nom||''));
+  el.innerHTML=`<div class="card" style="padding:0 14px">${sorted.map(j=>{
+    const name=[j.prenom,j.nom].filter(Boolean).join(' ')||'Mat. '+j.matricule;
+    return `<div class="row" onclick="openJspDetail('${j.id}')">
+      <div class="row-icon" style="background:var(--blue-light);font-size:20px">🛡️</div>
+      <div class="row-info">
+        <div class="row-name">${name}</div>
+        <div class="row-detail">${GRADE_LABELS[j.grade]||j.grade||'—'}${j.section?' · '+j.section:''}</div>
+      </div>
+      <i class="ti ti-chevron-right" style="color:var(--text2)"></i>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+async function openJspDetail(id){
+  curJspId=id;
+  const j=jsps.find(x=>x.id===id); if(!j) return;
+  const name=[j.prenom,j.nom].filter(Boolean).join(' ')||'Mat. '+j.matricule;
+  document.getElementById('jd-name').textContent=name;
+  document.getElementById('jd-grade').textContent=GRADE_LABELS[j.grade]||j.grade||'—';
+  document.getElementById('jd-mat').textContent=j.matricule;
+  document.getElementById('jd-section').textContent=j.section||'—';
+  document.getElementById('jd-ddn').textContent=fmt(j.date_naissance);
+  document.getElementById('jd-entree').textContent=fmt(j.date_entree);
+  document.getElementById('jd-parent').textContent=(j.contact_parent_nom||'—')+(j.contact_parent_tel?' · '+j.contact_parent_tel:'');
+  // Présences
+  const {data:pres}=await db.from('presences').select('*').eq('utilisateur_id',id).eq('present',true);
+  document.getElementById('jd-presences').textContent=(pres||[]).length+' présence'+(( pres||[]).length>1?'s':'');
+  // Brevets
+  const {data:brevs}=await db.from('brevets').select('*').eq('utilisateur_id',id);
+  document.getElementById('jd-brevets').innerHTML=(brevs&&brevs.length)?brevs.map(b=>`<span class="brevet">🏅 ${b.intitule}</span>`).join(''):'<span style="font-size:13px;color:var(--text2)">Aucun brevet</span>';
+  // Progression
+  const {data:progs}=await db.from('progression').select('*,cours(titre)').eq('utilisateur_id',id);
+  const progEl=document.getElementById('jd-progression');
+  if(progs&&progs.length){
+    progEl.innerHTML=progs.map(p=>{
+      const sp=STATUT_PROG[p.statut||'non_commence'];
+      return `<div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0">
+        <span>${p.cours?.titre||'—'}</span>
+        <span class="badge ${sp.cls}">${sp.lbl}</span>
+      </div>`;
+    }).join('');
+  } else { progEl.innerHTML=`<span style="font-size:13px;color:var(--text2)">Aucune progression</span>`; }
+  // Actions
+  const actEl=document.getElementById('jd-actions');
+  actEl.innerHTML='';
+  const btnProg=document.createElement('button');
+  btnProg.className='btn-ok'; btnProg.innerHTML='<i class="ti ti-chart-bar"></i>Valider cours';
+  btnProg.onclick=()=>{ closeModal('m-jsp-detail'); openValiderProg(id, null); };
+  actEl.appendChild(btnProg);
+  if(isAdmin()){
+    const btnReset=document.createElement('button');
+    btnReset.className='btn-ko'; btnReset.innerHTML='<i class="ti ti-lock-open"></i>Reset mdp';
+    btnReset.onclick=()=>resetMdp(id, j.matricule);
+    actEl.appendChild(btnReset);
+  }
+  openModal('m-jsp-detail');
+}
+
+async function resetMdp(id, mat){
+  if(!confirm(`Réinitialiser le mot de passe de ${mat} ?`)) return;
+  await db.from('utilisateurs').update({mot_de_passe:hash(mat+'2026'),premiere_connexion:true}).eq('id',id);
+  toast('Mot de passe réinitialisé — provisoire : '+mat+'2026');
+  closeModal('m-jsp-detail');
+}
+
+// ══════════════════════════════════════════════════════════
+// VALIDER PROGRESSION
+// ══════════════════════════════════════════════════════════
+function openValiderProg(jspId, coursId){
+  curProgJspId=jspId;
+  curProgCoursId=coursId;
+  // Remplir selects
+  const jspSel=document.createElement('div');
+  const jspList=jsps.filter(j=>j.role==='jsp');
+  let html='';
+  if(!jspId){
+    html+=`<div class="form-group"><label class="form-label">JSP *</label><select class="form-ctrl" id="vp-jsp-sel"><option value="">— Sélectionner —</option>${jspList.map(j=>`<option value="${j.id}">${[j.prenom,j.nom].filter(Boolean).join(' ')||j.matricule}</option>`).join('')}</select></div>`;
+  }
+  if(!coursId){
+    html+=`<div class="form-group"><label class="form-label">Cours *</label><select class="form-ctrl" id="vp-cours-sel"><option value="">— Sélectionner —</option>${cours.map(c=>`<option value="${c.id}">${c.titre}</option>`).join('')}</select></div>`;
+  }
+  document.getElementById('vp-info').innerHTML=html||'Enregistrer la progression';
+  document.getElementById('vp-statut').value='valide';
+  document.getElementById('vp-note').value='';
+  openModal('m-valider-prog');
+}
+
+async function saveProgression(){
+  const jspId=curProgJspId||document.getElementById('vp-jsp-sel')?.value;
+  const coursId=curProgCoursId||document.getElementById('vp-cours-sel')?.value;
+  if(!jspId||!coursId){ toast('Sélectionnez un JSP et un cours'); return; }
+  const statut=document.getElementById('vp-statut').value;
+  const note=document.getElementById('vp-note').value;
+  const {error}=await db.from('progression').upsert({
+    utilisateur_id:jspId, cours_id:coursId, statut,
+    note:note?parseFloat(note):null,
+    date_validation:statut==='valide'?new Date().toISOString().split('T')[0]:null,
+    validateur_id:user.id,
+  },{onConflict:'utilisateur_id,cours_id'});
+  if(error){ toast('Erreur : '+error.message); return; }
+  closeModal('m-valider-prog'); toast('Progression enregistrée ✓');
+}
+
+// ══════════════════════════════════════════════════════════
+// ADMIN — MEMBRES
+// ══════════════════════════════════════════════════════════
+function showAdminPanel(panel){
+  const panels=['admin-membres','admin-brevets'];
+  const mainCard=document.querySelector('#sc-admin .card');
+  panels.forEach(p=>{ const el=document.getElementById(p); if(el) el.style.display='none'; });
+  if(mainCard) mainCard.style.display=panel?'none':'block';
+  if(panel){ const el=document.getElementById(panel); if(el){ el.style.display='block'; if(panel==='admin-membres') loadAdminMembres(); if(panel==='admin-brevets') loadAdminBrevets(); } }
+}
+
+async function loadAdminMembres(){
+  const el=document.getElementById('l-admin-membres');
+  el.innerHTML=`<div class="loader"><i class="ti ti-loader"></i>Chargement…</div>`;
+  await loadAllJsps();
+  if(!jsps.length){ el.innerHTML=`<div class="empty"><i class="ti ti-users"></i><p>Aucun membre</p></div>`; return; }
+  el.innerHTML=`<div class="card" style="padding:0 14px">${jsps.map(j=>{
+    const name=[j.prenom,j.nom].filter(Boolean).join(' ')||'Mat. '+j.matricule;
+    const roleCls={jsp:'badge-blue',moniteur:'badge-amber',responsable:'badge-red'}[j.role]||'badge-gray';
+    return `<div class="row" onclick="openJspDetail('${j.id}')">
+      <div class="row-info">
+        <div class="row-name">${name}</div>
+        <div class="row-detail">Mat. ${j.matricule}${j.grade?' · '+(GRADE_LABELS[j.grade]||j.grade):''}</div>
+      </div>
+      <span class="badge ${roleCls}">${ROLE_LABELS[j.role]||j.role}</span>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+async function createMembre(){
+  const prenom=document.getElementById('nm-prenom').value.trim();
+  const nom=document.getElementById('nm-nom').value.trim();
+  const mat=document.getElementById('nm-mat').value.trim();
+  hideErr('nm-err');
+  if(!prenom||!nom||!mat){ showErr('nm-err','Prénom, nom et matricule obligatoires.'); return; }
+  const {data:exist}=await db.from('utilisateurs').select('id').eq('matricule',mat).maybeSingle();
+  if(exist){ showErr('nm-err','Ce matricule existe déjà.'); return; }
+  const mdpHash=hash(mat+'2026');
+  const {error}=await db.from('utilisateurs').insert({
+    matricule:mat, prenom, nom,
+    role:document.getElementById('nm-role').value,
+    grade:document.getElementById('nm-grade').value,
+    section:document.getElementById('nm-section').value.trim()||null,
+    date_naissance:document.getElementById('nm-ddn').value||null,
+    date_entree:document.getElementById('nm-entree').value||null,
+    contact_parent_nom:document.getElementById('nm-parent-nom').value.trim()||null,
+    contact_parent_tel:document.getElementById('nm-parent-tel').value.trim()||null,
+    mot_de_passe:mdpHash, premiere_connexion:true,
+  });
+  if(error){ showErr('nm-err','Erreur : '+error.message); return; }
+  closeModal('m-new-membre'); toast(`${prenom} ${nom} ajouté ✓ — mdp : ${mat}2026`);
+  await loadAllJsps(); loadAdminMembres();
+}
+
+// ══════════════════════════════════════════════════════════
+// ADMIN — BREVETS
+// ══════════════════════════════════════════════════════════
+async function loadAdminBrevets(){
+  const el=document.getElementById('l-admin-brevets');
+  const {data}=await db.from('brevets').select('*,utilisateurs(prenom,nom,matricule)').order('created_at',{ascending:false});
+  if(!data||!data.length){ el.innerHTML=`<div class="empty"><i class="ti ti-award"></i><p>Aucun brevet attribué</p></div>`; return; }
+  el.innerHTML=`<div class="card" style="padding:0 14px">${data.map(b=>{
+    const u=b.utilisateurs;
+    const name=u?[u.prenom,u.nom].filter(Boolean).join(' ')||'Mat. '+u.matricule:'—';
+    return `<div class="row">
+      <div class="row-icon" style="background:var(--purple-light);font-size:20px">🏅</div>
+      <div class="row-info">
+        <div class="row-name">${b.intitule}</div>
+        <div class="row-detail">${name}${b.date_obtention?' · '+fmt(b.date_obtention):''}</div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+  // Remplir select JSP dans la modale
+  const sel=document.getElementById('nb-jsp');
+  sel.innerHTML='<option value="">— Sélectionner —</option>'+jsps.filter(j=>j.role==='jsp').map(j=>`<option value="${j.id}">${[j.prenom,j.nom].filter(Boolean).join(' ')||j.matricule}</option>`).join('');
+}
+
+async function saveBrevet(){
+  const jspId=document.getElementById('nb-jsp').value;
+  const intitule=document.getElementById('nb-intitule').value.trim();
+  if(!jspId||!intitule){ toast('JSP et intitulé obligatoires'); return; }
+  const {error}=await db.from('brevets').insert({
+    utilisateur_id:jspId, intitule,
+    date_obtention:document.getElementById('nb-date').value||null,
+    delivre_par:document.getElementById('nb-par').value.trim()||null,
+  });
+  if(error){ toast('Erreur : '+error.message); return; }
+  closeModal('m-new-brevet'); toast('Brevet attribué ✓'); loadAdminBrevets();
+}
+
+// ══════════════════════════════════════════════════════════
+// PROFIL
+// ══════════════════════════════════════════════════════════
+function loadProfil(){
+  if(!user) return;
+  const name=[user.prenom,user.nom].filter(Boolean).join(' ')||'Mat. '+user.matricule;
+  document.getElementById('profil-name').textContent=name;
+  document.getElementById('profil-grade').textContent=GRADE_LABELS[user.grade]||user.grade||'—';
+  document.getElementById('profil-mat').textContent='Matricule '+user.matricule;
+  document.getElementById('profil-section').textContent=user.section||'—';
+  document.getElementById('profil-role').textContent=ROLE_LABELS[user.role]||user.role;
+  document.getElementById('profil-entree').textContent=fmt(user.date_entree);
+  document.getElementById('profil-ddn').textContent=fmt(user.date_naissance);
+  document.getElementById('profil-parents').textContent=(user.contact_parent_nom||'—')+(user.contact_parent_tel?' · '+user.contact_parent_tel:'');
+}
+
+async function saveChangePw(){
+  const old=document.getElementById('cpw-old').value;
+  const n1=document.getElementById('cpw-1').value;
+  const n2=document.getElementById('cpw-2').value;
+  hideErr('cpw-err');
+  if(hash(old)!==user.mot_de_passe){ showErr('cpw-err','Mot de passe actuel incorrect.'); return; }
+  if(n1.length<6){ showErr('cpw-err','Minimum 6 caractères.'); return; }
+  if(n1!==n2){ showErr('cpw-err','Les mots de passe ne correspondent pas.'); return; }
+  const {error}=await db.from('utilisateurs').update({mot_de_passe:hash(n1)}).eq('id',user.id);
+  if(error){ showErr('cpw-err','Erreur : '+error.message); return; }
+  user.mot_de_passe=hash(n1);
+  closeModal('m-changepw'); toast('Mot de passe mis à jour ✓');
+}
+
+// ══════════════════════════════════════════════════════════
+// INIT — DOMContentLoaded
+// ══════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function(){
+  showPage('pg-login');
+  const saved=localStorage.getItem('jsp_mat');
+  if(saved){ const el=document.getElementById('l-mat'); if(el) el.value=saved; }
+
+  // Auth
+  document.getElementById('btn-login').addEventListener('click', doLogin);
+  document.getElementById('l-pw').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+  document.getElementById('btn-goto-newpw').addEventListener('click', ()=>showPage('pg-newpw'));
+  document.getElementById('btn-set-pw').addEventListener('click', doFirstLogin);
+  document.getElementById('btn-back-login').addEventListener('click', ()=>showPage('pg-login'));
+  document.getElementById('btn-drawer-logout').addEventListener('click', doLogout);
+
+  // Drawer
+  document.getElementById('btn-drawer-open').addEventListener('click', openDrawer);
+  document.getElementById('drawer-overlay').addEventListener('click', closeDrawer);
+  document.querySelectorAll('[data-tab]').forEach(btn=>{ btn.addEventListener('click', ()=>switchTab(btn.dataset.tab)); });
+
+  // Filtres séances
+  document.querySelectorAll('[data-sfilter]').forEach(btn=>{ btn.addEventListener('click', ()=>{ seanceFilter=btn.dataset.sfilter; document.querySelectorAll('[data-sfilter]').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); loadSeances(); }); });
+
+  // Filtres cours
+  document.querySelectorAll('[data-cfilter]').forEach(btn=>{ btn.addEventListener('click', ()=>{ coursFilter=btn.dataset.cfilter; document.querySelectorAll('[data-cfilter]').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); loadCours(); }); });
+
+  // Filtres docs
+  document.querySelectorAll('[data-dfilter]').forEach(btn=>{ btn.addEventListener('click', ()=>{ docFilter=btn.dataset.dfilter; document.querySelectorAll('[data-dfilter]').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); loadDocs(); }); });
+
+  // Modales — fermeture clic overlay
+  document.querySelectorAll('.modal-overlay').forEach(ov=>{ ov.addEventListener('click', e=>{ if(e.target===ov) closeModal(ov.id); }); });
+
+  // Boutons création
+  document.getElementById('btn-new-seance').addEventListener('click', ()=>openModal('m-new-seance'));
+  document.getElementById('btn-create-seance').addEventListener('click', createSeance);
+  document.getElementById('btn-new-cours').addEventListener('click', ()=>openModal('m-new-cours'));
+  document.getElementById('btn-create-cours').addEventListener('click', createCours);
+  document.getElementById('btn-new-doc').addEventListener('click', ()=>openModal('m-new-doc'));
+  document.getElementById('btn-create-doc').addEventListener('click', createDoc);
+  document.getElementById('btn-add-membre').addEventListener('click', ()=>openModal('m-new-membre'));
+  document.getElementById('btn-create-membre').addEventListener('click', createMembre);
+  document.getElementById('btn-add-brevet').addEventListener('click', ()=>openModal('m-new-brevet'));
+  document.getElementById('btn-save-brevet').addEventListener('click', saveBrevet);
+  document.getElementById('btn-save-appel').addEventListener('click', saveAppel);
+  document.getElementById('btn-save-prog').addEventListener('click', saveProgression);
+  document.getElementById('btn-changepw').addEventListener('click', ()=>openModal('m-changepw'));
+  document.getElementById('btn-save-pw').addEventListener('click', saveChangePw);
+
+  // Admin panels
+  document.getElementById('admin-btn-membres').addEventListener('click', ()=>showAdminPanel('admin-membres'));
+  document.getElementById('admin-btn-cours').addEventListener('click', ()=>{ closeModal('m-admin'); switchTab('sc-cours'); });
+  document.getElementById('admin-btn-seances').addEventListener('click', ()=>switchTab('sc-seances'));
+  document.getElementById('admin-btn-brevets').addEventListener('click', ()=>showAdminPanel('admin-brevets'));
+
+  // Appel — changement séance
+  document.getElementById('appel-select-seance').addEventListener('change', e=>{ if(e.target.value) loadAppelForSeance(e.target.value); });
+
+  // Recherche JSP
+  document.getElementById('jsps-search').addEventListener('input', e=>loadJsps(e.target.value));
+});
+</script>
+</body>
+</html>
