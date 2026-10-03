@@ -266,6 +266,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
       <button class="drawer-item admin-only" data-tab="sc-admin" style="display:none"><span style="font-style:normal">⚙️</span><span>Administration</span></button>
       <div class="drawer-sep"></div>
       <div class="drawer-section">Compte</div>
+      <button class="drawer-item sa-only" data-tab="sc-test" style="display:none">🧪<span style="margin-left:12px">Comptes test</span></button>
       <button class="drawer-item" data-tab="sc-profil"><span style="font-style:normal">👤</span><span>Mon profil</span></button>
     </div>
     <div id="drawer-footer">
@@ -453,6 +454,34 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
         </div>
         <div id="l-admin-brevets"><div class="loader"><span style="font-style:normal">⟳</span>Chargement…</div></div>
       </div>
+    </div>
+  </div>
+
+  <!-- ── TEST ── -->
+  <div class="screen" id="sc-test">
+    <div class="section">
+      <div class="section-title">Simuler un compte</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:16px">Navigue dans l'app comme si tu étais ce type d'utilisateur. Un bouton retour flottant te ramène à ton compte.</div>
+      <div style="display:flex;flex-direction:column;gap:10px" id="test-role-list">
+        <div class="card" style="cursor:pointer;border-left:4px solid var(--blue)" onclick="simulateRole('jsp')">
+          <div style="font-size:20px;margin-bottom:4px">🛡️ <strong>JSP (élève)</strong></div>
+          <div style="font-size:12px;color:var(--text2)">Vue basique — séances, cours, progression personnelle</div>
+        </div>
+        <div class="card" style="cursor:pointer;border-left:4px solid var(--amber)" onclick="simulateRole('moniteur')">
+          <div style="font-size:20px;margin-bottom:4px">📋 <strong>Moniteur</strong></div>
+          <div style="font-size:12px;color:var(--text2)">Faire l'appel, valider progression, voir les JSP</div>
+        </div>
+        <div class="card" style="cursor:pointer;border-left:4px solid var(--green)" onclick="simulateRole('responsable')">
+          <div style="font-size:20px;margin-bottom:4px">⚙️ <strong>Responsable JSP</strong></div>
+          <div style="font-size:12px;color:var(--text2)">Administration complète d'une caserne</div>
+        </div>
+      </div>
+      <div style="height:16px"></div>
+      <div class="section-title">Ou simuler un vrai compte</div>
+      <div style="margin-bottom:10px">
+        <input class="form-ctrl" id="test-search" placeholder="🔍 Rechercher un utilisateur…">
+      </div>
+      <div id="test-user-list"><div class="loader">⟳ Chargement…</div></div>
     </div>
   </div>
 
@@ -740,7 +769,9 @@ const db = supabase.createClient(SUPA_URL, SUPA_KEY);
 // ══════════════════════════════════════════════════════════
 let user = null;
 let seances = [], cours = [], docs = [], jsps = [];
-let userCaserne = null; // caserne de l'utilisateur connecté
+let userCaserne = null;
+let simulatedUser = null; // utilisateur simulé (super admin)
+let realUser = null;      // vrai utilisateur sauvegardé pendant simulation // caserne de l'utilisateur connecté
 let appelData = {}; // { utilisateur_id: true/false }
 let curSeanceId = null, curCoursId = null, curJspId = null, curProgJspId = null, curProgCoursId = null;
 let seanceFilter = 'all', coursFilter = 'all', docFilter = 'all';
@@ -781,8 +812,9 @@ function hideErr(id){ const e=document.getElementById(id); if(e) e.style.display
 function togglePw(id,btn){ const el=document.getElementById(id); const show=el.type==='password'; el.type=show?'text':'password'; var iEl=btn.querySelector('i,span'); if(iEl) iEl.textContent=show?'🙈':'👁'; }
 function isMonitor(){ return user && (user.role==='moniteur'||user.role==='responsable'||user.super_admin); }
 function isAdmin(){ return user && (user.role==='responsable'||user.super_admin); }
-function isSuperAdmin(){ return user && user.super_admin; }
-function getCaserne(){ return isSuperAdmin() ? null : (user.caserne||null); }
+function isSuperAdmin(){ return realUser ? realUser.super_admin : (user && user.super_admin); }
+function isSimulating(){ return !!simulatedUser; }
+function getCaserne(){ return isSuperAdmin()&&!isSimulating() ? null : (user.caserne||null); }
 
 function showPage(id){
   ['pg-login','pg-app'].forEach(function(p){
@@ -815,6 +847,7 @@ function switchTab(tabId){
   if(tabId==='sc-jsps') loadJsps();
   if(tabId==='sc-admin') { showAdminPanel(null); }
   if(tabId==='sc-profil') loadProfil();
+  if(tabId==='sc-test'){ loadTestUsers(); }
 }
 function openDrawer(){ document.getElementById('drawer').classList.add('open'); document.getElementById('drawer-overlay').classList.add('open'); }
 function closeDrawer(){ document.getElementById('drawer').classList.remove('open'); document.getElementById('drawer-overlay').classList.remove('open'); }
@@ -973,6 +1006,95 @@ async function renderHome(){
   }
 }
 
+
+
+// ══════════════════════════════════════════════════════════
+// SIMULATION DE COMPTE (super admin)
+// ══════════════════════════════════════════════════════════
+async function loadTestUsers(){
+  var search = document.getElementById('test-search')?.value||'';
+  var {data}=await db.from('utilisateurs').select('id,matricule,prenom,nom,role,caserne,grade').order('nom');
+  var list=(data||[]).filter(u=>u.id!==user.id&&(!search||(u.prenom+' '+u.nom+' '+u.matricule).toLowerCase().includes(search.toLowerCase())));
+  var el=document.getElementById('test-user-list');
+  if(!list.length){ el.innerHTML='<div class="empty">👥<p>Aucun utilisateur</p></div>'; return; }
+  var roleCls={jsp:'badge-blue',moniteur:'badge-amber',responsable:'badge-green'};
+  el.innerHTML='<div class="card" style="padding:0 14px">'+list.map(u=>{
+    var name=[u.prenom,u.nom].filter(Boolean).join(' ')||'Mat. '+u.matricule;
+    return '<div class="row" onclick="simulateUser(''+u.id+'')">'+
+      '<div class="row-info"><div class="row-name">'+name+'</div>'+
+      '<div class="row-detail">Mat. '+u.matricule+(u.caserne?' · '+u.caserne:'')+'</div></div>'+
+      '<span class="badge '+(roleCls[u.role]||'badge-gray')+'">'+( ROLE_LABELS[u.role]||u.role)+'</span>'+
+    '</div>';
+  }).join('')+'</div>';
+}
+
+async function simulateRole(role){
+  // Créer un utilisateur virtuel avec ce rôle
+  var virtualUser = {
+    id: 'virtual-'+role,
+    matricule: 'TEST',
+    prenom: 'Compte', nom: 'Test',
+    role: role,
+    caserne: user.caserne||'CSP La Ferté-Bernard',
+    grade: role==='jsp'?'JSP1':'Moniteur',
+    section: null, super_admin: false,
+  };
+  await startSimulation(virtualUser);
+}
+
+async function simulateUser(uid){
+  var {data}=await db.from('utilisateurs').select('*').eq('id',uid).single();
+  if(!data){ toast('Utilisateur introuvable'); return; }
+  await startSimulation(data);
+}
+
+async function startSimulation(targetUser){
+  realUser = {...user};
+  simulatedUser = targetUser;
+  user = {...targetUser, _simulated: true};
+  userCaserne = user.caserne||null;
+  // Afficher bouton retour flottant
+  var btn = document.getElementById('btn-return');
+  if(btn){ btn.style.display='flex'; }
+  // Réinitialiser l'UI
+  document.querySelectorAll('.monitor-only').forEach(el=>el.style.display=isMonitor()?'flex':'none');
+  document.querySelectorAll('.admin-only').forEach(el=>el.style.display=isAdmin()?'flex':'none');
+  document.querySelectorAll('.sa-only').forEach(el=>el.style.display='none'); // jamais en simulation
+  // Header
+  var name=[user.prenom,user.nom].filter(Boolean).join(' ')||'Mat. '+user.matricule;
+  document.getElementById('d-name').textContent=name;
+  document.getElementById('d-role').textContent=ROLE_LABELS[user.role]||user.role;
+  document.getElementById('h-sub').textContent=(ROLE_LABELS[user.role]||user.role)+' · '+(user.caserne||'CSP LFB');
+  var badgeWrap=document.getElementById('h-badge-wrap');
+  if(badgeWrap) badgeWrap.innerHTML='<span class="header-badge" style="background:rgba(255,200,0,0.4)">TEST</span>';
+  await Promise.all([loadAllSeances(),loadAllCours(),loadAllDocs(),loadAllJsps()]);
+  switchTab('sc-home');
+  toast('Simulation : '+(ROLE_LABELS[user.role]||user.role));
+}
+
+async function stopSimulation(){
+  if(!realUser) return;
+  user = {...realUser};
+  simulatedUser = null;
+  realUser = null;
+  userCaserne = user.caserne||null;
+  var btn = document.getElementById('btn-return');
+  if(btn) btn.style.display='none';
+  // Restaurer l'UI super admin
+  document.querySelectorAll('.monitor-only').forEach(el=>el.style.display=isMonitor()?'flex':'none');
+  document.querySelectorAll('.admin-only').forEach(el=>el.style.display=isAdmin()?'flex':'none');
+  document.querySelectorAll('.sa-only').forEach(el=>el.style.display=isSuperAdmin()?'flex':'none');
+  var name=[user.prenom,user.nom].filter(Boolean).join(' ')||'Mat. '+user.matricule;
+  document.getElementById('d-name').textContent=name;
+  document.getElementById('d-role').textContent='Super Admin';
+  document.getElementById('h-sub').textContent='Super Admin · '+(user.caserne||'CSP LFB');
+  var badgeWrap=document.getElementById('h-badge-wrap');
+  if(badgeWrap) badgeWrap.innerHTML='<span class="header-badge">SA</span>';
+  await Promise.all([loadAllSeances(),loadAllCours(),loadAllDocs(),loadAllJsps()]);
+  await populateCaserneFilters();
+  switchTab('sc-home');
+  toast('Retour en mode Super Admin ✓');
+}
 
 // ══════════════════════════════════════════════════════════
 // SUPER ADMIN — gestion multi-casernes
@@ -1545,6 +1667,8 @@ document.addEventListener('DOMContentLoaded', function(){
   document.getElementById('btn-login').addEventListener('click', doLogin);
   document.getElementById('l-pw').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
   document.getElementById('btn-drawer-logout').addEventListener('click', doLogout);
+  var btnReturn = document.getElementById('btn-return');
+  if(btnReturn) btnReturn.addEventListener('click', stopSimulation);
 
   // Drawer
   document.getElementById('btn-drawer-open').addEventListener('click', openDrawer);
@@ -1594,6 +1718,8 @@ document.addEventListener('DOMContentLoaded', function(){
   if(fcJsps) fcJsps.addEventListener('change', function(){ loadJsps('', this.value); });
   var fcSeances=document.getElementById('filter-caserne-seances');
   if(fcSeances) fcSeances.addEventListener('change', function(){ loadSeancesFiltered(this.value); });
+  var testSearch=document.getElementById('test-search');
+  if(testSearch) testSearch.addEventListener('input', loadTestUsers);
 });
 </script>
 </body>
