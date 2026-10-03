@@ -771,7 +771,7 @@ let user = null;
 let seances = [], cours = [], docs = [], jsps = [];
 let userCaserne = null;
 let simulatedUser = null; // utilisateur simulé (super admin)
-let realUser = null;      // vrai utilisateur sauvegardé pendant simulation // caserne de l'utilisateur connecté
+let realUser = null;      // vrai utilisateur sauvegarde pendant simulation
 let appelData = {}; // { utilisateur_id: true/false }
 let curSeanceId = null, curCoursId = null, curJspId = null, curProgJspId = null, curProgCoursId = null;
 let seanceFilter = 'all', coursFilter = 'all', docFilter = 'all';
@@ -1020,7 +1020,7 @@ async function loadTestUsers(){
   var roleCls={jsp:'badge-blue',moniteur:'badge-amber',responsable:'badge-green'};
   el.innerHTML='<div class="card" style="padding:0 14px">'+list.map(u=>{
     var name=[u.prenom,u.nom].filter(Boolean).join(' ')||'Mat. '+u.matricule;
-    return '<div class="row" onclick="simulateUser(''+u.id+'')">'+
+    return '<div class="row" onclick="simulateUser(\''+u.id+'\')">'+
       '<div class="row-info"><div class="row-name">'+name+'</div>'+
       '<div class="row-detail">Mat. '+u.matricule+(u.caserne?' · '+u.caserne:'')+'</div></div>'+
       '<span class="badge '+(roleCls[u.role]||'badge-gray')+'">'+( ROLE_LABELS[u.role]||u.role)+'</span>'+
