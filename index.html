@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="JSP LFB">
 <meta name="theme-color" content="#1a56a0">
 <title>JSP — CSP La Ferté-Bernard</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/tabler-icons.min.css">
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -231,10 +231,10 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
         <label class="form-label">Mot de passe</label>
         <div style="position:relative">
           <input class="form-ctrl" id="l-pw" type="password" placeholder="Votre mot de passe" style="font-size:16px">
-          <button type="button" onclick="togglePw('l-pw',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);font-size:19px;padding:4px"><i class="ti ti-eye"></i></button>
+          <button type="button" onclick="togglePw('l-pw',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);font-size:19px;padding:4px"><span style="font-style:normal">👁</span></button>
         </div>
       </div>
-      <button class="btn btn-blue" id="btn-login" style="margin-top:4px"><i class="ti ti-login"></i>Se connecter</button>
+      <button class="btn btn-blue" id="btn-login" style="margin-top:4px"><span style="font-style:normal">→</span>Se connecter</button>
     </div>
   </div>
 </div>
@@ -254,23 +254,23 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
     </div>
     <div id="drawer-scroll">
       <div class="drawer-section">Modules</div>
-      <button class="drawer-item" data-tab="sc-home"><i class="ti ti-home"></i><span>Accueil</span></button>
-      <button class="drawer-item" data-tab="sc-seances"><i class="ti ti-calendar-event"></i><span>Séances</span></button>
-      <button class="drawer-item" data-tab="sc-cours"><i class="ti ti-book"></i><span>Cours</span></button>
-      <button class="drawer-item" data-tab="sc-docs"><i class="ti ti-folder"></i><span>Documents</span></button>
-      <button class="drawer-item" data-tab="sc-progression"><i class="ti ti-chart-bar"></i><span>Ma progression</span></button>
+      <button class="drawer-item" data-tab="sc-home"><span style="font-style:normal">🏠</span><span>Accueil</span></button>
+      <button class="drawer-item" data-tab="sc-seances"><span style="font-style:normal">📅</span><span>Séances</span></button>
+      <button class="drawer-item" data-tab="sc-cours"><span style="font-style:normal">📚</span><span>Cours</span></button>
+      <button class="drawer-item" data-tab="sc-docs"><span style="font-style:normal">📁</span><span>Documents</span></button>
+      <button class="drawer-item" data-tab="sc-progression"><span style="font-style:normal">📊</span><span>Ma progression</span></button>
       <div class="drawer-sep"></div>
       <div class="drawer-section">Administration</div>
-      <button class="drawer-item monitor-only" data-tab="sc-appel" style="display:none"><i class="ti ti-clipboard-list"></i><span>Faire l'appel</span></button>
-      <button class="drawer-item monitor-only" data-tab="sc-jsps" style="display:none"><i class="ti ti-users"></i><span>Mes JSP</span></button>
-      <button class="drawer-item admin-only" data-tab="sc-admin" style="display:none"><i class="ti ti-settings"></i><span>Administration</span></button>
+      <button class="drawer-item monitor-only" data-tab="sc-appel" style="display:none"><span style="font-style:normal">✅</span><span>Faire l'appel</span></button>
+      <button class="drawer-item monitor-only" data-tab="sc-jsps" style="display:none"><span style="font-style:normal">👥</span><span>Mes JSP</span></button>
+      <button class="drawer-item admin-only" data-tab="sc-admin" style="display:none"><span style="font-style:normal">⚙️</span><span>Administration</span></button>
       <div class="drawer-sep"></div>
       <div class="drawer-section">Compte</div>
-      <button class="drawer-item" data-tab="sc-profil"><i class="ti ti-user-circle"></i><span>Mon profil</span></button>
+      <button class="drawer-item" data-tab="sc-profil"><span style="font-style:normal">👤</span><span>Mon profil</span></button>
     </div>
     <div id="drawer-footer">
       <button class="drawer-item" id="btn-drawer-logout" style="color:var(--red)">
-        <i class="ti ti-logout" style="color:var(--red)"></i><span>Se déconnecter</span>
+        <span style="font-style:normal;color:var(--red)">←</span><span>Se déconnecter</span>
       </button>
     </div>
   </div>
@@ -296,10 +296,10 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
     <div class="module-grid" id="home-grid"></div>
     <div class="section">
       <div class="section-title">Prochaine séance</div>
-      <div id="home-next-seance"><div class="loader"><i class="ti ti-loader"></i>Chargement…</div></div>
+      <div id="home-next-seance"><div class="loader"><span style="font-style:normal">⟳</span>Chargement…</div></div>
       <div style="height:8px"></div>
       <div class="section-title">Activité récente</div>
-      <div id="home-activite"><div class="loader"><i class="ti ti-loader"></i>Chargement…</div></div>
+      <div id="home-activite"><div class="loader"><span style="font-style:normal">⟳</span>Chargement…</div></div>
     </div>
   </div>
 
@@ -308,7 +308,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
     <div class="section">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div class="section-title" style="margin-bottom:0">Planning des séances</div>
-        <button class="btn btn-blue btn-sm monitor-only" id="btn-new-seance" style="display:none"><i class="ti ti-plus"></i>Créer</button>
+        <button class="btn btn-blue btn-sm monitor-only" id="btn-new-seance" style="display:none"><span style="font-style:normal">+</span>Créer</button>
       </div>
       <div class="chips" style="margin-bottom:14px">
         <button class="chip active" data-sfilter="all">Toutes</button>
@@ -316,7 +316,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
         <button class="chip" data-sfilter="terminee">Terminées</button>
         <button class="chip" data-sfilter="annulee">Annulées</button>
       </div>
-      <div id="l-seances"><div class="loader"><i class="ti ti-loader"></i>Chargement…</div></div>
+      <div id="l-seances"><div class="loader"><span style="font-style:normal">⟳</span>Chargement…</div></div>
     </div>
   </div>
 
@@ -325,7 +325,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
     <div class="section">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div class="section-title" style="margin-bottom:0">Catalogue des cours</div>
-        <button class="btn btn-blue btn-sm monitor-only" id="btn-new-cours" style="display:none"><i class="ti ti-plus"></i>Créer</button>
+        <button class="btn btn-blue btn-sm monitor-only" id="btn-new-cours" style="display:none"><span style="font-style:normal">+</span>Créer</button>
       </div>
       <div class="chips" style="margin-bottom:14px">
         <button class="chip active" data-cfilter="all">Tous</button>
@@ -336,7 +336,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
         <button class="chip" data-cfilter="technique">🔧 Technique</button>
         <button class="chip" data-cfilter="autre">📋 Autre</button>
       </div>
-      <div id="l-cours"><div class="loader"><i class="ti ti-loader"></i>Chargement…</div></div>
+      <div id="l-cours"><div class="loader"><span style="font-style:normal">⟳</span>Chargement…</div></div>
     </div>
   </div>
 
@@ -345,7 +345,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
     <div class="section">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div class="section-title" style="margin-bottom:0">Documents</div>
-        <button class="btn btn-blue btn-sm monitor-only" id="btn-new-doc" style="display:none"><i class="ti ti-upload"></i>Ajouter</button>
+        <button class="btn btn-blue btn-sm monitor-only" id="btn-new-doc" style="display:none"><span style="font-style:normal">↑</span>Ajouter</button>
       </div>
       <div class="chips" style="margin-bottom:14px">
         <button class="chip active" data-dfilter="all">Tous</button>
@@ -354,7 +354,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
         <button class="chip" data-dfilter="administratif">📋 Administratif</button>
         <button class="chip" data-dfilter="autre">📁 Autre</button>
       </div>
-      <div id="l-docs"><div class="loader"><i class="ti ti-loader"></i>Chargement…</div></div>
+      <div id="l-docs"><div class="loader"><span style="font-style:normal">⟳</span>Chargement…</div></div>
     </div>
   </div>
 
@@ -366,10 +366,10 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
     </div>
     <div class="section" style="padding-top:0">
       <div class="section-title">Mes brevets</div>
-      <div id="prog-brevets"><div class="empty"><i class="ti ti-award"></i><p>Aucun brevet</p></div></div>
+      <div id="prog-brevets"><div class="empty"><span style="font-style:normal">🏅</span><p>Aucun brevet</p></div></div>
       <div style="height:14px"></div>
       <div class="section-title">Progression par cours</div>
-      <div id="prog-liste"><div class="loader"><i class="ti ti-loader"></i>Chargement…</div></div>
+      <div id="prog-liste"><div class="loader"><span style="font-style:normal">⟳</span>Chargement…</div></div>
     </div>
   </div>
 
@@ -382,9 +382,9 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
       </select>
       <div id="appel-info" style="display:none" class="card" style="margin-bottom:14px"></div>
       <div class="section-title">Liste des JSP</div>
-      <div id="l-appel"><div class="empty"><i class="ti ti-clipboard-list"></i><p>Sélectionnez une séance</p></div></div>
+      <div id="l-appel"><div class="empty"><span style="font-style:normal">✅</span><p>Sélectionnez une séance</p></div></div>
       <div id="appel-actions" style="display:none;margin-top:14px">
-        <button class="btn btn-green" id="btn-save-appel"><i class="ti ti-device-floppy"></i>Enregistrer l'appel</button>
+        <button class="btn btn-green" id="btn-save-appel"><span style="font-style:normal">💾</span>Enregistrer l'appel</button>
       </div>
     </div>
   </div>
@@ -398,7 +398,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
       <div style="margin-bottom:14px">
         <input class="form-ctrl" id="jsps-search" placeholder="🔍 Rechercher un JSP…">
       </div>
-      <div id="l-jsps"><div class="loader"><i class="ti ti-loader"></i>Chargement…</div></div>
+      <div id="l-jsps"><div class="loader"><span style="font-style:normal">⟳</span>Chargement…</div></div>
     </div>
   </div>
 
@@ -410,22 +410,22 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
         <div class="row" id="admin-btn-membres">
           <div class="row-icon" style="background:#eff6ff;font-size:22px">👥</div>
           <div class="row-info"><div class="row-name">Gérer les membres</div><div class="row-detail">Ajouter, modifier, droits</div></div>
-          <i class="ti ti-chevron-right" style="color:var(--text2)"></i>
+          <span style="font-style:normal;color:var(--text2)">›</span>
         </div>
         <div class="row" id="admin-btn-cours">
           <div class="row-icon" style="background:#f0fdf4;font-size:22px">📚</div>
           <div class="row-info"><div class="row-name">Gérer les cours</div><div class="row-detail">Créer, modifier, supprimer</div></div>
-          <i class="ti ti-chevron-right" style="color:var(--text2)"></i>
+          <span style="font-style:normal;color:var(--text2)">›</span>
         </div>
         <div class="row" id="admin-btn-seances">
           <div class="row-icon" style="background:#fdf4ff;font-size:22px">📅</div>
           <div class="row-info"><div class="row-name">Gérer les séances</div><div class="row-detail">Planning et appel</div></div>
-          <i class="ti ti-chevron-right" style="color:var(--text2)"></i>
+          <span style="font-style:normal;color:var(--text2)">›</span>
         </div>
         <div class="row" id="admin-btn-brevets">
           <div class="row-icon" style="background:#fefce8;font-size:22px">🏅</div>
           <div class="row-info"><div class="row-name">Attribuer des brevets</div><div class="row-detail">Brevets et certifications</div></div>
-          <i class="ti ti-chevron-right" style="color:var(--text2)"></i>
+          <span style="font-style:normal;color:var(--text2)">›</span>
         </div>
       </div>
     </div>
@@ -434,10 +434,10 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
     <div id="admin-membres" style="display:none">
       <div class="section">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <button class="btn btn-ghost btn-sm" onclick="showAdminPanel(null)"><i class="ti ti-arrow-left"></i>Retour</button>
-          <button class="btn btn-blue btn-sm" id="btn-add-membre"><i class="ti ti-user-plus"></i>Ajouter</button>
+          <button class="btn btn-ghost btn-sm" onclick="showAdminPanel(null)"><span style="font-style:normal">←</span>Retour</button>
+          <button class="btn btn-blue btn-sm" id="btn-add-membre"><span style="font-style:normal">👤+</span>Ajouter</button>
         </div>
-        <div id="l-admin-membres"><div class="loader"><i class="ti ti-loader"></i>Chargement…</div></div>
+        <div id="l-admin-membres"><div class="loader"><span style="font-style:normal">⟳</span>Chargement…</div></div>
       </div>
     </div>
 
@@ -445,10 +445,10 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
     <div id="admin-brevets" style="display:none">
       <div class="section">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <button class="btn btn-ghost btn-sm" onclick="showAdminPanel(null)"><i class="ti ti-arrow-left"></i>Retour</button>
-          <button class="btn btn-blue btn-sm" id="btn-add-brevet"><i class="ti ti-plus"></i>Attribuer</button>
+          <button class="btn btn-ghost btn-sm" onclick="showAdminPanel(null)"><span style="font-style:normal">←</span>Retour</button>
+          <button class="btn btn-blue btn-sm" id="btn-add-brevet"><span style="font-style:normal">+</span>Attribuer</button>
         </div>
-        <div id="l-admin-brevets"><div class="loader"><i class="ti ti-loader"></i>Chargement…</div></div>
+        <div id="l-admin-brevets"><div class="loader"><span style="font-style:normal">⟳</span>Chargement…</div></div>
       </div>
     </div>
   </div>
@@ -471,14 +471,14 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
       <div class="section-title">Coordonnées parents</div>
       <div class="card" id="profil-parents" style="font-size:13px;color:var(--text2)">—</div>
       <div style="height:14px"></div>
-      <button class="btn btn-ghost" id="btn-changepw"><i class="ti ti-lock"></i>Changer mon mot de passe</button>
+      <button class="btn btn-ghost" id="btn-changepw"><span style="font-style:normal">🔒</span>Changer mon mot de passe</button>
     </div>
   </div>
 
 </div><!-- /pg-app -->
 
 <!-- BOUTON RETOUR (vue simulée) -->
-<button id="btn-return"><i class="ti ti-arrow-back-up"></i>Retour admin</button>
+<button id="btn-return"><span style="font-style:normal">↩</span>Retour admin</button>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
@@ -541,7 +541,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
       <div class="form-group"><label class="form-label">Lieu</label><input class="form-ctrl" id="ns-lieu" placeholder="Ex : Caserne CSP LFB"></div>
       <div class="form-group"><label class="form-label">Cours associé</label><select class="form-ctrl" id="ns-cours"><option value="">— Aucun —</option></select></div>
       <div class="form-group"><label class="form-label">Description</label><textarea class="form-ctrl" id="ns-desc" rows="2"></textarea></div>
-      <button class="btn btn-blue" id="btn-create-seance"><i class="ti ti-calendar-plus"></i>Planifier</button>
+      <button class="btn btn-blue" id="btn-create-seance"><span style="font-style:normal">📅+</span>Planifier</button>
     </div>
   </div>
 </div>
@@ -569,7 +569,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
       </div>
       <div class="form-group"><label class="form-label">Objectifs</label><textarea class="form-ctrl" id="nc-obj" rows="2"></textarea></div>
       <div class="form-group"><label class="form-label">Contenu</label><textarea class="form-ctrl" id="nc-contenu" rows="3"></textarea></div>
-      <button class="btn btn-blue" id="btn-create-cours"><i class="ti ti-check"></i>Créer le cours</button>
+      <button class="btn btn-blue" id="btn-create-cours"><span style="font-style:normal">✓</span>Créer le cours</button>
     </div>
   </div>
 </div>
@@ -593,7 +593,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
       </div>
       <div class="form-group"><label class="form-label">Description</label><input class="form-ctrl" id="nd-desc" placeholder="Optionnel"></div>
       <div class="form-group"><label class="form-label">Fichier *</label><input class="form-ctrl" type="file" id="nd-fichier" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.png"></div>
-      <button class="btn btn-blue" id="btn-create-doc"><i class="ti ti-upload"></i>Publier</button>
+      <button class="btn btn-blue" id="btn-create-doc"><span style="font-style:normal">↑</span>Publier</button>
     </div>
   </div>
 </div>
@@ -639,7 +639,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
       </div>
       <div class="form-group"><label class="form-label">Contact parent (nom)</label><input class="form-ctrl" id="nm-parent-nom"></div>
       <div class="form-group"><label class="form-label">Contact parent (tél)</label><input class="form-ctrl" id="nm-parent-tel" type="tel"></div>
-      <button class="btn btn-blue" id="btn-create-membre"><i class="ti ti-user-plus"></i>Créer le compte</button>
+      <button class="btn btn-blue" id="btn-create-membre"><span style="font-style:normal">👤+</span>Créer le compte</button>
     </div>
   </div>
 </div>
@@ -656,7 +656,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
         <div class="ig-item form-group"><label class="form-label">Date d'obtention</label><input class="form-ctrl" type="date" id="nb-date"></div>
         <div class="ig-item form-group"><label class="form-label">Délivré par</label><input class="form-ctrl" id="nb-par" placeholder="Ex : SDIS 72"></div>
       </div>
-      <button class="btn btn-blue" id="btn-save-brevet"><i class="ti ti-award"></i>Attribuer</button>
+      <button class="btn btn-blue" id="btn-save-brevet"><span style="font-style:normal">🏅</span>Attribuer</button>
     </div>
   </div>
 </div>
@@ -668,10 +668,10 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
     <div class="modal-inner">
       <div class="modal-title">Changer mon mot de passe</div>
       <div class="err-box" id="cpw-err"></div>
-      <div class="form-group"><label class="form-label">Mot de passe actuel</label><div style="position:relative"><input class="form-ctrl" id="cpw-old" type="password"><button type="button" onclick="togglePw('cpw-old',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);font-size:19px;padding:4px"><i class="ti ti-eye"></i></button></div></div>
-      <div class="form-group"><label class="form-label">Nouveau mot de passe</label><div style="position:relative"><input class="form-ctrl" id="cpw-1" type="password" placeholder="Min. 6 caractères"><button type="button" onclick="togglePw('cpw-1',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);font-size:19px;padding:4px"><i class="ti ti-eye"></i></button></div></div>
-      <div class="form-group"><label class="form-label">Confirmer</label><div style="position:relative"><input class="form-ctrl" id="cpw-2" type="password"><button type="button" onclick="togglePw('cpw-2',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);font-size:19px;padding:4px"><i class="ti ti-eye"></i></button></div></div>
-      <button class="btn btn-blue" id="btn-save-pw"><i class="ti ti-lock"></i>Mettre à jour</button>
+      <div class="form-group"><label class="form-label">Mot de passe actuel</label><div style="position:relative"><input class="form-ctrl" id="cpw-old" type="password"><button type="button" onclick="togglePw('cpw-old',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);font-size:19px;padding:4px"><span style="font-style:normal">👁</span></button></div></div>
+      <div class="form-group"><label class="form-label">Nouveau mot de passe</label><div style="position:relative"><input class="form-ctrl" id="cpw-1" type="password" placeholder="Min. 6 caractères"><button type="button" onclick="togglePw('cpw-1',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);font-size:19px;padding:4px"><span style="font-style:normal">👁</span></button></div></div>
+      <div class="form-group"><label class="form-label">Confirmer</label><div style="position:relative"><input class="form-ctrl" id="cpw-2" type="password"><button type="button" onclick="togglePw('cpw-2',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);font-size:19px;padding:4px"><span style="font-style:normal">👁</span></button></div></div>
+      <button class="btn btn-blue" id="btn-save-pw"><span style="font-style:normal">🔒</span>Mettre à jour</button>
     </div>
   </div>
 </div>
@@ -713,7 +713,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
         </select>
       </div>
       <div class="form-group"><label class="form-label">Note /20 (optionnel)</label><input class="form-ctrl" type="number" id="vp-note" min="0" max="20" step="0.5"></div>
-      <button class="btn btn-green" id="btn-save-prog"><i class="ti ti-check"></i>Enregistrer</button>
+      <button class="btn btn-green" id="btn-save-prog"><span style="font-style:normal">✓</span>Enregistrer</button>
     </div>
   </div>
 </div>
@@ -768,7 +768,7 @@ function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 function showErr(id,msg){ const e=document.getElementById(id); e.textContent=msg; e.style.display='block'; }
 function hideErr(id){ const e=document.getElementById(id); if(e) e.style.display='none'; }
-function togglePw(id,btn){ const el=document.getElementById(id); const show=el.type==='password'; el.type=show?'text':'password'; btn.querySelector('i').className=show?'ti ti-eye-off':'ti ti-eye'; }
+function togglePw(id,btn){ const el=document.getElementById(id); const show=el.type==='password'; el.type=show?'text':'password'; var iEl=btn.querySelector('i,span'); if(iEl) iEl.textContent=show?'🙈':'👁'; }
 function isMonitor(){ return user && (user.role==='moniteur'||user.role==='responsable'); }
 function isAdmin(){ return user && user.role==='responsable'; }
 
@@ -816,7 +816,7 @@ async function doLogin(){
   const btn=document.getElementById('btn-login');
   hideErr('login-err');
   if(!mat||!pw){ showErr('login-err','Remplissez tous les champs.'); return; }
-  btn.disabled=true; btn.innerHTML='<i class="ti ti-loader"></i>Connexion…';
+  btn.disabled=true; btn.innerHTML='<span style="font-style:normal">⟳</span>Connexion…';
   try{
     const {data,error}=await db.from('utilisateurs').select('*').eq('matricule',mat).single();
     if(error||!data){ showErr('login-err','Matricule introuvable.'); return; }
@@ -825,7 +825,7 @@ async function doLogin(){
     localStorage.setItem('jsp_mat',mat);
     await initApp();
   } catch(e){ showErr('login-err','Erreur de connexion.'); }
-  finally{ btn.disabled=false; btn.innerHTML='<i class="ti ti-login"></i>Se connecter'; }
+  finally{ btn.disabled=false; btn.innerHTML='<span style="font-style:normal">→</span>Se connecter'; }
 }
 
 
@@ -944,7 +944,7 @@ async function renderHome(){
 function loadSeances(){
   const list=seanceFilter==='all'?seances:seances.filter(s=>s.statut===seanceFilter);
   const el=document.getElementById('l-seances');
-  if(!list.length){ el.innerHTML=`<div class="empty"><i class="ti ti-calendar-event"></i><p>Aucune séance</p></div>`; return; }
+  if(!list.length){ el.innerHTML=`<div class="empty"><span style="font-style:normal">📅</span><p>Aucune séance</p></div>`; return; }
   const today=new Date().toISOString().split('T')[0];
   const grouped={};
   list.forEach(s=>{ const m=s.date_seance.slice(0,7); if(!grouped[m])grouped[m]=[]; grouped[m].push(s); });
@@ -988,12 +988,12 @@ async function openSeanceDetail(id){
   actEl.innerHTML='';
   if(isMonitor()&&s.statut==='planifiee'){
     const btn=document.createElement('button');
-    btn.className='btn btn-blue'; btn.innerHTML='<i class="ti ti-clipboard-list"></i>Faire l\'appel pour cette séance';
+    btn.className='btn btn-blue'; btn.innerHTML='<span style="font-style:normal">✅</span>Faire l\'appel pour cette séance';
     btn.onclick=()=>{ closeModal('m-seance'); document.getElementById('appel-select-seance').value=id; switchTab('sc-appel'); loadAppelForSeance(id); };
     actEl.appendChild(btn);
     if(isAdmin()){
       const btn2=document.createElement('button');
-      btn2.className='btn btn-ghost'; btn2.style.marginTop='8px'; btn2.innerHTML='<i class="ti ti-x"></i>Annuler la séance';
+      btn2.className='btn btn-ghost'; btn2.style.marginTop='8px'; btn2.innerHTML='<span style="font-style:normal">✕</span>Annuler la séance';
       btn2.onclick=()=>annulerSeance(id);
       actEl.appendChild(btn2);
     }
@@ -1030,7 +1030,7 @@ async function createSeance(){
 function loadCours(){
   const list=coursFilter==='all'?cours:cours.filter(c=>c.categorie===coursFilter);
   const el=document.getElementById('l-cours');
-  if(!list.length){ el.innerHTML=`<div class="empty"><i class="ti ti-book"></i><p>Aucun cours</p></div>`; return; }
+  if(!list.length){ el.innerHTML=`<div class="empty"><span style="font-style:normal">📚</span><p>Aucun cours</p></div>`; return; }
   el.innerHTML=`<div class="card" style="padding:0 14px">${list.map(c=>{
     const cat=CAT_CFG[c.categorie]||{ico:'📋',lbl:c.categorie,bg:'#f3f4f6',col:'#374151'};
     return `<div class="row" onclick="openCoursDetail('${c.id}')">
@@ -1039,7 +1039,7 @@ function loadCours(){
         <div class="row-name">${c.titre}</div>
         <div class="row-detail">${cat.lbl}${c.duree_minutes?' · '+c.duree_minutes+' min':''}</div>
       </div>
-      <i class="ti ti-chevron-right" style="color:var(--text2)"></i>
+      <span style="font-style:normal;color:var(--text2)">›</span>
     </div>`;
   }).join('')}</div>`;
 }
@@ -1066,7 +1066,7 @@ async function openCoursDetail(id){
   if(isMonitor()){
     const btn=document.createElement('button');
     btn.className='btn btn-ghost'; btn.style.marginTop='8px';
-    btn.innerHTML='<i class="ti ti-check"></i>Valider la progression d\'un JSP';
+    btn.innerHTML='<span style="font-style:normal">✓</span>Valider la progression d\'un JSP';
     btn.onclick=()=>{ closeModal('m-cours'); openValiderProg(null, id); };
     actEl.appendChild(btn);
   }
@@ -1096,7 +1096,7 @@ async function createCours(){
 function loadDocs(){
   const list=docFilter==='all'?docs:docs.filter(d=>d.categorie===docFilter);
   const el=document.getElementById('l-docs');
-  if(!list.length){ el.innerHTML=`<div class="empty"><i class="ti ti-folder"></i><p>Aucun document</p></div>`; return; }
+  if(!list.length){ el.innerHTML=`<div class="empty"><span style="font-style:normal">📁</span><p>Aucun document</p></div>`; return; }
   el.innerHTML=`<div class="card" style="padding:0 14px">${list.map(d=>`
     <a href="${d.fichier_url||'#'}" target="_blank" class="row" style="text-decoration:none;color:inherit">
       <div class="row-icon" style="background:var(--bg2);font-size:22px">${DOC_CFG[d.categorie]||'📁'}</div>
@@ -1104,7 +1104,7 @@ function loadDocs(){
         <div class="row-name">${d.titre}</div>
         <div class="row-detail">${d.description||''}${d.fichier_nom?' · '+d.fichier_nom:''}</div>
       </div>
-      <i class="ti ti-download" style="color:var(--text2)"></i>
+      <span style="font-style:normal;color:var(--text2)">↓</span>
     </a>`).join('')}</div>`;
 }
 
@@ -1146,11 +1146,11 @@ async function loadProgression(){
   const brevs=brevRes.data||[];
   brevEl.innerHTML=brevs.length
     ? `<div>${brevs.map(b=>`<span class="brevet">🏅 ${b.intitule}${b.date_obtention?' ('+fmt(b.date_obtention)+')':''}</span>`).join('')}</div>`
-    : `<div class="empty"><i class="ti ti-award"></i><p>Aucun brevet</p></div>`;
+    : `<div class="empty"><span style="font-style:normal">🏅</span><p>Aucun brevet</p></div>`;
   // Progression cours
   const progEl=document.getElementById('prog-liste');
   const progs=progRes.data||[];
-  if(!progs.length&&!cours.length){ progEl.innerHTML=`<div class="empty"><i class="ti ti-chart-bar"></i><p>Aucun cours disponible</p></div>`; return; }
+  if(!progs.length&&!cours.length){ progEl.innerHTML=`<div class="empty"><span style="font-style:normal">📊</span><p>Aucun cours disponible</p></div>`; return; }
   // Afficher tous les cours avec statut
   const progMap={};
   progs.forEach(p=>{ if(p.cours_id) progMap[p.cours_id]=p; });
@@ -1194,7 +1194,7 @@ async function loadAppelForSeance(seanceId){
   // Liste JSP uniquement
   const jspList=jsps.filter(j=>j.role==='jsp');
   const el=document.getElementById('l-appel');
-  if(!jspList.length){ el.innerHTML=`<div class="empty"><i class="ti ti-users"></i><p>Aucun JSP enregistré</p></div>`; return; }
+  if(!jspList.length){ el.innerHTML=`<div class="empty"><span style="font-style:normal">👥</span><p>Aucun JSP enregistré</p></div>`; return; }
   const GRADES_ORDER=['JSP1','JSP2','JSP3','JSP4'];
   const sorted=[...jspList].sort((a,b)=>GRADES_ORDER.indexOf(a.grade)-GRADES_ORDER.indexOf(b.grade)||( a.nom||'').localeCompare(b.nom||''));
   el.innerHTML=`<div class="card" style="padding:0 14px">${sorted.map(j=>{
@@ -1228,10 +1228,10 @@ async function saveAppel(){
   const entries=Object.entries(appelData);
   if(!entries.length){ toast('Aucune présence saisie'); return; }
   const btn=document.getElementById('btn-save-appel');
-  btn.disabled=true; btn.innerHTML='<i class="ti ti-loader"></i>Enregistrement…';
+  btn.disabled=true; btn.innerHTML='<span style="font-style:normal">⟳</span>Enregistrement…';
   const upserts=entries.map(([uid,present])=>({seance_id:seanceId,utilisateur_id:uid,present}));
   const {error}=await db.from('presences').upsert(upserts,{onConflict:'seance_id,utilisateur_id'});
-  btn.disabled=false; btn.innerHTML='<i class="ti ti-device-floppy"></i>Enregistrer l\'appel';
+  btn.disabled=false; btn.innerHTML='<span style="font-style:normal">💾</span>Enregistrer l\'appel';
   if(error){ toast('Erreur : '+error.message); return; }
   // Marquer la séance comme terminée
   await db.from('seances').update({statut:'terminee'}).eq('id',seanceId);
@@ -1240,7 +1240,7 @@ async function saveAppel(){
   appelData={};
   document.getElementById('appel-select-seance').value='';
   document.getElementById('appel-info').style.display='none';
-  document.getElementById('l-appel').innerHTML=`<div class="empty"><i class="ti ti-check"></i><p>Appel enregistré !</p></div>`;
+  document.getElementById('l-appel').innerHTML=`<div class="empty"><span style="font-style:normal">✓</span><p>Appel enregistré !</p></div>`;
   document.getElementById('appel-actions').style.display='none';
 }
 
@@ -1250,7 +1250,7 @@ async function saveAppel(){
 function loadJsps(search=''){
   const list=jsps.filter(j=>j.role==='jsp'&&(!search||(j.prenom+' '+j.nom+' '+j.matricule).toLowerCase().includes(search.toLowerCase())));
   const el=document.getElementById('l-jsps');
-  if(!list.length){ el.innerHTML=`<div class="empty"><i class="ti ti-users"></i><p>Aucun JSP</p></div>`; return; }
+  if(!list.length){ el.innerHTML=`<div class="empty"><span style="font-style:normal">👥</span><p>Aucun JSP</p></div>`; return; }
   const sorted=[...list].sort((a,b)=>(a.nom||'').localeCompare(b.nom||''));
   el.innerHTML=`<div class="card" style="padding:0 14px">${sorted.map(j=>{
     const name=[j.prenom,j.nom].filter(Boolean).join(' ')||'Mat. '+j.matricule;
@@ -1260,7 +1260,7 @@ function loadJsps(search=''){
         <div class="row-name">${name}</div>
         <div class="row-detail">${GRADE_LABELS[j.grade]||j.grade||'—'}${j.section?' · '+j.section:''}</div>
       </div>
-      <i class="ti ti-chevron-right" style="color:var(--text2)"></i>
+      <span style="font-style:normal;color:var(--text2)">›</span>
     </div>`;
   }).join('')}</div>`;
 }
@@ -1298,12 +1298,12 @@ async function openJspDetail(id){
   const actEl=document.getElementById('jd-actions');
   actEl.innerHTML='';
   const btnProg=document.createElement('button');
-  btnProg.className='btn-ok'; btnProg.innerHTML='<i class="ti ti-chart-bar"></i>Valider cours';
+  btnProg.className='btn-ok'; btnProg.innerHTML='<span style="font-style:normal">📊</span>Valider cours';
   btnProg.onclick=()=>{ closeModal('m-jsp-detail'); openValiderProg(id, null); };
   actEl.appendChild(btnProg);
   if(isAdmin()){
     const btnReset=document.createElement('button');
-    btnReset.className='btn-ko'; btnReset.innerHTML='<i class="ti ti-lock-open"></i>Reset mdp';
+    btnReset.className='btn-ko'; btnReset.innerHTML='<span style="font-style:normal">🔒</span>Reset mdp';
     btnReset.onclick=()=>resetMdp(id, j.matricule);
     actEl.appendChild(btnReset);
   }
@@ -1368,9 +1368,9 @@ function showAdminPanel(panel){
 
 async function loadAdminMembres(){
   const el=document.getElementById('l-admin-membres');
-  el.innerHTML=`<div class="loader"><i class="ti ti-loader"></i>Chargement…</div>`;
+  el.innerHTML=`<div class="loader"><span style="font-style:normal">⟳</span>Chargement…</div>`;
   await loadAllJsps();
-  if(!jsps.length){ el.innerHTML=`<div class="empty"><i class="ti ti-users"></i><p>Aucun membre</p></div>`; return; }
+  if(!jsps.length){ el.innerHTML=`<div class="empty"><span style="font-style:normal">👥</span><p>Aucun membre</p></div>`; return; }
   el.innerHTML=`<div class="card" style="padding:0 14px">${jsps.map(j=>{
     const name=[j.prenom,j.nom].filter(Boolean).join(' ')||'Mat. '+j.matricule;
     const roleCls={jsp:'badge-blue',moniteur:'badge-amber',responsable:'badge-red'}[j.role]||'badge-gray';
@@ -1415,7 +1415,7 @@ async function createMembre(){
 async function loadAdminBrevets(){
   const el=document.getElementById('l-admin-brevets');
   const {data}=await db.from('brevets').select('*,utilisateurs(prenom,nom,matricule)').order('created_at',{ascending:false});
-  if(!data||!data.length){ el.innerHTML=`<div class="empty"><i class="ti ti-award"></i><p>Aucun brevet attribué</p></div>`; return; }
+  if(!data||!data.length){ el.innerHTML=`<div class="empty"><span style="font-style:normal">🏅</span><p>Aucun brevet attribué</p></div>`; return; }
   el.innerHTML=`<div class="card" style="padding:0 14px">${data.map(b=>{
     const u=b.utilisateurs;
     const name=u?[u.prenom,u.nom].filter(Boolean).join(' ')||'Mat. '+u.matricule:'—';
