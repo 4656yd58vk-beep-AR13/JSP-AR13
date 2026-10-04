@@ -256,7 +256,6 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
       <div class="drawer-section">Modules</div>
       <button class="drawer-item" data-tab="sc-home"><span style="font-style:normal">🏠</span><span>Accueil</span></button>
       <button class="drawer-item" data-tab="sc-seances"><span style="font-style:normal">📅</span><span>Séances</span></button>
-      <button class="drawer-item" data-tab="sc-cours"><span style="font-style:normal">📚</span><span>Cours</span></button>
       <button class="drawer-item" data-tab="sc-docs"><span style="font-style:normal">📁</span><span>Documents</span></button>
       <button class="drawer-item" data-tab="sc-progression"><span style="font-style:normal">📊</span><span>Ma progression</span></button>
       <div class="drawer-sep"></div>
@@ -911,7 +910,7 @@ function switchTab(tabId){
   const el=document.getElementById(tabId); if(el) el.classList.add('active');
   const btn=document.querySelector(`[data-tab="${tabId}"]`); if(btn) btn.classList.add('active');
   const titles={
-    'sc-home':'Accueil','sc-seances':'Séances','sc-cours':'Cours','sc-docs':'Documents',
+    'sc-home':'Accueil','sc-seances':'Séances','sc-docs':'Documents',
     'sc-progression':'Ma progression','sc-appel':'Faire l\'appel','sc-jsps':'Mes JSP',
     'sc-admin':'Administration','sc-profil':'Mon profil',
   };
