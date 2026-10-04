@@ -445,6 +445,43 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
       </div>
     </div>
 
+    <!-- Sous-panel droits -->
+    <div id="admin-droits" style="display:none">
+      <div class="section">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <button class="btn btn-ghost btn-sm" onclick="showAdminPanel(null)">← Retour</button>
+          <div class="section-title" style="margin-bottom:0">Droits & accès</div>
+        </div>
+        <!-- Droits par rôle -->
+        <div class="section-title">Par rôle (défaut)</div>
+        <div class="card" style="padding:14px;margin-bottom:14px" id="droits-roles-panel">
+          <div class="chips" style="margin-bottom:14px">
+            <button class="chip active" data-drole="jsp">JSP</button>
+            <button class="chip" data-drole="moniteur">Moniteur</button>
+            <button class="chip" data-drole="responsable">Responsable</button>
+          </div>
+          <div id="droits-roles-grid"></div>
+          <div style="height:10px"></div>
+          <button class="btn btn-blue btn-sm" id="btn-save-droits-role" style="width:auto;padding:10px 20px">💾 Enregistrer</button>
+        </div>
+        <!-- Droits par utilisateur -->
+        <div class="section-title">Par utilisateur (override)</div>
+        <div style="margin-bottom:10px">
+          <select class="form-ctrl" id="droits-user-select">
+            <option value="">— Sélectionner un utilisateur —</option>
+          </select>
+        </div>
+        <div id="droits-user-grid" style="display:none">
+          <div class="card" style="padding:14px" id="droits-user-modules"></div>
+          <div style="height:10px"></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost btn-sm" id="btn-reset-droits-user">↩ Réinitialiser</button>
+            <button class="btn btn-blue btn-sm" id="btn-save-droits-user" style="flex:1">💾 Enregistrer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Sous-panel brevets -->
     <div id="admin-brevets" style="display:none">
       <div class="section">
@@ -758,6 +795,55 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
 
 <script>
 // ══════════════════════════════════════════════════════════
+// DROITS & MODULES
+// ══════════════════════════════════════════════════════════
+const MODULES_CFG = [
+  {key:'seances',  lbl:'Séances',      tab:'sc-seances',    ico:'📅'},
+  {key:'cours',    lbl:'Cours',        tab:'sc-cours',      ico:'📚'},
+  {key:'docs',     lbl:'Documents',    tab:'sc-docs',       ico:'📁'},
+  {key:'progression', lbl:'Progression', tab:'sc-progression', ico:'📊'},
+  {key:'appel',    lbl:'Faire l appel', tab:'sc-appel',     ico:'✅', moniteur:true},
+  {key:'jsps',     lbl:'Mes JSP',      tab:'sc-jsps',       ico:'👥', moniteur:true},
+  {key:'admin',    lbl:'Administration',tab:'sc-admin',     ico:'⚙️', admin:true},
+  {key:'test',     lbl:'Comptes test', tab:'sc-test',       ico:'🧪', sa:true},
+];
+
+const DROITS_DEFAUT = {
+  jsp:         {seances:true, cours:true, docs:true, progression:true, appel:false, jsps:false, admin:false, test:false},
+  moniteur:    {seances:true, cours:true, docs:true, progression:true, appel:true,  jsps:true,  admin:false, test:false},
+  responsable: {seances:true, cours:true, docs:true, progression:true, appel:true,  jsps:true,  admin:true,  test:false},
+};
+
+function getDroitsUser(u){
+  // Droits effectifs = défauts de base + overrides rôle + overrides utilisateur
+  var base = Object.assign({}, DROITS_DEFAUT[u.role]||DROITS_DEFAUT.jsp);
+  var roleOverrides = (droitsRoleOverrides&&droitsRoleOverrides[u.role]) || {};
+  var userOverrides = u.droits || {};
+  return Object.assign(base, roleOverrides, userOverrides);
+}
+
+function canAccess(module){
+  if(!user) return false;
+  if(user.super_admin) return true;
+  var droits = getDroitsUser(user);
+  return !!droits[module];
+}
+
+function updateDrawerAccess(){
+  if(!user) return;
+  MODULES_CFG.forEach(function(m){
+    var btn = document.querySelector('[data-tab="'+m.tab+'"]');
+    if(!btn) return;
+    var visible = canAccess(m.key);
+    btn.style.display = visible ? 'flex' : 'none';
+  });
+  // Drawer items spéciaux
+  document.querySelectorAll('.sa-only').forEach(el=>{
+    el.style.display = isSuperAdmin() ? 'flex' : 'none';
+  });
+}
+
+// ══════════════════════════════════════════════════════════
 // CONFIG SUPABASE — À REMPLACER PAR TES VRAIES CLÉS
 // ══════════════════════════════════════════════════════════
 const SUPA_URL = 'https://qpeywbblofnvfkqldstw.supabase.co';
@@ -885,10 +971,9 @@ async function initApp(){
   const name=[user.prenom,user.nom].filter(Boolean).join(' ')||'Mat. '+user.matricule;
   document.getElementById('d-name').textContent=name;
   document.getElementById('d-role').textContent=ROLE_LABELS[user.role]||user.role;
-  // Afficher/masquer items selon rôle
-  document.querySelectorAll('.monitor-only').forEach(el=>el.style.display=isMonitor()?'flex':'none');
-  document.querySelectorAll('.admin-only').forEach(el=>el.style.display=isAdmin()?'flex':'none');
-  document.querySelectorAll('.sa-only').forEach(el=>el.style.display=isSuperAdmin()?'flex':'none');
+  // Afficher/masquer items selon droits effectifs
+  loadDroitsRoleOverrides();
+  updateDrawerAccess();
   // Header
   userCaserne = user.caserne||null;
   var roleLbl = user.super_admin ? 'Super Admin' : (ROLE_LABELS[user.role]||user.role);
@@ -1538,11 +1623,11 @@ async function saveProgression(){
 // ADMIN — MEMBRES
 // ══════════════════════════════════════════════════════════
 function showAdminPanel(panel){
-  const panels=['admin-membres','admin-brevets'];
+  const panels=['admin-membres','admin-brevets','admin-droits'];
   const mainCard=document.querySelector('#sc-admin .card');
   panels.forEach(p=>{ const el=document.getElementById(p); if(el) el.style.display='none'; });
   if(mainCard) mainCard.style.display=panel?'none':'block';
-  if(panel){ const el=document.getElementById(panel); if(el){ el.style.display='block'; if(panel==='admin-membres') loadAdminMembres(); if(panel==='admin-brevets') loadAdminBrevets(); } }
+  if(panel){ const el=document.getElementById(panel); if(el){ el.style.display='block'; if(panel==='admin-membres') loadAdminMembres(); if(panel==='admin-brevets') loadAdminBrevets(); if(panel==='admin-droits') initDroitsPanel(); } }
 }
 
 async function loadAdminMembres(){
@@ -1720,7 +1805,150 @@ document.addEventListener('DOMContentLoaded', function(){
   if(fcSeances) fcSeances.addEventListener('change', function(){ loadSeancesFiltered(this.value); });
   var testSearch=document.getElementById('test-search');
   if(testSearch) testSearch.addEventListener('input', loadTestUsers);
+  // Droits
+  document.getElementById('admin-btn-droits').addEventListener('click', ()=>showAdminPanel('admin-droits'));
+  document.getElementById('btn-save-droits-role').addEventListener('click', saveDroitsRole);
+  document.getElementById('btn-save-droits-user').addEventListener('click', saveDroitsUser);
+  document.getElementById('btn-reset-droits-user').addEventListener('click', resetDroitsUser);
+  document.getElementById('droits-user-select').addEventListener('change', function(){ loadDroitsUser(this.value); });
+  document.querySelectorAll('[data-drole]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('[data-drole]').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      renderDroitsRoleGrid(btn.dataset.drole);
+    });
+  });
+  // Charger les overrides de rôle au démarrage
+  loadDroitsRoleOverrides();
 });
+
+// ══════════════════════════════════════════════════════════
+// DROITS & ACCÈS
+// ══════════════════════════════════════════════════════════
+var droitsRoleOverrides = {}; // droits par rôle sauvegardés en localStorage
+var curDroitsRole = 'jsp';
+var curDroitsUserId = null;
+
+function loadDroitsRoleOverrides(){
+  try { droitsRoleOverrides = JSON.parse(localStorage.getItem('jsp_droits_roles')||'{}'); } catch(e){ droitsRoleOverrides={}; }
+}
+
+function saveDroitsRoleOverrides(){
+  localStorage.setItem('jsp_droits_roles', JSON.stringify(droitsRoleOverrides));
+}
+
+function getDroitsDefautRole(role){
+  // Défauts de base + overrides sauvegardés
+  var base = Object.assign({}, DROITS_DEFAUT[role]||DROITS_DEFAUT.jsp);
+  var overrides = droitsRoleOverrides[role]||{};
+  return Object.assign(base, overrides);
+}
+
+function renderDroitsRoleGrid(role){
+  curDroitsRole = role;
+  var droits = getDroitsDefautRole(role);
+  var el = document.getElementById('droits-roles-grid');
+  if(!el) return;
+  // Modules accessibles pour ce rôle (pas les modules SA)
+  var modules = MODULES_CFG.filter(function(m){ return !m.sa; });
+  el.innerHTML = modules.map(function(m){
+    var checked = !!droits[m.key];
+    var disabled = (m.admin && role!=='responsable') || m.sa;
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">'+
+      '<div style="display:flex;align-items:center;gap:10px">'+
+        '<span style="font-size:18px">'+m.ico+'</span>'+
+        '<span style="font-size:14px;font-weight:600'+(disabled?';color:var(--text2)':'')+'">'+m.lbl+'</span>'+
+      '</div>'+
+      '<label class="toggle-switch">'+
+        '<input type="checkbox" class="droits-role-cb" data-key="'+m.key+'"'+(checked?' checked':'')+(disabled?' disabled':'')+'>'+
+        '<span class="toggle-slider"></span>'+
+      '</label>'+
+    '</div>';
+  }).join('');
+}
+
+function saveDroitsRole(){
+  var overrides = {};
+  document.querySelectorAll('.droits-role-cb').forEach(function(cb){
+    var base = DROITS_DEFAUT[curDroitsRole]||DROITS_DEFAUT.jsp;
+    if(cb.checked !== !!base[cb.dataset.key]) overrides[cb.dataset.key] = cb.checked;
+  });
+  if(!droitsRoleOverrides) droitsRoleOverrides={};
+  droitsRoleOverrides[curDroitsRole] = overrides;
+  saveDroitsRoleOverrides();
+  toast('Droits '+curDroitsRole+' sauvegardés ✓');
+  loadDroitsRoleOverrides();
+  updateDrawerAccess();
+}
+
+async function loadDroitsUserSelect(){
+  var sel = document.getElementById('droits-user-select');
+  if(!sel) return;
+  var list = jsps.filter(function(j){ return !j.super_admin; });
+  sel.innerHTML = '<option value="">— Sélectionner un utilisateur —</option>' +
+    list.map(function(u){
+      var name = [u.prenom,u.nom].filter(Boolean).join(' ')||'Mat. '+u.matricule;
+      return '<option value="'+u.id+'">'+name+' ('+( ROLE_LABELS[u.role]||u.role)+')</option>';
+    }).join('');
+}
+
+async function loadDroitsUser(uid){
+  curDroitsUserId = uid;
+  if(!uid){ document.getElementById('droits-user-grid').style.display='none'; return; }
+  var u = jsps.find(function(j){ return j.id===uid; });
+  if(!u) return;
+  document.getElementById('droits-user-grid').style.display='block';
+  var droitsEffectifs = getDroitsUser(u);
+  var modules = MODULES_CFG.filter(function(m){ return !m.sa; });
+  document.getElementById('droits-user-modules').innerHTML =
+    '<div style="font-size:12px;color:var(--text2);margin-bottom:10px">Rôle : <strong>'+(ROLE_LABELS[u.role]||u.role)+'</strong> — Les cases cochées indiquent les accès effectifs.</div>'+
+    modules.map(function(m){
+      var checked = !!droitsEffectifs[m.key];
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">'+
+        '<div style="display:flex;align-items:center;gap:10px">'+
+          '<span style="font-size:18px">'+m.ico+'</span>'+
+          '<span style="font-size:14px;font-weight:600">'+m.lbl+'</span>'+
+        '</div>'+
+        '<label class="toggle-switch">'+
+          '<input type="checkbox" class="droits-user-cb" data-key="'+m.key+'"'+(checked?' checked':'')+'>'+
+          '<span class="toggle-slider"></span>'+
+        '</label>'+
+      '</div>';
+    }).join('');
+}
+
+async function saveDroitsUser(){
+  if(!curDroitsUserId) return;
+  var u = jsps.find(function(j){ return j.id===curDroitsUserId; });
+  if(!u) return;
+  var droitsBase = getDroitsDefautRole(u.role);
+  var overrides = {};
+  document.querySelectorAll('.droits-user-cb').forEach(function(cb){
+    if(!!cb.checked !== !!droitsBase[cb.dataset.key]) overrides[cb.dataset.key]=cb.checked;
+  });
+  var {error} = await db.from('utilisateurs').update({droits: Object.keys(overrides).length ? overrides : null}).eq('id',curDroitsUserId);
+  if(error){ toast('Erreur : '+error.message); return; }
+  // Mettre à jour localement
+  var idx = jsps.findIndex(function(j){ return j.id===curDroitsUserId; });
+  if(idx!==-1) jsps[idx].droits = Object.keys(overrides).length ? overrides : null;
+  toast('Droits utilisateur sauvegardés ✓');
+  if(user.id===curDroitsUserId) updateDrawerAccess();
+}
+
+async function resetDroitsUser(){
+  if(!curDroitsUserId) return;
+  await db.from('utilisateurs').update({droits:null}).eq('id',curDroitsUserId);
+  var idx = jsps.findIndex(function(j){ return j.id===curDroitsUserId; });
+  if(idx!==-1) jsps[idx].droits=null;
+  await loadDroitsUser(curDroitsUserId);
+  toast('Droits réinitialisés aux défauts du rôle');
+}
+
+function initDroitsPanel(){
+  loadDroitsRoleOverrides();
+  renderDroitsRoleGrid('jsp');
+  loadDroitsUserSelect();
+}
 </script>
 </body>
 </html>
