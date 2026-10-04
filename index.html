@@ -217,7 +217,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
 <!-- ═══════════════ LOGIN ═══════════════ -->
 <div id="pg-login" class="app" style="display:none">
   <div class="auth">
-    <div class="auth-logo">🛡️</div>
+    <div class="auth-logo"><span class="app-logo" style="font-size:40px">🛡️</span></div>
     <div class="auth-title">JSP LFB</div>
     <div class="auth-sub">Jeunes Sapeurs-Pompiers — CSP La Ferté-Bernard</div>
     <div class="auth-card">
@@ -248,7 +248,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
   <!-- DRAWER -->
   <div id="drawer">
     <div id="drawer-head">
-      <div id="drawer-avatar">🛡️</div>
+      <div id="drawer-avatar"><span class="app-logo" style="font-size:22px">🛡️</span></div>
       <div style="color:#fff;font-weight:800;font-size:16px" id="d-name">JSP LFB</div>
       <div style="color:rgba(255,255,255,0.7);font-size:12px;margin-top:2px" id="d-role">—</div>
     </div>
@@ -276,7 +276,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
 
   <!-- HEADER -->
   <div class="header">
-    <div class="header-logo" id="btn-drawer-open">🛡️</div>
+    <div class="header-logo" id="btn-drawer-open"><span class="app-logo" style="font-size:18px">🛡️</span></div>
     <div class="header-info">
       <div class="header-title" id="h-title">JSP LFB</div>
       <div class="header-sub" id="h-sub">CSP La Ferté-Bernard</div>
@@ -422,6 +422,11 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
           <div class="row-info"><div class="row-name">Droits & acces</div><div class="row-detail">Gerer les droits par role et utilisateur</div></div>
           <span style="font-style:normal;color:var(--text2)">›</span>
         </div>
+        <div class="row" id="admin-btn-logo" onclick="openModal('m-logo')">
+          <div class="row-icon" style="background:#fff7ed;font-size:22px">🖼️</div>
+          <div class="row-info"><div class="row-name">Logo de la caserne</div><div class="row-detail">Personnaliser l'icône de l'app</div></div>
+          <span style="font-style:normal;color:var(--text2)">›</span>
+        </div>
         <div class="row sa-only" id="admin-btn-test" style="display:none" onclick="switchTab('sc-test')">
           <div class="row-icon" style="background:#fdf4ff;font-size:22px">🧪</div>
           <div class="row-info"><div class="row-name">Comptes test</div><div class="row-detail">Simuler un role ou un utilisateur</div></div>
@@ -521,7 +526,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
   <!-- ── PROFIL ── -->
   <div class="screen" id="sc-profil">
     <div style="background:linear-gradient(135deg,var(--blue),var(--blue-dark));padding:32px 16px 24px;text-align:center">
-      <div style="width:70px;height:70px;background:rgba(255,255,255,0.2);border-radius:18px;display:inline-flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:12px">🛡️</div>
+      <div style="width:70px;height:70px;background:rgba(255,255,255,0.2);border-radius:18px;display:inline-flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:12px"><span class="app-logo" style="font-size:32px">🛡️</span></div>
       <div style="font-size:20px;font-weight:800;color:#fff" id="profil-name">—</div>
       <div style="font-size:13px;color:rgba(255,255,255,0.75);margin-top:4px" id="profil-grade">—</div>
       <div style="font-size:12px;color:rgba(255,255,255,0.6);margin-top:2px" id="profil-mat">—</div>
@@ -713,6 +718,30 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
         <div class="ig-item form-group"><label class="form-label">Délivré par</label><input class="form-ctrl" id="nb-par" placeholder="Ex : SDIS 72"></div>
       </div>
       <button class="btn btn-blue" id="btn-save-brevet"><span style="font-style:normal">🏅</span>Attribuer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Logo caserne -->
+<div class="modal-overlay" id="m-logo">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-inner">
+      <div class="modal-title">Logo de la caserne</div>
+      <div style="text-align:center;margin-bottom:20px">
+        <div id="logo-preview" style="width:90px;height:90px;background:rgba(26,86,160,0.1);border-radius:20px;display:inline-flex;align-items:center;justify-content:center;font-size:44px;margin-bottom:10px">🛡️</div>
+        <div style="font-size:12px;color:var(--text2)">Aperçu du logo actuel</div>
+      </div>
+      <div class="err-box" id="logo-err"></div>
+      <div class="form-group">
+        <label class="form-label">Choisir une image</label>
+        <input class="form-ctrl" type="file" id="logo-file" accept="image/png,image/jpeg,image/svg+xml,image/webp">
+        <div style="font-size:11px;color:var(--text2);margin-top:4px">PNG, JPG ou SVG — max 2 Mo — carré recommandé</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-ghost btn-sm" id="btn-reset-logo" style="flex:1">↩ Réinitialiser</button>
+        <button class="btn btn-blue btn-sm" id="btn-save-logo" style="flex:2">🖼️ Enregistrer</button>
+      </div>
     </div>
   </div>
 </div>
@@ -976,6 +1005,7 @@ async function initApp(){
   // Afficher/masquer items selon droits effectifs
   loadDroitsRoleOverrides();
   updateDrawerAccess();
+  applyLogo();
   // Header
   userCaserne = user.caserne||null;
   var roleLbl = user.super_admin ? 'Super Admin' : (ROLE_LABELS[user.role]||user.role);
@@ -1819,6 +1849,8 @@ document.addEventListener('DOMContentLoaded', function(){
   if(testSearch) testSearch.addEventListener('input', loadTestUsers);
   // Droits
   document.getElementById('admin-btn-droits').addEventListener('click', ()=>showAdminPanel('admin-droits'));
+  document.getElementById('btn-save-logo').addEventListener('click', saveLogo);
+  document.getElementById('btn-reset-logo').addEventListener('click', resetLogo);
   document.getElementById('btn-save-droits-role').addEventListener('click', saveDroitsRole);
   document.getElementById('btn-save-droits-user').addEventListener('click', saveDroitsUser);
   document.getElementById('btn-reset-droits-user').addEventListener('click', resetDroitsUser);
@@ -1891,6 +1923,7 @@ function saveDroitsRole(){
   toast('Droits '+curDroitsRole+' sauvegardés ✓');
   loadDroitsRoleOverrides();
   updateDrawerAccess();
+  applyLogo();
 }
 
 async function loadDroitsUserSelect(){
@@ -1960,6 +1993,77 @@ function initDroitsPanel(){
   loadDroitsRoleOverrides();
   renderDroitsRoleGrid('jsp');
   loadDroitsUserSelect();
+}
+
+// ══════════════════════════════════════════════════════════
+// LOGO CASERNE
+// ══════════════════════════════════════════════════════════
+var LOGO_KEY = 'jsp_logo_';
+
+function getLogo(){
+  var caserne = userCaserne||'default';
+  return localStorage.getItem(LOGO_KEY+caserne)||null;
+}
+
+function applyLogo(){
+  var logo = getLogo();
+  var els = document.querySelectorAll('.app-logo');
+  if(logo){
+    els.forEach(function(el){
+      el.innerHTML = '';
+      var img = document.createElement('img');
+      img.src = logo;
+      img.style.cssText = 'width:100%;height:100%;object-fit:contain;border-radius:inherit';
+      el.appendChild(img);
+    });
+    // Aperçu dans la modale
+    var preview = document.getElementById('logo-preview');
+    if(preview){ preview.innerHTML=''; var img2=document.createElement('img'); img2.src=logo; img2.style.cssText='width:80px;height:80px;object-fit:contain;border-radius:14px'; preview.appendChild(img2); }
+  } else {
+    els.forEach(function(el){ el.textContent='🛡️'; });
+    var preview = document.getElementById('logo-preview');
+    if(preview) preview.textContent='🛡️';
+  }
+}
+
+async function saveLogo(){
+  var file = document.getElementById('logo-file').files[0];
+  hideErr('logo-err');
+  if(!file){ showErr('logo-err','Choisissez une image.'); return; }
+  if(file.size > 2*1024*1024){ showErr('logo-err','Image trop lourde (max 2 Mo).'); return; }
+  var btn = document.getElementById('btn-save-logo');
+  btn.disabled=true; btn.textContent='Chargement...';
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var b64 = e.target.result;
+    var caserne = userCaserne||'default';
+    try {
+      localStorage.setItem(LOGO_KEY+caserne, b64);
+    } catch(err) {
+      // localStorage plein — compresser ou signaler
+      showErr('logo-err','Image trop lourde pour le stockage local. Essayez une image plus petite.');
+      btn.disabled=false; btn.textContent='🖼️ Enregistrer';
+      return;
+    }
+    applyLogo();
+    closeModal('m-logo');
+    toast('Logo mis à jour ✓');
+    btn.disabled=false; btn.textContent='🖼️ Enregistrer';
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetLogo(){
+  var caserne = userCaserne||'default';
+  localStorage.removeItem(LOGO_KEY+caserne);
+  applyLogo();
+  closeModal('m-logo');
+  toast('Logo réinitialisé');
+}
+
+function openLogoModal(){
+  applyLogo(); // met à jour l'aperçu
+  openModal('m-logo');
 }
 </script>
 </body>
