@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="JSP LFB">
+<meta name="apple-mobile-web-app-title" content="JSP-72">
 <meta name="theme-color" content="#1a56a0">
-<title>JSP — CSP La Ferté-Bernard</title>
+<title>JSP-72</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -219,7 +219,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
   <div class="auth">
     <div class="auth-logo"><span class="app-logo" style="font-size:40px">🛡️</span></div>
     <div class="auth-title">JSP LFB</div>
-    <div class="auth-sub">Jeunes Sapeurs-Pompiers — CSP La Ferté-Bernard</div>
+    <div class="auth-sub">Jeunes Sapeurs-Pompiers — SDIS 72</div>
     <div class="auth-card">
       <div class="auth-card-title">Connexion</div>
       <div class="err-box" id="login-err"></div>
@@ -279,7 +279,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
     <div class="header-logo" id="btn-drawer-open"><span class="app-logo" style="font-size:18px">🛡️</span></div>
     <div class="header-info">
       <div class="header-title" id="h-title">JSP LFB</div>
-      <div class="header-sub" id="h-sub">CSP La Ferté-Bernard</div>
+      <div class="header-sub" id="h-sub">SDIS 72</div>
     </div>
     <div id="h-badge-wrap"></div>
   </div>
@@ -289,7 +289,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
     <div class="hero" id="home-hero">
       <div class="hero-grade" id="home-grade">—</div>
       <div class="hero-name" id="home-name">Bienvenue</div>
-      <div class="hero-sub" id="home-section">CSP La Ferté-Bernard</div>
+      <div class="hero-sub" id="home-section">SDIS 72</div>
       <div class="hero-stats" id="home-stats"></div>
     </div>
     <div class="module-grid" id="home-grid"></div>
@@ -620,7 +620,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
         <div class="ig-item form-group"><label class="form-label">Debut</label><input class="form-ctrl" type="time" id="ns-debut"></div>
         <div class="ig-item form-group"><label class="form-label">Fin</label><input class="form-ctrl" type="time" id="ns-fin"></div>
       </div>
-      <div class="form-group"><label class="form-label">Lieu</label><input class="form-ctrl" id="ns-lieu" placeholder="Ex : Caserne CSP LFB"></div>
+      <div class="form-group"><label class="form-label">Lieu</label><input class="form-ctrl" id="ns-lieu" placeholder="Ex : Caserne SDIS 72"></div>
       <div class="form-group"><label class="form-label">Mots-cles / matiere</label><input class="form-ctrl" id="ns-tags" placeholder="Ex : secourisme, PLS, RCP..."></div>
       <div class="form-group"><label class="form-label">Description</label><textarea class="form-ctrl" id="ns-desc" rows="2" placeholder="Objectifs, contenu..."></textarea></div>
       <button class="btn btn-blue" id="btn-create-seance">📅 Planifier</button>
@@ -690,7 +690,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
       </div>
       <div class="form-group sa-only" id="nm-caserne-row" style="display:none">
         <label class="form-label">Caserne</label>
-        <input class="form-ctrl" id="nm-caserne" placeholder="Ex : CSP La Ferté-Bernard">
+        <input class="form-ctrl" id="nm-caserne" placeholder="Ex : SDIS 72">
       </div>
       <div class="ig">
       </div>
@@ -952,7 +952,7 @@ function switchTab(tabId){
     'sc-progression':'Ma progression','sc-appel':'Faire l\'appel','sc-jsps':'Mes JSP',
     'sc-admin':'Administration','sc-profil':'Mon profil',
   };
-  document.getElementById('h-title').textContent = titles[tabId]||'JSP LFB';
+  document.getElementById('h-title').textContent = titles[tabId]||'JSP-72';
   window.scrollTo({top:0,behavior:'instant'});
   closeDrawer();
   // Charger les données selon l'onglet
@@ -1009,7 +1009,7 @@ async function initApp(){
   // Header
   userCaserne = user.caserne||null;
   var roleLbl = user.super_admin ? 'Super Admin' : (ROLE_LABELS[user.role]||user.role);
-  document.getElementById('h-sub').textContent=roleLbl+' · '+(user.caserne||'CSP LFB');
+  document.getElementById('h-sub').textContent=roleLbl+' · '+(user.caserne||'SDIS 72');
   // Badge super admin
   var badgeWrap = document.getElementById('h-badge-wrap');
   if(badgeWrap) badgeWrap.innerHTML = user.super_admin ? '<span class="header-badge">SA</span>' : '';
@@ -1061,7 +1061,7 @@ async function renderHome(){
   const name=[user.grade?( GRADE_LABELS[user.grade]||user.grade):'',user.prenom,user.nom].filter(Boolean);
   document.getElementById('home-grade').textContent=(GRADE_LABELS[user.grade]||user.grade||'').toUpperCase();
   document.getElementById('home-name').textContent=[user.prenom,user.nom].filter(Boolean).join(' ')||'Mat. '+user.matricule;
-  document.getElementById('home-section').textContent=(user.caserne||'CSP La Ferté-Bernard')+(user.section?' · '+user.section:'');
+  document.getElementById('home-section').textContent=(user.caserne||'SDIS 72')+(user.section?' · '+user.section:'');
   // Stats hero
   const [presRes,progRes]=await Promise.all([
     db.from('presences').select('*').eq('utilisateur_id',user.id).eq('present',true),
@@ -1152,7 +1152,7 @@ async function simulateRole(role){
     matricule: 'TEST',
     prenom: 'Compte', nom: 'Test',
     role: role,
-    caserne: user.caserne||'CSP La Ferté-Bernard',
+    caserne: user.caserne||'SDIS 72',
     grade: role==='jsp'?'JSP1':'Moniteur',
     section: null, super_admin: false,
   };
@@ -1181,7 +1181,7 @@ async function startSimulation(targetUser){
   var name=[user.prenom,user.nom].filter(Boolean).join(' ')||'Mat. '+user.matricule;
   document.getElementById('d-name').textContent=name;
   document.getElementById('d-role').textContent=ROLE_LABELS[user.role]||user.role;
-  document.getElementById('h-sub').textContent=(ROLE_LABELS[user.role]||user.role)+' · '+(user.caserne||'CSP LFB');
+  document.getElementById('h-sub').textContent=(ROLE_LABELS[user.role]||user.role)+' · '+(user.caserne||'SDIS 72');
   var badgeWrap=document.getElementById('h-badge-wrap');
   if(badgeWrap) badgeWrap.innerHTML='<span class="header-badge" style="background:rgba(255,200,0,0.4)">TEST</span>';
   await Promise.all([loadAllSeances(),loadAllCours(),loadAllDocs(),loadAllJsps()]);
@@ -1204,7 +1204,7 @@ async function stopSimulation(){
   var name=[user.prenom,user.nom].filter(Boolean).join(' ')||'Mat. '+user.matricule;
   document.getElementById('d-name').textContent=name;
   document.getElementById('d-role').textContent='Super Admin';
-  document.getElementById('h-sub').textContent='Super Admin · '+(user.caserne||'CSP LFB');
+  document.getElementById('h-sub').textContent='Super Admin · '+(user.caserne||'SDIS 72');
   var badgeWrap=document.getElementById('h-badge-wrap');
   if(badgeWrap) badgeWrap.innerHTML='<span class="header-badge">SA</span>';
   await Promise.all([loadAllSeances(),loadAllCours(),loadAllDocs(),loadAllJsps()]);
