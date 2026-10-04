@@ -222,7 +222,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
     <div class="auth-logo"><span class="app-logo" style="font-size:40px">🛡️</span></div>
     <div class="auth-title">JSP LFB</div>
     <div class="auth-sub">Jeunes Sapeurs-Pompiers — SDIS 72</div>
-    <div class="auth-card">
+    <div class="auth-card" id="login-card">
       <div class="auth-card-title">Connexion</div>
       <div class="err-box" id="login-err"></div>
       <div class="form-group">
@@ -237,6 +237,25 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
         </div>
       </div>
       <button class="btn btn-blue" id="btn-login" style="margin-top:4px"><span style="font-style:normal">→</span>Se connecter</button>
+    </div>
+    <div class="auth-card" id="first-card" style="display:none">
+      <div class="auth-card-title">Choisis ton mot de passe</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5">Tu utilises un mot de passe provisoire. Choisis-en un personnel pour continuer. Au moins 8 caractères.</div>
+      <div class="err-box" id="first-err"></div>
+      <div class="form-group" id="fl-old-row" style="display:none">
+        <label class="form-label" for="fl-old">Mot de passe provisoire</label>
+        <input class="form-ctrl" id="fl-old" type="password" autocomplete="current-password">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="fl-1">Nouveau mot de passe</label>
+        <input class="form-ctrl" id="fl-1" type="password" autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="fl-2">Confirmer</label>
+        <input class="form-ctrl" id="fl-2" type="password" autocomplete="new-password">
+      </div>
+      <button class="btn btn-blue" id="btn-first-save">Enregistrer et continuer</button>
+      <button class="btn btn-ghost" id="btn-first-cancel" style="margin-top:10px">Annuler</button>
     </div>
   </div>
 </div>
@@ -430,6 +449,11 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
           <div class="row-info"><div class="row-name">Droits & acces</div><div class="row-detail">Gerer les droits par role et utilisateur</div></div>
           <span style="font-style:normal;color:var(--text2)">›</span>
         </div>
+        <div class="row sa-only" id="admin-btn-casernes" style="display:none" onclick="showAdminPanel('admin-casernes')">
+          <div class="row-icon" style="background:#eff6ff;font-size:22px">🏢</div>
+          <div class="row-info"><div class="row-name">Casernes</div><div class="row-detail">Ajouter, renommer, supprimer</div></div>
+          <span style="font-style:normal;color:var(--text2)">›</span>
+        </div>
         <div class="row" id="admin-btn-logo" onclick="openModal('m-logo')">
           <div class="row-icon" style="background:#fff7ed;font-size:22px">🖼️</div>
           <div class="row-info"><div class="row-name">Logo de la caserne</div><div class="row-detail">Personnaliser l'icône de l'app</div></div>
@@ -488,6 +512,18 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
             <button class="btn btn-blue btn-sm" id="btn-save-droits-user" style="flex:1">💾 Enregistrer</button>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Sous-panel casernes -->
+    <div id="admin-casernes" style="display:none">
+      <div class="section">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <button class="btn btn-ghost btn-sm" onclick="showAdminPanel(null)"><span style="font-style:normal">←</span>Retour</button>
+          <button class="btn btn-blue btn-sm" id="btn-add-caserne"><span style="font-style:normal">+</span>Ajouter</button>
+        </div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.5">Renommer une caserne met à jour tous ses membres, séances, cours et documents. Une caserne ne peut être supprimée que si plus personne n'y est rattaché.</div>
+        <div id="l-casernes"><div class="loader"><span style="font-style:normal">⟳</span>Chargement…</div></div>
       </div>
     </div>
 
@@ -725,8 +761,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
       </div>
       <div class="form-group sa-only" id="nm-caserne-row" style="display:none">
         <label class="form-label">Caserne</label>
-        <input class="form-ctrl" id="nm-caserne" list="nm-caserne-list" placeholder="Ex : CSP La Ferté-Bernard" autocomplete="off">
-        <datalist id="nm-caserne-list"></datalist>
+        <select class="form-ctrl" id="nm-caserne"><option value="">— Choisir —</option></select>
       </div>
       <div class="ig">
       </div>
@@ -782,6 +817,37 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
   </div>
 </div>
 
+<!-- Caserne (ajout / renommage) -->
+<div class="modal-overlay" id="m-caserne">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-inner">
+      <div class="modal-title" id="mcas-title">Nouvelle caserne</div>
+      <div class="err-box" id="mcas-err"></div>
+      <div class="form-group">
+        <label class="form-label" for="mcas-nom">Nom de la caserne</label>
+        <input class="form-ctrl" id="mcas-nom" placeholder="Ex : CSP La Ferté-Bernard" autocomplete="off">
+      </div>
+      <button class="btn btn-blue" id="btn-save-caserne">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Mot de passe provisoire -->
+<div class="modal-overlay" id="m-mdp">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-inner" style="text-align:center">
+      <div class="modal-title" id="mdp-title">Mot de passe provisoire</div>
+      <div class="modal-sub" id="mdp-sub">—</div>
+      <div id="mdp-value" style="font-size:30px;font-weight:800;letter-spacing:0.15em;padding:18px;background:var(--bg2);border:1.5px dashed var(--border);border-radius:var(--radius);margin-bottom:12px;user-select:all;-webkit-user-select:all">—</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.5">Transmets-le à la personne. Il ne sera plus affiché ensuite. À sa première connexion, elle devra choisir son propre mot de passe.</div>
+      <button class="btn btn-ghost" id="btn-copy-mdp" style="margin-bottom:10px">Copier</button>
+      <button class="btn btn-blue" onclick="closeModal('m-mdp')">J'ai noté le mot de passe</button>
+    </div>
+  </div>
+</div>
+
 <!-- Changer mot de passe -->
 <div class="modal-overlay" id="m-changepw">
   <div class="modal">
@@ -790,7 +856,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
       <div class="modal-title">Changer mon mot de passe</div>
       <div class="err-box" id="cpw-err"></div>
       <div class="form-group"><label class="form-label">Mot de passe actuel</label><div style="position:relative"><input class="form-ctrl" id="cpw-old" type="password"><button type="button" onclick="togglePw('cpw-old',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);font-size:19px;padding:4px"><span style="font-style:normal">👁</span></button></div></div>
-      <div class="form-group"><label class="form-label">Nouveau mot de passe</label><div style="position:relative"><input class="form-ctrl" id="cpw-1" type="password" placeholder="Min. 6 caractères"><button type="button" onclick="togglePw('cpw-1',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);font-size:19px;padding:4px"><span style="font-style:normal">👁</span></button></div></div>
+      <div class="form-group"><label class="form-label">Nouveau mot de passe</label><div style="position:relative"><input class="form-ctrl" id="cpw-1" type="password" placeholder="Min. 8 caractères"><button type="button" onclick="togglePw('cpw-1',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);font-size:19px;padding:4px"><span style="font-style:normal">👁</span></button></div></div>
       <div class="form-group"><label class="form-label">Confirmer</label><div style="position:relative"><input class="form-ctrl" id="cpw-2" type="password"><button type="button" onclick="togglePw('cpw-2',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);font-size:19px;padding:4px"><span style="font-style:normal">👁</span></button></div></div>
       <button class="btn btn-blue" id="btn-save-pw"><span style="font-style:normal">🔒</span>Mettre à jour</button>
     </div>
@@ -954,6 +1020,10 @@ let realUser = null;      // vrai utilisateur sauvegarde pendant simulation
 let appelData = {}; // { utilisateur_id: true/false }
 let curSeanceId = null, curCoursId = null, curJspId = null, curProgJspId = null, curProgCoursId = null;
 let seanceFilter = 'all', coursFilter = 'all', docFilter = 'all';
+let sessionToken = null;      // jeton de session (serveur)
+let firstLoginPw = null;      // mdp provisoire saisi, gardé le temps de la 1re connexion
+let casernesList = [];        // [{id, nom}] — liste officielle
+const TOKEN_KEY = 'jsp_token';
 
 const ROLE_LABELS = { jsp:'JSP', moniteur:'Moniteur', responsable:'Responsable JSP' };
 const GRADE_LABELS = { JSP1:'JSP 1ère année', JSP2:'JSP 2ème année', JSP3:'JSP 3ème année', JSP4:'JSP 4ème année', Moniteur:'Moniteur' };
@@ -1009,6 +1079,37 @@ function isAdmin(){ return user && (user.role==='responsable'||user.super_admin)
 function isSuperAdmin(){ return realUser ? realUser.super_admin : (user && user.super_admin); }
 function isSimulating(){ return !!simulatedUser; }
 function getCaserne(){ return isSuperAdmin()&&!isSimulating() ? null : (user.caserne||null); }
+
+// Appel d'une fonction sécurisée côté serveur (Supabase RPC)
+async function rpc(fn, args){
+  const {data,error}=await db.rpc(fn, Object.assign({p_token:sessionToken}, args||{}));
+  if(error){
+    var msg=error.message||'Erreur serveur';
+    if(msg.indexOf('Session expirée')!==-1 && fn!=='jsp_session'){ toast(msg); doLogout(true); }
+    throw new Error(msg);
+  }
+  return data;
+}
+// Échappe un texte avant de l'insérer dans du HTML
+function esc(v){ return String(v===null||v===undefined?'':v).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function showPwModal(title, sub, pw){
+  document.getElementById('mdp-title').textContent=title;
+  document.getElementById('mdp-sub').textContent=sub;
+  document.getElementById('mdp-value').textContent=pw;
+  openModal('m-mdp');
+}
+async function loadCasernes(){
+  const {data,error}=await db.from('casernes').select('id,nom').order('nom');
+  casernesList = error ? [] : (data||[]);
+  if(error) console.warn('Table casernes indisponible', error);
+  return casernesList;
+}
+function caserneOptions(selected, placeholder){
+  var names=casernesList.map(function(c){ return c.nom; });
+  if(selected && names.indexOf(selected)===-1) names.unshift(selected);
+  return (placeholder?'<option value="">'+esc(placeholder)+'</option>':'')+
+    names.map(function(n){ return '<option value="'+esc(n)+'"'+(n===selected?' selected':'')+'>'+esc(n)+'</option>'; }).join('');
+}
 
 // Vrai si l'utilisateur EFFECTIF (simulé ou non) voit toutes les casernes
 function seesAllCasernes(){ return !!(user && user.super_admin); }
@@ -1067,22 +1168,76 @@ async function doLogin(){
   if(!mat||!pw){ showErr('login-err','Remplissez tous les champs.'); return; }
   btn.disabled=true; btn.innerHTML='<span style="font-style:normal">⟳</span>Connexion…';
   try{
-    const {data,error}=await db.from('utilisateurs').select('*').eq('matricule',mat).single();
-    if(error||!data){ showErr('login-err','Matricule introuvable.'); return; }
-    if(hash(pw)!==data.mot_de_passe){ showErr('login-err','Mot de passe incorrect.'); return; }
-    user=data;
-    localStorage.setItem('jsp_mat',mat);
+    // hash() ne sert plus qu'à migrer l'ancien mot de passe, une seule fois
+    const {data,error}=await db.rpc('jsp_login',{p_matricule:mat, p_password:pw, p_legacy:hash(pw)});
+    if(error){ showErr('login-err','Connexion impossible : '+error.message); return; }
+    if(!data||data.error){ showErr('login-err',(data&&data.error)||'Connexion impossible.'); return; }
+    sessionToken=data.token; user=data.user;
+    try{ localStorage.setItem(TOKEN_KEY, sessionToken); localStorage.setItem('jsp_mat',mat); }catch(e){}
+    document.getElementById('l-pw').value='';
+    if(user.premiere_connexion){ firstLoginPw=pw; showFirstLogin(); return; }
     await initApp();
-  } catch(e){ showErr('login-err','Erreur de connexion.'); }
+  } catch(e){ showErr('login-err','Erreur de connexion. Vérifie ta connexion internet.'); }
   finally{ btn.disabled=false; btn.innerHTML='<span style="font-style:normal">→</span>Se connecter'; }
 }
 
 
-function doLogout(){
+function showLoginCard(){
+  var lc=document.getElementById('login-card'), fc=document.getElementById('first-card');
+  if(lc) lc.style.display='block';
+  if(fc) fc.style.display='none';
+}
+function showFirstLogin(){
+  showPage('pg-login');
+  hideErr('first-err');
+  ['fl-old','fl-1','fl-2'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('login-card').style.display='none';
+  document.getElementById('first-card').style.display='block';
+  document.getElementById('fl-old-row').style.display = firstLoginPw ? 'none' : 'block';
+  var f=document.getElementById(firstLoginPw?'fl-1':'fl-old'); if(f) f.focus();
+}
+async function saveFirstLogin(){
+  hideErr('first-err');
+  var old=firstLoginPw||document.getElementById('fl-old').value;
+  var n1=document.getElementById('fl-1').value, n2=document.getElementById('fl-2').value;
+  if(!old){ showErr('first-err','Saisis le mot de passe provisoire reçu.'); return; }
+  if(n1.length<8){ showErr('first-err','Au moins 8 caractères.'); return; }
+  if(n1!==n2){ showErr('first-err','Les deux mots de passe ne sont pas identiques.'); return; }
+  var btn=document.getElementById('btn-first-save'); btn.disabled=true;
+  try{
+    await rpc('jsp_change_mdp',{p_old:old, p_new:n1});
+    firstLoginPw=null; user.premiere_connexion=false;
+    showLoginCard();
+    toast('Mot de passe enregistré ✓');
+    await initApp();
+  }catch(e){ showErr('first-err',e.message); }
+  finally{ btn.disabled=false; }
+}
+function doLogout(silent){
+  if(sessionToken && silent!==true){ db.rpc('jsp_logout',{p_token:sessionToken}); }
+  sessionToken=null; firstLoginPw=null;
+  try{ localStorage.removeItem(TOKEN_KEY); }catch(e){}
   user=null; seances=[]; cours=[]; docs=[]; jsps=[];
   simulatedUser=null; realUser=null;
   var btnRet=document.getElementById('btn-return'); if(btnRet) btnRet.style.display='none';
+  document.querySelectorAll('.modal-overlay.open').forEach(function(m){ m.classList.remove('open'); });
+  showLoginCard();
   showPage('pg-login');
+}
+// Au chargement : reprendre la session si elle est encore valide
+async function resumeSession(){
+  var t=null; try{ t=localStorage.getItem(TOKEN_KEY); }catch(e){}
+  if(!t) return;
+  sessionToken=t;
+  try{
+    user=await rpc('jsp_session');
+    if(user.premiere_connexion){ showFirstLogin(); return; }
+    await initApp();
+  }catch(e){
+    sessionToken=null; user=null;
+    try{ localStorage.removeItem(TOKEN_KEY); }catch(e2){}
+    showLoginCard(); showPage('pg-login');
+  }
 }
 
 async function initApp(){
@@ -1105,7 +1260,7 @@ async function initApp(){
   var badgeWrap = document.getElementById('h-badge-wrap');
   if(badgeWrap) badgeWrap.innerHTML = user.super_admin ? '<span class="header-badge">SA</span>' : '';
   // Charger tout
-  await Promise.all([loadAllSeances(), loadAllCours(), loadAllDocs(), loadAllJsps()]);
+  await Promise.all([loadAllSeances(), loadAllCours(), loadAllDocs(), loadAllJsps(), loadCasernes()]);
   if(isSuperAdmin()) await populateCaserneFilters();
   switchTab('sc-home');
 }
@@ -1124,11 +1279,11 @@ async function loadAllSeances(){
   const sel=document.getElementById('appel-select-seance');
   if(sel){
     const upcoming=seances.filter(s=>s.statut!=='annulee');
-    sel.innerHTML='<option value="">— Choisir une séance —</option>'+upcoming.map(s=>`<option value="${s.id}">${s.titre} — ${fmt(s.date_seance)}</option>`).join('');
+    sel.innerHTML='<option value="">— Choisir une séance —</option>'+upcoming.map(s=>`<option value="${esc(s.id)}">${esc(s.titre)} — ${fmt(s.date_seance)}</option>`).join('');
   }
   // Remplir le select nouvelle séance
   const nsSel=document.getElementById('ns-cours');
-  if(nsSel) nsSel.innerHTML='<option value="">— Aucun —</option>'+((await db.from('cours').select('id,titre').order('titre')).data||[]).map(c=>`<option value="${c.id}">${c.titre}</option>`).join('');
+  if(nsSel) nsSel.innerHTML='<option value="">— Aucun —</option>'+((await db.from('cours').select('id,titre').order('titre')).data||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.titre)}</option>`).join('');
 }
 async function loadAllCours(){
   var q = db.from('cours').select('*').order('categorie,titre');
@@ -1143,10 +1298,16 @@ async function loadAllDocs(){
   docs=data||[];
 }
 async function loadAllJsps(){
-  var q = db.from('utilisateurs').select('*').order('nom');
-  if(!seesAllCasernes() && userCaserne) q = q.eq('caserne', userCaserne);
-  const {data}=await q;
-  jsps=data||[];
+  // Le serveur ne renvoie que ce que le VRAI compte a le droit de voir.
+  var all=[];
+  try{ all=await rpc('jsp_membres')||[]; }
+  catch(e){ console.warn(e); toast('Membres indisponibles : '+e.message); }
+  // En simulation, on restreint à ce que verrait le compte simulé
+  if(isSimulating() && !user.super_admin){
+    if(user.role==='jsp') all=all.filter(function(j){ return j.id===user.id; });
+    else all=all.filter(function(j){ return !!userCaserne && j.caserne===userCaserne; });
+  }
+  jsps=all;
 }
 
 // ══════════════════════════════════════════════════════════
@@ -1166,10 +1327,9 @@ async function renderHome(){
   // Super admin (hors simulation) : stats globales
   var statsHtml = '';
   if(seesAllCasernes()){
-    const {data:allJsps}=await db.from('utilisateurs').select('id').eq('role','jsp');
-    const {data:allSeances}=await db.from('seances').select('id');
-    statsHtml = '<div class="hero-stat"><strong>'+(allJsps||[]).length+'</strong><span>JSP total</span></div>'+
-                '<div class="hero-stat"><strong>'+(allSeances||[]).length+'</strong><span>Séances</span></div>';
+    statsHtml = '<div class="hero-stat"><strong>'+jsps.filter(function(j){ return j.role==='jsp'; }).length+'</strong><span>JSP total</span></div>'+
+                '<div class="hero-stat"><strong>'+seances.length+'</strong><span>Séances</span></div>'+
+                '<div class="hero-stat"><strong>'+casernesList.length+'</strong><span>Casernes</span></div>';
   } else {
     statsHtml = '<div class="hero-stat"><strong>'+nbPres+'</strong><span>Présences</span></div>'+
                 '<div class="hero-stat"><strong>'+nbValides+'</strong><span>Cours validés</span></div>';
@@ -1196,9 +1356,9 @@ async function renderHome(){
   if(next){
     nextEl.innerHTML=`<div class="card" style="cursor:pointer;border-left:4px solid var(--blue)" onclick="openSeanceDetail('${next.id}')">
       <div style="font-size:12px;color:var(--text2);text-transform:uppercase;font-weight:700;letter-spacing:0.06em;margin-bottom:6px">Prochaine séance</div>
-      <div style="font-size:16px;font-weight:800">${next.titre}</div>
+      <div style="font-size:16px;font-weight:800">${esc(next.titre)}</div>
       <div style="font-size:13px;color:var(--text2);margin-top:4px">${fmtDate(next.date_seance)}${next.heure_debut?' · '+next.heure_debut.slice(0,5):''}</div>
-      ${next.lieu?`<div style="font-size:12px;color:var(--text2);margin-top:2px">📍 ${next.lieu}</div>`:''}
+      ${next.lieu?`<div style="font-size:12px;color:var(--text2);margin-top:2px">📍 ${esc(next.lieu)}</div>`:''}
     </div>`;
   } else {
     nextEl.innerHTML=`<div style="text-align:center;padding:20px;color:var(--text2);font-size:13px">Aucune séance planifiée</div>`;
@@ -1211,7 +1371,7 @@ async function renderHome(){
       <div class="row">
         <div class="pres-dot ${p.present?'present':'absent'}" style="width:12px;height:12px"></div>
         <div class="row-info">
-          <div class="row-name">${p.seances?.titre||'—'}</div>
+          <div class="row-name">${esc(p.seances?.titre||'—')}</div>
           <div class="row-detail">${fmt(p.seances?.date_seance)}</div>
         </div>
         <span class="badge ${p.present?'badge-green':'badge-red'}">${p.present?'Présent':'Absent'}</span>
@@ -1232,15 +1392,15 @@ const TEST_CASERNE_KEY = 'jsp_test_caserne';
 async function loadTestCasernes(){
   var sel=document.getElementById('test-caserne');
   if(!sel) return;
-  var {data}=await db.from('utilisateurs').select('caserne').not('caserne','is',null);
-  var casernes=[...new Set((data||[]).map(u=>u.caserne).filter(Boolean))].sort();
+  await loadCasernes();
+  var casernes=casernesList.map(c=>c.nom);
   var mine = user && user.caserne;
   if(mine && !casernes.includes(mine)) casernes.unshift(mine);
   if(!casernes.length){
     sel.innerHTML='<option value="">Aucune caserne en base</option>';
     return;
   }
-  sel.innerHTML=casernes.map(c=>'<option value="'+c+'">'+c+'</option>').join('');
+  sel.innerHTML=casernes.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('');
   var saved='';
   try{ saved=localStorage.getItem(TEST_CASERNE_KEY)||''; }catch(e){}
   if(saved && casernes.includes(saved)) sel.value=saved;
@@ -1249,16 +1409,17 @@ async function loadTestCasernes(){
 
 async function loadTestUsers(){
   var search = document.getElementById('test-search')?.value||'';
-  var {data}=await db.from('utilisateurs').select('id,matricule,prenom,nom,role,caserne,grade').order('nom');
-  var list=(data||[]).filter(u=>u.id!==user.id&&(!search||(u.prenom+' '+u.nom+' '+u.matricule).toLowerCase().includes(search.toLowerCase())));
+  var data=[];
+  try{ data=await rpc('jsp_membres')||[]; }catch(e){ console.warn(e); }
+  var list=data.filter(u=>u.id!==user.id&&(!search||(u.prenom+' '+u.nom+' '+u.matricule).toLowerCase().includes(search.toLowerCase())));
   var el=document.getElementById('test-user-list');
   if(!list.length){ el.innerHTML='<div class="empty">👥<p>Aucun utilisateur</p></div>'; return; }
   var roleCls={jsp:'badge-blue',moniteur:'badge-amber',responsable:'badge-green'};
   el.innerHTML='<div class="card" style="padding:0 14px">'+list.map(u=>{
     var name=[u.prenom,u.nom].filter(Boolean).join(' ')||'Mat. '+u.matricule;
-    return '<div class="row" onclick="simulateUser(\''+u.id+'\')">'+
-      '<div class="row-info"><div class="row-name">'+name+'</div>'+
-      '<div class="row-detail">Mat. '+u.matricule+(u.caserne?' · '+u.caserne:'')+'</div></div>'+
+    return '<div class="row" onclick="simulateUser(\''+esc(u.id)+'\')">'+
+      '<div class="row-info"><div class="row-name">'+esc(name)+'</div>'+
+      '<div class="row-detail">Mat. '+esc(u.matricule)+(u.caserne?' · '+esc(u.caserne):'')+'</div></div>'+
       '<span class="badge '+(roleCls[u.role]||'badge-gray')+'">'+( ROLE_LABELS[u.role]||u.role)+'</span>'+
     '</div>';
   }).join('')+'</div>';
@@ -1283,7 +1444,9 @@ async function simulateRole(role){
 }
 
 async function simulateUser(uid){
-  var {data}=await db.from('utilisateurs').select('*').eq('id',uid).single();
+  var list=[];
+  try{ list=await rpc('jsp_membres')||[]; }catch(e){}
+  var data=list.find(function(u){ return String(u.id)===String(uid); });
   if(!data){ toast('Utilisateur introuvable'); return; }
   await startSimulation(data);
 }
@@ -1348,9 +1511,8 @@ async function stopSimulation(){
 async function populateCaserneFilters(){
   if(!isSuperAdmin()) return;
   // Récupérer toutes les casernes distinctes
-  const {data}=await db.from('utilisateurs').select('caserne').not('caserne','is',null);
-  const casernes=[...new Set((data||[]).map(u=>u.caserne).filter(Boolean))].sort();
-  const opts='<option value="">Toutes casernes</option>'+casernes.map(c=>`<option value="${c}">${c}</option>`).join('');
+  await loadCasernes();
+  const opts=caserneOptions(null,'Toutes casernes');
   ['filter-caserne-jsps','filter-caserne-seances'].forEach(id=>{
     var el=document.getElementById(id);
     if(el){ el.innerHTML=opts; el.style.display=''; }
@@ -1394,7 +1556,7 @@ function renderSeancesList(list){
         return `<div class="row" onclick="openSeanceDetail('${s.id}')" style="opacity:${isPast&&s.statut==='planifiee'?'0.5':'1'}">
           <div class="row-icon" style="background:#eff6ff;font-size:22px">${cat.ico}</div>
           <div class="row-info">
-            <div class="row-name">${s.titre}</div>
+            <div class="row-name">${esc(s.titre)}</div>
             <div class="row-detail">${new Date(s.date_seance).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'})}${s.heure_debut?' · '+s.heure_debut.slice(0,5):''}</div>
           </div>
           <span class="badge ${sc.cls}">${sc.lbl}</span>
@@ -1484,7 +1646,7 @@ function loadCours(){
     return `<div class="row" onclick="openCoursDetail('${c.id}')">
       <div class="row-icon" style="background:${cat.bg};font-size:22px">${cat.ico}</div>
       <div class="row-info">
-        <div class="row-name">${c.titre}</div>
+        <div class="row-name">${esc(c.titre)}</div>
         <div class="row-detail">${cat.lbl}${c.duree_minutes?' · '+c.duree_minutes+' min':''}</div>
       </div>
       <span style="font-style:normal;color:var(--text2)">›</span>
@@ -1535,7 +1697,7 @@ async function createCours(){
   closeModal('m-new-cours'); toast('Cours créé ✓'); await loadAllCours(); loadCours();
   // Mettre à jour le select séances
   const nsSel=document.getElementById('ns-cours');
-  if(nsSel) nsSel.innerHTML='<option value="">— Aucun —</option>'+cours.map(c=>`<option value="${c.id}">${c.titre}</option>`).join('');
+  if(nsSel) nsSel.innerHTML='<option value="">— Aucun —</option>'+cours.map(c=>`<option value="${esc(c.id)}">${esc(c.titre)}</option>`).join('');
 }
 
 // ══════════════════════════════════════════════════════════
@@ -1546,11 +1708,11 @@ function loadDocs(){
   const el=document.getElementById('l-docs');
   if(!list.length){ el.innerHTML=`<div class="empty"><span style="font-style:normal">📁</span><p>Aucun document</p></div>`; return; }
   el.innerHTML=`<div class="card" style="padding:0 14px">${list.map(d=>`
-    <a href="${d.fichier_url||'#'}" target="_blank" class="row" style="text-decoration:none;color:inherit">
+    <a href="${esc(d.fichier_url||'#')}" target="_blank" class="row" style="text-decoration:none;color:inherit">
       <div class="row-icon" style="background:var(--bg2);font-size:22px">${DOC_CFG[d.categorie]||'📁'}</div>
       <div class="row-info">
-        <div class="row-name">${d.titre}</div>
-        <div class="row-detail">${d.description||''}${d.fichier_nom?' · '+d.fichier_nom:''}</div>
+        <div class="row-name">${esc(d.titre)}</div>
+        <div class="row-detail">${esc(d.description||'')}${d.fichier_nom?' · '+esc(d.fichier_nom):''}</div>
       </div>
       <span style="font-style:normal;color:var(--text2)">↓</span>
     </a>`).join('')}</div>`;
@@ -1594,7 +1756,7 @@ async function loadProgression(){
   const brevEl=document.getElementById('prog-brevets');
   const brevs=brevRes.data||[];
   brevEl.innerHTML=brevs.length
-    ? `<div>${brevs.map(b=>`<span class="brevet">🏅 ${b.intitule}${b.date_obtention?' ('+fmt(b.date_obtention)+')':''}</span>`).join('')}</div>`
+    ? `<div>${brevs.map(b=>`<span class="brevet">🏅 ${esc(b.intitule)}${b.date_obtention?' ('+fmt(b.date_obtention)+')':''}</span>`).join('')}</div>`
     : `<div class="empty"><span style="font-style:normal">🏅</span><p>Aucun brevet</p></div>`;
   // Progression cours
   const progEl=document.getElementById('prog-liste');
@@ -1611,7 +1773,7 @@ async function loadProgression(){
     const fillClass=p?.statut==='valide'?'green':p?.statut==='en_cours'?'amber':'';
     return `<div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <div style="font-size:13px;font-weight:700">${cat.ico} ${c.titre}</div>
+        <div style="font-size:13px;font-weight:700">${cat.ico} ${esc(c.titre)}</div>
         <span class="badge ${sp.cls}">${sp.lbl}</span>
       </div>
       <div class="prog-bar"><div class="prog-fill ${fillClass}" style="width:${pct}%"></div></div>
@@ -1634,7 +1796,7 @@ async function loadAppelForSeance(seanceId){
   const infoEl=document.getElementById('appel-info');
   if(s){
     infoEl.style.display='block';
-    infoEl.innerHTML=`<div style="font-size:14px;font-weight:700">${s.titre}</div><div style="font-size:12px;color:var(--text2);margin-top:2px">${fmtDate(s.date_seance)}${s.heure_debut?' · '+s.heure_debut.slice(0,5):''}</div>`;
+    infoEl.innerHTML=`<div style="font-size:14px;font-weight:700">${esc(s.titre)}</div><div style="font-size:12px;color:var(--text2);margin-top:2px">${fmtDate(s.date_seance)}${s.heure_debut?' · '+s.heure_debut.slice(0,5):''}</div>`;
   }
   // Présences existantes
   const {data:pres}=await db.from('presences').select('*').eq('seance_id',seanceId);
@@ -1657,7 +1819,7 @@ async function loadAppelForSeance(seanceId){
     const state=appelData[j.id]; // true | false | undefined
     return `<div class="appel-row" data-uid="${j.id}">
       <div style="flex:1">
-        <div style="font-size:14px;font-weight:700">${name}</div>
+        <div style="font-size:14px;font-weight:700">${esc(name)}</div>
         <div style="font-size:11px;color:var(--text2)">${GRADE_LABELS[j.grade]||j.grade||''}</div>
       </div>
       <div class="appel-btns">
@@ -1716,8 +1878,8 @@ function loadJsps(search='', caserneFilter=''){
     return `<div class="row" onclick="openJspDetail('${j.id}')">
       <div class="row-icon" style="background:var(--blue-light);font-size:20px">🛡️</div>
       <div class="row-info">
-        <div class="row-name">${name}</div>
-        <div class="row-detail">${GRADE_LABELS[j.grade]||j.grade||'—'}${j.section?' · '+j.section:''}</div>
+        <div class="row-name">${esc(name)}</div>
+        <div class="row-detail">${GRADE_LABELS[j.grade]||j.grade||'—'}${j.section?' · '+esc(j.section):''}</div>
       </div>
       <span style="font-style:normal;color:var(--text2)">›</span>
     </div>`;
@@ -1740,7 +1902,7 @@ async function openJspDetail(id){
   document.getElementById('jd-presences').textContent=(pres||[]).length+' présence'+(( pres||[]).length>1?'s':'');
   // Brevets
   const {data:brevs}=await db.from('brevets').select('*').eq('utilisateur_id',id);
-  document.getElementById('jd-brevets').innerHTML=(brevs&&brevs.length)?brevs.map(b=>`<span class="brevet">🏅 ${b.intitule}</span>`).join(''):'<span style="font-size:13px;color:var(--text2)">Aucun brevet</span>';
+  document.getElementById('jd-brevets').innerHTML=(brevs&&brevs.length)?brevs.map(b=>`<span class="brevet">🏅 ${esc(b.intitule)}</span>`).join(''):'<span style="font-size:13px;color:var(--text2)">Aucun brevet</span>';
   // Progression
   const {data:progs}=await db.from('progression').select('*,cours(titre)').eq('utilisateur_id',id);
   const progEl=document.getElementById('jd-progression');
@@ -1748,7 +1910,7 @@ async function openJspDetail(id){
     progEl.innerHTML=progs.map(p=>{
       const sp=STATUT_PROG[p.statut||'non_commence'];
       return `<div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0">
-        <span>${p.cours?.titre||'—'}</span>
+        <span>${esc(p.cours?.titre||'—')}</span>
         <span class="badge ${sp.cls}">${sp.lbl}</span>
       </div>`;
     }).join('');
@@ -1782,10 +1944,14 @@ async function openJspDetail(id){
 
 async function resetMdp(id, mat){
   if(!canResetMdp(findMembre(id))){ toast('Action non autorisée'); return; }
-  if(!confirm(`Réinitialiser le mot de passe de ${mat} ?`)) return;
-  await db.from('utilisateurs').update({mot_de_passe:hash(mat+'2026'),premiere_connexion:true}).eq('id',id);
-  toast('Mot de passe réinitialisé — provisoire : '+mat+'2026');
-  closeModal('m-jsp-detail');
+  var j=findMembre(id);
+  var name=j?([j.prenom,j.nom].filter(Boolean).join(' ')||'Mat. '+mat):'Mat. '+mat;
+  if(!confirm('Réinitialiser le mot de passe de '+name+' ? Son ancien mot de passe ne fonctionnera plus.')) return;
+  try{
+    var pw=await rpc('jsp_reset_mdp',{p_id:String(id)});
+    closeModal('m-jsp-detail');
+    showPwModal('Nouveau mot de passe provisoire', name+' · matricule '+mat, pw);
+  }catch(e){ toast(e.message); }
 }
 
 // ══════════════════════════════════════════════════════════
@@ -1798,10 +1964,10 @@ function openValiderProg(jspId, coursId){
   const jspList=jsps.filter(j=>j.role==='jsp');
   let html='';
   if(!jspId){
-    html+=`<div class="form-group"><label class="form-label">JSP *</label><select class="form-ctrl" id="vp-jsp-sel"><option value="">— Sélectionner —</option>${jspList.map(j=>`<option value="${j.id}">${[j.prenom,j.nom].filter(Boolean).join(' ')||j.matricule}</option>`).join('')}</select></div>`;
+    html+=`<div class="form-group"><label class="form-label">JSP *</label><select class="form-ctrl" id="vp-jsp-sel"><option value="">— Sélectionner —</option>${jspList.map(j=>`<option value="${esc(j.id)}">${esc([j.prenom,j.nom].filter(Boolean).join(' ')||j.matricule)}</option>`).join('')}</select></div>`;
   }
   if(!coursId){
-    html+=`<div class="form-group"><label class="form-label">Cours *</label><select class="form-ctrl" id="vp-cours-sel"><option value="">— Sélectionner —</option>${cours.map(c=>`<option value="${c.id}">${c.titre}</option>`).join('')}</select></div>`;
+    html+=`<div class="form-group"><label class="form-label">Cours *</label><select class="form-ctrl" id="vp-cours-sel"><option value="">— Sélectionner —</option>${cours.map(c=>`<option value="${esc(c.id)}">${esc(c.titre)}</option>`).join('')}</select></div>`;
   }
   document.getElementById('vp-info').innerHTML=html||'Enregistrer la progression';
   document.getElementById('vp-statut').value='valide';
@@ -1830,11 +1996,11 @@ async function saveProgression(){
 // ADMIN — MEMBRES
 // ══════════════════════════════════════════════════════════
 function showAdminPanel(panel){
-  const panels=['admin-membres','admin-brevets','admin-droits'];
+  const panels=['admin-membres','admin-brevets','admin-droits','admin-casernes'];
   const mainCard=document.querySelector('#sc-admin .card');
   panels.forEach(p=>{ const el=document.getElementById(p); if(el) el.style.display='none'; });
   if(mainCard) mainCard.style.display=panel?'none':'block';
-  if(panel){ const el=document.getElementById(panel); if(el){ el.style.display='block'; if(panel==='admin-membres') loadAdminMembres(); if(panel==='admin-brevets') loadAdminBrevets(); if(panel==='admin-droits') initDroitsPanel(); } }
+  if(panel){ const el=document.getElementById(panel); if(el){ el.style.display='block'; if(panel==='admin-membres') loadAdminMembres(); if(panel==='admin-brevets') loadAdminBrevets(); if(panel==='admin-droits') initDroitsPanel(); if(panel==='admin-casernes') loadCasernesAdmin(); } }
 }
 
 async function loadAdminMembres(){
@@ -1847,8 +2013,8 @@ async function loadAdminMembres(){
     const roleCls={jsp:'badge-blue',moniteur:'badge-amber',responsable:'badge-red'}[j.role]||'badge-gray';
     return `<div class="row" onclick="openJspDetail('${j.id}')">
       <div class="row-info">
-        <div class="row-name">${name}</div>
-        <div class="row-detail">Mat. ${j.matricule}${j.grade?' · '+(GRADE_LABELS[j.grade]||j.grade):''}</div>
+        <div class="row-name">${esc(name)}</div>
+        <div class="row-detail">Mat. ${esc(j.matricule)}${j.grade?' · '+(GRADE_LABELS[j.grade]||j.grade):''}</div>
       </div>
       <span class="badge ${roleCls}">${ROLE_LABELS[j.role]||j.role}</span>
     </div>`;
@@ -1913,13 +2079,17 @@ function fillMembreForm(j){
   setFieldVal('nm-entree', j?j.date_entree:'');
   setFieldVal('nm-parent-nom', j?j.contact_parent_nom:'');
   setFieldVal('nm-parent-tel', j?j.contact_parent_tel:'');
-  // Caserne : modifiable uniquement par le super admin
+  // Caserne : choisie dans la liste officielle, uniquement par le super admin
   var casRow=document.getElementById('nm-caserne-row');
   if(casRow) casRow.style.display = user.super_admin ? 'block' : 'none';
-  var dl=document.getElementById('nm-caserne-list');
-  if(dl){
-    var casernes=[...new Set(jsps.map(function(u){ return u.caserne; }).filter(Boolean))].sort();
-    dl.innerHTML=casernes.map(function(c){ return '<option value="'+c+'"></option>'; }).join('');
+  var casSel=document.getElementById('nm-caserne');
+  if(casSel) casSel.innerHTML=caserneOptions(j?j.caserne:(userCaserne||''),'— Choisir —');
+  // Rôle : un responsable ne nomme pas de responsable et ne change pas son propre rôle
+  var roleSel=document.getElementById('nm-role');
+  if(roleSel){
+    var optResp=roleSel.querySelector('option[value="responsable"]');
+    if(optResp) optResp.disabled = !user.super_admin && !(j && j.role==='responsable');
+    roleSel.disabled = !user.super_admin && !!j && j.id===user.id;
   }
   var t=document.getElementById('nm-title');
   if(t) t.textContent = j ? 'Modifier le membre' : 'Ajouter un membre';
@@ -1961,14 +2131,13 @@ async function createMembre(){
   if(editMembreId && !canEditMembre(orig)){ showErr('nm-err','Modification non autorisée.'); return; }
   if(!editMembreId && !canAccess('membres_ajouter')){ showErr('nm-err','Ajout non autorisé.'); return; }
   if(!editMembreId && !user.super_admin && !userCaserne){ showErr('nm-err','Aucune caserne rattachée à ce compte.'); return; }
-  const {data:exist}=await db.from('utilisateurs').select('id').eq('matricule',mat).maybeSingle();
-  if(exist && exist.id!==editMembreId){ showErr('nm-err','Ce matricule existe déjà.'); return; }
   const role=document.getElementById('nm-role').value;
   const grade=role==='jsp' ? document.getElementById('nm-grade').value : 'Moniteur';
   // Caserne : saisie libre pour le super admin, sinon celle du responsable
   const caserne = user.super_admin
     ? ((document.getElementById('nm-caserne')?.value||'').trim()||null)
     : (orig ? orig.caserne : (userCaserne||null));
+  if(!caserne){ showErr('nm-err','Choisis une caserne pour ce membre.'); return; }
   const fields={
     matricule:mat, prenom, nom, caserne, role, grade,
     section:document.getElementById('nm-section').value.trim()||null,
@@ -1979,16 +2148,15 @@ async function createMembre(){
   };
   const btn=document.getElementById('btn-create-membre');
   if(btn) btn.disabled=true;
-  let error;
-  if(editMembreId){
-    let q=db.from('utilisateurs').update(fields).eq('id',editMembreId);
-    if(!user.super_admin) q=q.eq('caserne',user.caserne); // sécurité : sa caserne uniquement
-    ({error}=await q);
-  } else {
-    ({error}=await db.from('utilisateurs').insert(Object.assign({}, fields, {mot_de_passe:hash(mat+'2026'), premiere_connexion:true})));
+  // Les règles (droits, caserne, rôle) sont revérifiées par le serveur
+  let res;
+  try{
+    res=await rpc('jsp_save_membre',{p_id:editMembreId?String(editMembreId):null, p:fields});
+  }catch(e){
+    if(btn) btn.disabled=false;
+    showErr('nm-err',e.message); return;
   }
   if(btn) btn.disabled=false;
-  if(error){ showErr('nm-err','Erreur : '+error.message); return; }
   closeModal('m-new-membre');
   if(editMembreId){
     // Si on s'est modifié soi-même, mettre à jour la session
@@ -2001,7 +2169,7 @@ async function createMembre(){
     }
     toast(`${prenom} ${nom} modifié ✓`);
   } else {
-    toast(`${prenom} ${nom} ajouté ✓ — mdp : ${mat}2026`);
+    showPwModal('Compte créé ✓', prenom+' '+nom+' · matricule '+mat, res.mdp_provisoire);
   }
   editMembreId=null;
   await loadAllJsps();
@@ -2021,22 +2189,25 @@ async function createMembre(){
 // ══════════════════════════════════════════════════════════
 async function loadAdminBrevets(){
   const el=document.getElementById('l-admin-brevets');
-  const {data}=await db.from('brevets').select('*,utilisateurs(prenom,nom,matricule)').order('created_at',{ascending:false});
-  if(!data||!data.length){ el.innerHTML=`<div class="empty"><span style="font-style:normal">🏅</span><p>Aucun brevet attribué</p></div>`; return; }
+  const {data:raw}=await db.from('brevets').select('*').order('created_at',{ascending:false});
+  const byId={}; jsps.forEach(function(j){ byId[j.id]=j; });
+  // On ne garde que les brevets des membres visibles par ce compte
+  const data=(raw||[]).filter(function(b){ return !!byId[b.utilisateur_id]; }).map(function(b){ return Object.assign({},b,{utilisateurs:byId[b.utilisateur_id]}); });
+  if(!data.length){ el.innerHTML=`<div class="empty"><span style="font-style:normal">🏅</span><p>Aucun brevet attribué</p></div>`; return; }
   el.innerHTML=`<div class="card" style="padding:0 14px">${data.map(b=>{
     const u=b.utilisateurs;
     const name=u?[u.prenom,u.nom].filter(Boolean).join(' ')||'Mat. '+u.matricule:'—';
     return `<div class="row">
       <div class="row-icon" style="background:var(--purple-light);font-size:20px">🏅</div>
       <div class="row-info">
-        <div class="row-name">${b.intitule}</div>
-        <div class="row-detail">${name}${b.date_obtention?' · '+fmt(b.date_obtention):''}</div>
+        <div class="row-name">${esc(b.intitule)}</div>
+        <div class="row-detail">${esc(name)}${b.date_obtention?' · '+fmt(b.date_obtention):''}</div>
       </div>
     </div>`;
   }).join('')}</div>`;
   // Remplir select JSP dans la modale
   const sel=document.getElementById('nb-jsp');
-  sel.innerHTML='<option value="">— Sélectionner —</option>'+jsps.filter(j=>j.role==='jsp').map(j=>`<option value="${j.id}">${[j.prenom,j.nom].filter(Boolean).join(' ')||j.matricule}</option>`).join('');
+  sel.innerHTML='<option value="">— Sélectionner —</option>'+jsps.filter(j=>j.role==='jsp').map(j=>`<option value="${esc(j.id)}">${esc([j.prenom,j.nom].filter(Boolean).join(' ')||j.matricule)}</option>`).join('');
 }
 
 async function saveBrevet(){
@@ -2081,12 +2252,12 @@ async function saveChangePw(){
   const n1=document.getElementById('cpw-1').value;
   const n2=document.getElementById('cpw-2').value;
   hideErr('cpw-err');
-  if(hash(old)!==user.mot_de_passe){ showErr('cpw-err','Mot de passe actuel incorrect.'); return; }
-  if(n1.length<6){ showErr('cpw-err','Minimum 6 caractères.'); return; }
+  if(isSimulating()){ showErr('cpw-err','Impossible en mode test.'); return; }
+  if(n1.length<8){ showErr('cpw-err','Au moins 8 caractères.'); return; }
   if(n1!==n2){ showErr('cpw-err','Les mots de passe ne correspondent pas.'); return; }
-  const {error}=await db.from('utilisateurs').update({mot_de_passe:hash(n1)}).eq('id',user.id);
-  if(error){ showErr('cpw-err','Erreur : '+error.message); return; }
-  user.mot_de_passe=hash(n1);
+  try{ await rpc('jsp_change_mdp',{p_old:old, p_new:n1}); }
+  catch(e){ showErr('cpw-err',e.message); return; }
+  ['cpw-old','cpw-1','cpw-2'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
   closeModal('m-changepw'); toast('Mot de passe mis à jour ✓');
 }
 
@@ -2097,13 +2268,24 @@ document.addEventListener('DOMContentLoaded', function(){
   showPage('pg-login');
   const saved=localStorage.getItem('jsp_mat');
   if(saved){ const el=document.getElementById('l-mat'); if(el) el.value=saved; }
+  document.getElementById('btn-first-save').addEventListener('click', saveFirstLogin);
+  document.getElementById('fl-2').addEventListener('keydown', e=>{ if(e.key==='Enter') saveFirstLogin(); });
+  document.getElementById('btn-first-cancel').addEventListener('click', ()=>doLogout());
+  document.getElementById('btn-add-caserne').addEventListener('click', ()=>openCaserneModal(null));
+  document.getElementById('btn-save-caserne').addEventListener('click', saveCaserne);
+  document.getElementById('mcas-nom').addEventListener('keydown', e=>{ if(e.key==='Enter') saveCaserne(); });
+  document.getElementById('btn-copy-mdp').addEventListener('click', function(){
+    var v=document.getElementById('mdp-value').textContent;
+    if(navigator.clipboard) navigator.clipboard.writeText(v).then(()=>toast('Copié ✓'),()=>toast('Copie impossible, note-le à la main'));
+  });
+  resumeSession();
 
   // Auth
   document.getElementById('btn-login').addEventListener('click', doLogin);
   document.getElementById('l-pw').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
-  document.getElementById('btn-drawer-logout').addEventListener('click', doLogout);
+  document.getElementById('btn-drawer-logout').addEventListener('click', ()=>doLogout());
   var btnProfilLogout=document.getElementById('btn-profil-logout');
-  if(btnProfilLogout) btnProfilLogout.addEventListener('click', doLogout);
+  if(btnProfilLogout) btnProfilLogout.addEventListener('click', ()=>doLogout());
   var btnReturn = document.getElementById('btn-return');
   if(btnReturn) btnReturn.addEventListener('click', stopSimulation);
 
@@ -2212,10 +2394,8 @@ async function loadDroitsRoleOverrides(){
 }
 
 async function saveDroitsRoleOverrides(role, overrides){
-  return await db.from('droits_roles').upsert(
-    {role:role, droits:overrides, updated_at:new Date().toISOString()},
-    {onConflict:'role'}
-  );
+  try{ await rpc('jsp_set_droits_role',{p_role:role, p_droits:overrides}); return {error:null}; }
+  catch(e){ return {error:e}; }
 }
 
 function getDroitsDefautRole(role){
@@ -2282,7 +2462,7 @@ async function loadDroitsUserSelect(){
   sel.innerHTML = '<option value="">— Sélectionner un utilisateur —</option>' +
     list.map(function(u){
       var name = [u.prenom,u.nom].filter(Boolean).join(' ')||'Mat. '+u.matricule;
-      return '<option value="'+u.id+'">'+name+' ('+( ROLE_LABELS[u.role]||u.role)+')</option>';
+      return '<option value="'+esc(u.id)+'">'+esc(name)+' ('+( ROLE_LABELS[u.role]||u.role)+')</option>';
     }).join('');
 }
 
@@ -2307,8 +2487,8 @@ async function saveDroitsUser(){
   document.querySelectorAll('.droits-user-cb').forEach(function(cb){
     if(!!cb.checked !== !!droitsBase[cb.dataset.key]) overrides[cb.dataset.key]=cb.checked;
   });
-  var {error} = await db.from('utilisateurs').update({droits: Object.keys(overrides).length ? overrides : null}).eq('id',curDroitsUserId);
-  if(error){ toast('Erreur : '+error.message); return; }
+  try{ await rpc('jsp_set_droits_user',{p_id:String(curDroitsUserId), p_droits:overrides}); }
+  catch(e){ toast('Erreur : '+e.message); return; }
   // Mettre à jour localement
   var idx = jsps.findIndex(function(j){ return j.id===curDroitsUserId; });
   if(idx!==-1) jsps[idx].droits = Object.keys(overrides).length ? overrides : null;
@@ -2318,7 +2498,8 @@ async function saveDroitsUser(){
 
 async function resetDroitsUser(){
   if(!curDroitsUserId) return;
-  await db.from('utilisateurs').update({droits:null}).eq('id',curDroitsUserId);
+  try{ await rpc('jsp_set_droits_user',{p_id:String(curDroitsUserId), p_droits:{}}); }
+  catch(e){ toast('Erreur : '+e.message); return; }
   var idx = jsps.findIndex(function(j){ return j.id===curDroitsUserId; });
   if(idx!==-1) jsps[idx].droits=null;
   await loadDroitsUser(curDroitsUserId);
@@ -2331,6 +2512,85 @@ async function initDroitsPanel(){
   renderDroitsRoleGrid('jsp');
   loadDroitsUserSelect();
   var g = document.getElementById('droits-user-grid'); if(g) g.style.display='none';
+}
+
+// ══════════════════════════════════════════════════════════
+// CASERNES (super admin)
+// ══════════════════════════════════════════════════════════
+var editCaserneId = null;
+
+async function loadCasernesAdmin(){
+  var el=document.getElementById('l-casernes');
+  if(!el) return;
+  el.innerHTML='<div class="loader"><span style="font-style:normal">⟳</span>Chargement…</div>';
+  await Promise.all([loadCasernes(), loadAllJsps()]);
+  if(!casernesList.length){
+    el.innerHTML='<div class="empty"><span style="font-style:normal">🏢</span><p>Aucune caserne</p><small>Ajoute ta première caserne avec le bouton « Ajouter ».</small></div>';
+    return;
+  }
+  var count={};
+  jsps.forEach(function(j){ if(j.caserne) count[j.caserne]=(count[j.caserne]||0)+1; });
+  el.innerHTML='<div class="card" style="padding:0 14px">'+casernesList.map(function(c){
+    var n=count[c.nom]||0;
+    return '<div class="row" style="cursor:default">'+
+      '<div class="row-icon" style="background:#eff6ff;font-size:20px">🏢</div>'+
+      '<div class="row-info"><div class="row-name">'+esc(c.nom)+'</div>'+
+      '<div class="row-detail">'+(n?n+' membre'+(n>1?'s':''):'Aucun membre')+'</div></div>'+
+      '<div style="display:flex;gap:6px;flex-shrink:0">'+
+        '<button class="btn btn-ghost btn-sm" aria-label="Renommer" onclick="openCaserneModal(\''+c.id+'\')">✏️</button>'+
+        '<button class="btn btn-ghost btn-sm" aria-label="Supprimer" onclick="deleteCaserne(\''+c.id+'\')" style="color:var(--red)">🗑</button>'+
+      '</div>'+
+    '</div>';
+  }).join('')+'</div>';
+}
+
+function openCaserneModal(id){
+  editCaserneId=id;
+  var c=id ? casernesList.find(function(x){ return x.id===id; }) : null;
+  hideErr('mcas-err');
+  document.getElementById('mcas-title').textContent = c ? 'Renommer la caserne' : 'Nouvelle caserne';
+  document.getElementById('mcas-nom').value = c ? c.nom : '';
+  openModal('m-caserne');
+  setTimeout(function(){ var f=document.getElementById('mcas-nom'); if(f) f.focus(); }, 50);
+}
+
+async function saveCaserne(){
+  hideErr('mcas-err');
+  var nom=document.getElementById('mcas-nom').value.trim();
+  if(!nom){ showErr('mcas-err','Donne un nom à la caserne.'); return; }
+  var old = editCaserneId ? (casernesList.find(function(x){ return x.id===editCaserneId; })||{}).nom : null;
+  var btn=document.getElementById('btn-save-caserne'); btn.disabled=true;
+  try{
+    await rpc('jsp_caserne_save',{p_id:editCaserneId, p_nom:nom});
+  }catch(e){ showErr('mcas-err',e.message); btn.disabled=false; return; }
+  btn.disabled=false;
+  // Le logo suit la caserne renommée
+  if(old && old!==nom){
+    try{ var lg=localStorage.getItem(LOGO_KEY+old); if(lg){ localStorage.setItem(LOGO_KEY+nom, lg); localStorage.removeItem(LOGO_KEY+old); } }catch(e){}
+  }
+  closeModal('m-caserne');
+  toast(old ? 'Caserne renommée ✓' : 'Caserne ajoutée ✓');
+  await refreshAfterCaserneChange();
+}
+
+async function deleteCaserne(id){
+  var c=casernesList.find(function(x){ return x.id===id; });
+  if(!c) return;
+  if(!confirm('Supprimer la caserne « '+c.nom+' » ?')) return;
+  try{ await rpc('jsp_caserne_delete',{p_id:id}); }
+  catch(e){ toast(e.message); return; }
+  toast('Caserne supprimée ✓');
+  await refreshAfterCaserneChange();
+}
+
+// Après un renommage, les données en mémoire portent l'ancien nom : on recharge
+async function refreshAfterCaserneChange(){
+  try{ var me=await rpc('jsp_session'); if(me){ user=me; userCaserne=user.caserne||null; } }catch(e){}
+  await Promise.all([loadAllSeances(), loadAllCours(), loadAllDocs(), loadAllJsps(), loadCasernes()]);
+  await populateCaserneFilters();
+  var sub=document.getElementById('h-sub');
+  if(sub) sub.textContent='Super Admin · '+(user.caserne||'SDIS 72');
+  loadCasernesAdmin();
 }
 
 // ══════════════════════════════════════════════════════════
