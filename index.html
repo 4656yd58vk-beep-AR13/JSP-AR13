@@ -265,7 +265,6 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
       <button class="drawer-item admin-only" data-tab="sc-admin" style="display:none"><span style="font-style:normal">⚙️</span><span>Administration</span></button>
       <div class="drawer-sep"></div>
       <div class="drawer-section">Compte</div>
-      <button class="drawer-item sa-only" data-tab="sc-test" style="display:none">🧪<span style="margin-left:12px">Comptes test</span></button>
       <button class="drawer-item" data-tab="sc-profil"><span style="font-style:normal">👤</span><span>Mon profil</span></button>
     </div>
     <div id="drawer-footer">
@@ -416,6 +415,16 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
         <div class="row" id="admin-btn-brevets">
           <div class="row-icon" style="background:#fefce8;font-size:22px">🏅</div>
           <div class="row-info"><div class="row-name">Attribuer des brevets</div><div class="row-detail">Brevets et certifications</div></div>
+          <span style="font-style:normal;color:var(--text2)">›</span>
+        </div>
+        <div class="row sa-only" id="admin-btn-droits" style="display:none" onclick="showAdminPanel('admin-droits')">
+          <div class="row-icon" style="background:#f0fdf4;font-size:22px">🔐</div>
+          <div class="row-info"><div class="row-name">Droits & acces</div><div class="row-detail">Gerer les droits par role et utilisateur</div></div>
+          <span style="font-style:normal;color:var(--text2)">›</span>
+        </div>
+        <div class="row sa-only" id="admin-btn-test" style="display:none" onclick="switchTab('sc-test')">
+          <div class="row-icon" style="background:#fdf4ff;font-size:22px">🧪</div>
+          <div class="row-info"><div class="row-name">Comptes test</div><div class="row-detail">Simuler un role ou un utilisateur</div></div>
           <span style="font-style:normal;color:var(--text2)">›</span>
         </div>
       </div>
