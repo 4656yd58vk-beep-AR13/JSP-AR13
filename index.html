@@ -316,12 +316,15 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
       </div>
       <div class="chips" style="margin-bottom:14px">
         <button class="chip active" data-sfilter="all">Toutes</button>
+        <button class="chip" data-sfilter="planifiee">À venir</button>
+        <button class="chip" data-sfilter="terminee">Terminées</button>
         <button class="chip" data-sfilter="sport">💪 Sport</button>
         <button class="chip" data-sfilter="cours">📚 Cours</button>
         <button class="chip" data-sfilter="manoeuvre">🔥 Manœuvre</button>
-        <button class="chip" data-sfilter="administratif">📋 Admin</button>
-        <button class="chip" data-sfilter="planifiee">À venir</button>
-        <button class="chip" data-sfilter="terminee">Terminées</button>
+        <button class="chip" data-sfilter="JSP1">JSP 1</button>
+        <button class="chip" data-sfilter="JSP2">JSP 2</button>
+        <button class="chip" data-sfilter="JSP3">JSP 3</button>
+        <button class="chip" data-sfilter="JSP4">JSP 4</button>
       </div>
       <div id="l-seances"><div class="loader"><span style="font-style:normal">⟳</span>Chargement…</div></div>
     </div>
@@ -567,6 +570,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
         <div class="ig-item"><label>Lieu</label><span id="ms-lieu">—</span></div>
         <div class="ig-item"><label>Type</label><span id="ms-cours">—</span></div></div><div class="ig"><div class="ig-item"><label>Mots-clés</label><span id="ms-tags">—</span></div>
         <div class="ig-item"><label>Statut</label><span id="ms-statut">—</span></div>
+        <div class="ig-item"><label>Niveaux</label><span id="ms-niveaux">Tous</span></div>
       </div>
       <div id="ms-desc" style="font-size:13px;color:var(--text2);margin-bottom:14px"></div>
       <div id="ms-ma-presence" style="margin-bottom:14px"></div>
@@ -621,6 +625,24 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
         <div class="ig-item form-group"><label class="form-label">Fin</label><input class="form-ctrl" type="time" id="ns-fin"></div>
       </div>
       <div class="form-group"><label class="form-label">Lieu</label><input class="form-ctrl" id="ns-lieu" placeholder="Ex : Caserne SDIS 72"></div>
+      <div class="form-group">
+        <label class="form-label">Niveaux concernés</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+          <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer;background:var(--bg2);padding:8px 14px;border-radius:20px;border:1.5px solid var(--border)">
+            <input type="checkbox" name="ns-niveaux" value="JSP1" style="accent-color:var(--blue)"> JSP 1
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer;background:var(--bg2);padding:8px 14px;border-radius:20px;border:1.5px solid var(--border)">
+            <input type="checkbox" name="ns-niveaux" value="JSP2" style="accent-color:var(--blue)"> JSP 2
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer;background:var(--bg2);padding:8px 14px;border-radius:20px;border:1.5px solid var(--border)">
+            <input type="checkbox" name="ns-niveaux" value="JSP3" style="accent-color:var(--blue)"> JSP 3
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer;background:var(--bg2);padding:8px 14px;border-radius:20px;border:1.5px solid var(--border)">
+            <input type="checkbox" name="ns-niveaux" value="JSP4" style="accent-color:var(--blue)"> JSP 4
+          </label>
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-top:6px">Laisser vide = tous niveaux</div>
+      </div>
       <div class="form-group"><label class="form-label">Mots-cles / matiere</label><input class="form-ctrl" id="ns-tags" placeholder="Ex : secourisme, PLS, RCP..."></div>
       <div class="form-group"><label class="form-label">Description</label><textarea class="form-ctrl" id="ns-desc" rows="2" placeholder="Objectifs, contenu..."></textarea></div>
       <button class="btn btn-blue" id="btn-create-seance">📅 Planifier</button>
@@ -1093,7 +1115,13 @@ async function renderHome(){
     </div>`).join('');
   // Prochaine séance
   const now=new Date().toISOString().split('T')[0];
-  const next=seances.filter(s=>s.date_seance>=now&&s.statut==='planifiee')[0];
+  // Filtrer la prochaine séance selon le niveau du JSP connecté
+  const next=seances.filter(function(s){
+    if(s.date_seance<now||s.statut!=='planifiee') return false;
+    if(!s.niveaux) return true; // tous niveaux
+    if(!user.grade) return true;
+    return s.niveaux.split(',').includes(user.grade);
+  })[0];
   const nextEl=document.getElementById('home-next-seance');
   if(next){
     nextEl.innerHTML=`<div class="card" style="cursor:pointer;border-left:4px solid var(--blue)" onclick="openSeanceDetail('${next.id}')">
@@ -1239,10 +1267,13 @@ function loadSeancesFiltered(caserne){
 }
 function loadSeances(){
   const statusFilters=['planifiee','terminee','annulee'];
+  const niveauFilters=['JSP1','JSP2','JSP3','JSP4'];
   const list=seanceFilter==='all'?seances:
     statusFilters.includes(seanceFilter)
       ? seances.filter(s=>s.statut===seanceFilter)
-      : seances.filter(s=>s.type_seance===seanceFilter);
+      : niveauFilters.includes(seanceFilter)
+        ? seances.filter(s=>!s.niveaux||s.niveaux.split(',').includes(seanceFilter))
+        : seances.filter(s=>s.type_seance===seanceFilter);
   const el=document.getElementById('l-seances');
   if(!list.length){ el.innerHTML=`<div class="empty"><span style="font-style:normal">📅</span><p>Aucune séance</p></div>`; return; }
   const today=new Date().toISOString().split('T')[0];
@@ -1278,6 +1309,8 @@ async function openSeanceDetail(id){
   document.getElementById('ms-cours').textContent=tc2.ico+' '+tc2.lbl;
   var msTagsEl=document.getElementById('ms-tags');
   if(msTagsEl) msTagsEl.textContent=s.tags||'—';
+  var msNivEl=document.getElementById('ms-niveaux');
+  if(msNivEl) msNivEl.textContent=s.niveaux ? s.niveaux.split(',').join(' · ') : 'Tous niveaux';
   const sc=STATUT_SEANCE[s.statut]||{lbl:s.statut,cls:'badge-gray'};
   document.getElementById('ms-statut').innerHTML=`<span class="badge ${sc.cls}">${sc.lbl}</span>`;
   document.getElementById('ms-desc').textContent=s.description||'';
@@ -1318,6 +1351,7 @@ async function createSeance(){
     titre, date_seance:date, createur_id:user.id, caserne:userCaserne||null,
     type_seance:document.getElementById('ns-type').value||'autre',
     tags:document.getElementById('ns-tags').value.trim()||null,
+    niveaux:(function(){ var c=[...document.querySelectorAll('input[name="ns-niveaux"]:checked')].map(cb=>cb.value); return c.length?c.join(','):null; })(),
     heure_debut:document.getElementById('ns-debut').value||null,
     heure_fin:document.getElementById('ns-fin').value||null,
     lieu:document.getElementById('ns-lieu').value.trim()||null,
@@ -1496,7 +1530,13 @@ async function loadAppelForSeance(seanceId){
   appelData={};
   (pres||[]).forEach(p=>{ appelData[p.utilisateur_id]=p.present; });
   // Liste JSP uniquement
-  const jspList=jsps.filter(j=>j.role==='jsp');
+  const s_appel=seances.find(x=>x.id===seanceId);
+  const niveauxSeance=s_appel&&s_appel.niveaux?s_appel.niveaux.split(','):null;
+  const jspList=jsps.filter(j=>j.role==='jsp'&&(!niveauxSeance||!j.grade||niveauxSeance.includes(j.grade)));
+  if(niveauxSeance){
+    var el_niv=document.getElementById('appel-info');
+    if(el_niv) el_niv.innerHTML+='<div style="font-size:12px;color:var(--blue);margin-top:4px;font-weight:600">Niveaux : '+niveauxSeance.join(' · ')+'</div>';
+  }
   const el=document.getElementById('l-appel');
   if(!jspList.length){ el.innerHTML=`<div class="empty"><span style="font-style:normal">👥</span><p>Aucun JSP enregistré</p></div>`; return; }
   const GRADES_ORDER=['JSP1','JSP2','JSP3','JSP4'];
@@ -1629,7 +1669,13 @@ function openValiderProg(jspId, coursId){
   curProgCoursId=coursId;
   // Remplir selects
   const jspSel=document.createElement('div');
-  const jspList=jsps.filter(j=>j.role==='jsp');
+  const s_appel=seances.find(x=>x.id===seanceId);
+  const niveauxSeance=s_appel&&s_appel.niveaux?s_appel.niveaux.split(','):null;
+  const jspList=jsps.filter(j=>j.role==='jsp'&&(!niveauxSeance||!j.grade||niveauxSeance.includes(j.grade)));
+  if(niveauxSeance){
+    var el_niv=document.getElementById('appel-info');
+    if(el_niv) el_niv.innerHTML+='<div style="font-size:12px;color:var(--blue);margin-top:4px;font-weight:600">Niveaux : '+niveauxSeance.join(' · ')+'</div>';
+  }
   let html='';
   if(!jspId){
     html+=`<div class="form-group"><label class="form-label">JSP *</label><select class="form-ctrl" id="vp-jsp-sel"><option value="">— Sélectionner —</option>${jspList.map(j=>`<option value="${j.id}">${[j.prenom,j.nom].filter(Boolean).join(' ')||j.matricule}</option>`).join('')}</select></div>`;
