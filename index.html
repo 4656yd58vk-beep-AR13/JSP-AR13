@@ -308,36 +308,24 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
   <div class="screen" id="sc-seances">
     <div class="section">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <div class="section-title" style="margin-bottom:0">Planning des séances</div>
-        <button class="btn btn-blue btn-sm monitor-only" id="btn-new-seance" style="display:none"><span style="font-style:normal">+</span>Créer</button>
+        <div class="section-title" style="margin-bottom:0">Séances</div>
+        <div style="display:flex;gap:6px">
+          <select class="form-ctrl" id="filter-caserne-seances" style="display:none;width:120px;font-size:12px;padding:6px 10px">
+            <option value="">Toutes casernes</option>
+          </select>
+          <button class="btn btn-blue btn-sm monitor-only" id="btn-new-seance" style="display:none">+ Créer</button>
+        </div>
       </div>
       <div class="chips" style="margin-bottom:14px">
         <button class="chip active" data-sfilter="all">Toutes</button>
+        <button class="chip" data-sfilter="sport">💪 Sport</button>
+        <button class="chip" data-sfilter="cours">📚 Cours</button>
+        <button class="chip" data-sfilter="manoeuvre">🔥 Manœuvre</button>
+        <button class="chip" data-sfilter="administratif">📋 Admin</button>
         <button class="chip" data-sfilter="planifiee">À venir</button>
         <button class="chip" data-sfilter="terminee">Terminées</button>
-        <button class="chip" data-sfilter="annulee">Annulées</button>
       </div>
       <div id="l-seances"><div class="loader"><span style="font-style:normal">⟳</span>Chargement…</div></div>
-    </div>
-  </div>
-
-  <!-- ── COURS ── -->
-  <div class="screen" id="sc-cours">
-    <div class="section">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <div class="section-title" style="margin-bottom:0">Catalogue des cours</div>
-        <button class="btn btn-blue btn-sm monitor-only" id="btn-new-cours" style="display:none"><span style="font-style:normal">+</span>Créer</button>
-      </div>
-      <div class="chips" style="margin-bottom:14px">
-        <button class="chip active" data-cfilter="all">Tous</button>
-        <button class="chip" data-cfilter="secourisme">🚑 Secourisme</button>
-        <button class="chip" data-cfilter="incendie">🔥 Incendie</button>
-        <button class="chip" data-cfilter="sport">💪 Sport</button>
-        <button class="chip" data-cfilter="citoyennete">🎖️ Citoyenneté</button>
-        <button class="chip" data-cfilter="technique">🔧 Technique</button>
-        <button class="chip" data-cfilter="autre">📋 Autre</button>
-      </div>
-      <div id="l-cours"><div class="loader"><span style="font-style:normal">⟳</span>Chargement…</div></div>
     </div>
   </div>
 
@@ -564,7 +552,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
       <div class="ig">
         <div class="ig-item"><label>Horaires</label><span id="ms-horaires">—</span></div>
         <div class="ig-item"><label>Lieu</label><span id="ms-lieu">—</span></div>
-        <div class="ig-item"><label>Cours associé</label><span id="ms-cours">—</span></div>
+        <div class="ig-item"><label>Type</label><span id="ms-cours">—</span></div></div><div class="ig"><div class="ig-item"><label>Mots-clés</label><span id="ms-tags">—</span></div>
         <div class="ig-item"><label>Statut</label><span id="ms-statut">—</span></div>
       </div>
       <div id="ms-desc" style="font-size:13px;color:var(--text2);margin-bottom:14px"></div>
@@ -601,46 +589,31 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
     <div class="modal-inner">
       <div class="modal-title">Nouvelle séance</div>
       <div class="err-box" id="ns-err"></div>
-      <div class="form-group"><label class="form-label">Titre *</label><input class="form-ctrl" id="ns-titre" placeholder="Ex : Séance secourisme PSC1"></div>
-      <div class="form-group"><label class="form-label">Date *</label><input class="form-ctrl" type="date" id="ns-date"></div>
+      <div class="form-group"><label class="form-label">Titre *</label><input class="form-ctrl" id="ns-titre" placeholder="Ex : PSC1 — Gestes de premiers secours"></div>
       <div class="ig">
-        <div class="ig-item form-group"><label class="form-label">Début</label><input class="form-ctrl" type="time" id="ns-debut"></div>
+        <div class="ig-item form-group">
+          <label class="form-label">Type *</label>
+          <select class="form-ctrl" id="ns-type">
+            <option value="cours">📚 Cours</option>
+            <option value="sport">💪 Sport</option>
+            <option value="manoeuvre">🔥 Manoeuvre</option>
+            <option value="administratif">📋 Administratif</option>
+            <option value="autre">📅 Autre</option>
+          </select>
+        </div>
+        <div class="ig-item form-group"><label class="form-label">Date *</label><input class="form-ctrl" type="date" id="ns-date"></div>
+      </div>
+      <div class="ig">
+        <div class="ig-item form-group"><label class="form-label">Debut</label><input class="form-ctrl" type="time" id="ns-debut"></div>
         <div class="ig-item form-group"><label class="form-label">Fin</label><input class="form-ctrl" type="time" id="ns-fin"></div>
       </div>
       <div class="form-group"><label class="form-label">Lieu</label><input class="form-ctrl" id="ns-lieu" placeholder="Ex : Caserne CSP LFB"></div>
-      <div class="form-group"><label class="form-label">Cours associé</label><select class="form-ctrl" id="ns-cours"><option value="">— Aucun —</option></select></div>
-      <div class="form-group"><label class="form-label">Description</label><textarea class="form-ctrl" id="ns-desc" rows="2"></textarea></div>
-      <button class="btn btn-blue" id="btn-create-seance"><span style="font-style:normal">📅+</span>Planifier</button>
+      <div class="form-group"><label class="form-label">Mots-cles / matiere</label><input class="form-ctrl" id="ns-tags" placeholder="Ex : secourisme, PLS, RCP..."></div>
+      <div class="form-group"><label class="form-label">Description</label><textarea class="form-ctrl" id="ns-desc" rows="2" placeholder="Objectifs, contenu..."></textarea></div>
+      <button class="btn btn-blue" id="btn-create-seance">📅 Planifier</button>
     </div>
   </div>
-</div>
-
-<!-- Nouveau cours -->
-<div class="modal-overlay" id="m-new-cours">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-inner">
-      <div class="modal-title">Nouveau cours</div>
-      <div class="form-group"><label class="form-label">Titre *</label><input class="form-ctrl" id="nc-titre" placeholder="Ex : Introduction au secourisme"></div>
-      <div class="ig">
-        <div class="ig-item form-group">
-          <label class="form-label">Catégorie</label>
-          <select class="form-ctrl" id="nc-cat">
-            <option value="secourisme">🚑 Secourisme</option>
-            <option value="incendie">🔥 Incendie</option>
-            <option value="sport">💪 Sport</option>
-            <option value="citoyennete">🎖️ Citoyenneté</option>
-            <option value="technique">🔧 Technique</option>
-            <option value="autre">📋 Autre</option>
-          </select>
-        </div>
-        <div class="ig-item form-group"><label class="form-label">Durée (min)</label><input class="form-ctrl" type="number" id="nc-duree" placeholder="60" min="15"></div>
-      </div>
-      <div class="form-group"><label class="form-label">Objectifs</label><textarea class="form-ctrl" id="nc-obj" rows="2"></textarea></div>
-      <div class="form-group"><label class="form-label">Contenu</label><textarea class="form-ctrl" id="nc-contenu" rows="3"></textarea></div>
-      <button class="btn btn-blue" id="btn-create-cours"><span style="font-style:normal">✓</span>Créer le cours</button>
-    </div>
-  </div>
+</div></div>
 </div>
 
 <!-- Nouveau doc -->
@@ -799,7 +772,6 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
 // ══════════════════════════════════════════════════════════
 const MODULES_CFG = [
   {key:'seances',  lbl:'Séances',      tab:'sc-seances',    ico:'📅'},
-  {key:'cours',    lbl:'Cours',        tab:'sc-cours',      ico:'📚'},
   {key:'docs',     lbl:'Documents',    tab:'sc-docs',       ico:'📁'},
   {key:'progression', lbl:'Progression', tab:'sc-progression', ico:'📊'},
   {key:'appel',    lbl:'Faire l appel', tab:'sc-appel',     ico:'✅', moniteur:true},
@@ -809,9 +781,9 @@ const MODULES_CFG = [
 ];
 
 const DROITS_DEFAUT = {
-  jsp:         {seances:true, cours:true, docs:true, progression:true, appel:false, jsps:false, admin:false, test:false},
-  moniteur:    {seances:true, cours:true, docs:true, progression:true, appel:true,  jsps:true,  admin:false, test:false},
-  responsable: {seances:true, cours:true, docs:true, progression:true, appel:true,  jsps:true,  admin:true,  test:false},
+  jsp:         {seances:true, docs:true, progression:true, appel:false, jsps:false, admin:false, test:false},
+  moniteur:    {seances:true, docs:true, progression:true, appel:true,  jsps:true,  admin:false, test:false},
+  responsable: {seances:true, docs:true, progression:true, appel:true,  jsps:true,  admin:true,  test:false},
 };
 
 function getDroitsUser(u){
@@ -827,6 +799,20 @@ function canAccess(module){
   if(user.super_admin) return true;
   var droits = getDroitsUser(user);
   return !!droits[module];
+}
+
+
+function switchPlanTab(tab){
+  document.querySelectorAll('.plan-tab').forEach(function(b){
+    var isActive = b.dataset.plan===tab;
+    b.style.color = isActive ? 'var(--blue)' : 'var(--text2)';
+    b.style.fontWeight = isActive ? '700' : '600';
+    b.style.borderBottom = isActive ? '2px solid var(--blue)' : 'none';
+  });
+  document.getElementById('plan-seances').style.display = tab==='seances' ? 'block' : 'none';
+  document.getElementById('plan-cours').style.display   = tab==='cours'   ? 'block' : 'none';
+  if(tab==='seances') loadSeances();
+  if(tab==='cours')   loadCours();
 }
 
 function updateDrawerAccess(){
@@ -873,6 +859,15 @@ const CAT_CFG = {
   autre:      {ico:'📋', lbl:'Autre',       bg:'#f3f4f6', col:'#374151'},
 };
 const DOC_CFG = { cours:'📚', reglement:'📜', administratif:'📋', autre:'📁' };
+
+const TYPE_SEANCE_CFG = {
+  cours:          {ico:'📚', lbl:'Cours théorique', bg:'#dbeafe', col:'#1e40af'},
+  sport:          {ico:'💪', lbl:'Sport',            bg:'#d1fae5', col:'#065f46'},
+  manoeuvre:      {ico:'🔥', lbl:'Manœuvre',        bg:'#fef3c7', col:'#92400e'},
+  administratif:  {ico:'📋', lbl:'Administratif',   bg:'#f3f4f6', col:'#374151'},
+  autre:          {ico:'📅', lbl:'Séance',           bg:'#ede9fe', col:'#4c1d95'},
+};
+
 const STATUT_SEANCE = {
   planifiee: {lbl:'Planifiée', cls:'badge-blue'},
   terminee:  {lbl:'Terminée',  cls:'badge-green'},
@@ -925,8 +920,6 @@ function switchTab(tabId){
   closeDrawer();
   // Charger les données selon l'onglet
   if(tabId==='sc-home') renderHome();
-  if(tabId==='sc-seances') loadSeances();
-  if(tabId==='sc-cours') loadCours();
   if(tabId==='sc-docs') loadDocs();
   if(tabId==='sc-progression') loadProgression();
   if(tabId==='sc-appel') loadAppel();
@@ -934,6 +927,7 @@ function switchTab(tabId){
   if(tabId==='sc-admin') { showAdminPanel(null); }
   if(tabId==='sc-profil') loadProfil();
   if(tabId==='sc-test'){ loadTestUsers(); }
+
 }
 function openDrawer(){ document.getElementById('drawer').classList.add('open'); document.getElementById('drawer-overlay').classList.add('open'); }
 function closeDrawer(){ document.getElementById('drawer').classList.remove('open'); document.getElementById('drawer-overlay').classList.remove('open'); }
@@ -1206,7 +1200,11 @@ function loadSeancesFiltered(caserne){
   renderSeancesList(list);
 }
 function loadSeances(){
-  const list=seanceFilter==='all'?seances:seances.filter(s=>s.statut===seanceFilter);
+  const statusFilters=['planifiee','terminee','annulee'];
+  const list=seanceFilter==='all'?seances:
+    statusFilters.includes(seanceFilter)
+      ? seances.filter(s=>s.statut===seanceFilter)
+      : seances.filter(s=>s.type_seance===seanceFilter);
   const el=document.getElementById('l-seances');
   if(!list.length){ el.innerHTML=`<div class="empty"><span style="font-style:normal">📅</span><p>Aucune séance</p></div>`; return; }
   const today=new Date().toISOString().split('T')[0];
@@ -1238,7 +1236,10 @@ async function openSeanceDetail(id){
   document.getElementById('ms-date').textContent=fmtDate(s.date_seance);
   document.getElementById('ms-horaires').textContent=s.heure_debut?s.heure_debut.slice(0,5)+(s.heure_fin?' → '+s.heure_fin.slice(0,5):''):'—';
   document.getElementById('ms-lieu').textContent=s.lieu||'—';
-  document.getElementById('ms-cours').textContent=s.cours?s.cours.titre:'—';
+  var tc2=TYPE_SEANCE_CFG[s.type_seance]||TYPE_SEANCE_CFG.autre;
+  document.getElementById('ms-cours').textContent=tc2.ico+' '+tc2.lbl;
+  var msTagsEl=document.getElementById('ms-tags');
+  if(msTagsEl) msTagsEl.textContent=s.tags||'—';
   const sc=STATUT_SEANCE[s.statut]||{lbl:s.statut,cls:'badge-gray'};
   document.getElementById('ms-statut').innerHTML=`<span class="badge ${sc.cls}">${sc.lbl}</span>`;
   document.getElementById('ms-desc').textContent=s.description||'';
@@ -1277,7 +1278,8 @@ async function createSeance(){
   if(!titre||!date){ showErr('ns-err','Titre et date obligatoires.'); return; }
   const {error}=await db.from('seances').insert({
     titre, date_seance:date, createur_id:user.id, caserne:userCaserne||null,
-    cours_id:document.getElementById('ns-cours').value||null,
+    type_seance:document.getElementById('ns-type').value||'autre',
+    tags:document.getElementById('ns-tags').value.trim()||null,
     heure_debut:document.getElementById('ns-debut').value||null,
     heure_fin:document.getElementById('ns-fin').value||null,
     lieu:document.getElementById('ns-lieu').value.trim()||null,
@@ -1775,8 +1777,6 @@ document.addEventListener('DOMContentLoaded', function(){
   // Boutons création
   document.getElementById('btn-new-seance').addEventListener('click', ()=>openModal('m-new-seance'));
   document.getElementById('btn-create-seance').addEventListener('click', createSeance);
-  document.getElementById('btn-new-cours').addEventListener('click', ()=>openModal('m-new-cours'));
-  document.getElementById('btn-create-cours').addEventListener('click', createCours);
   document.getElementById('btn-new-doc').addEventListener('click', ()=>openModal('m-new-doc'));
   document.getElementById('btn-create-doc').addEventListener('click', createDoc);
   document.getElementById('btn-add-membre').addEventListener('click', ()=>openModal('m-new-membre'));
@@ -1790,8 +1790,8 @@ document.addEventListener('DOMContentLoaded', function(){
 
   // Admin panels
   document.getElementById('admin-btn-membres').addEventListener('click', ()=>showAdminPanel('admin-membres'));
-  document.getElementById('admin-btn-cours').addEventListener('click', ()=>{ closeModal('m-admin'); switchTab('sc-cours'); });
-  document.getElementById('admin-btn-seances').addEventListener('click', ()=>switchTab('sc-seances'));
+  document.getElementById('admin-btn-cours').addEventListener('click', ()=>{ closeModal('m-admin'); switchTab('sc-planning'); });
+  document.getElementById('admin-btn-seances').addEventListener('click', ()=>switchTab('sc-planning'));
   document.getElementById('admin-btn-brevets').addEventListener('click', ()=>showAdminPanel('admin-brevets'));
 
   // Appel — changement séance
@@ -1803,6 +1803,10 @@ document.addEventListener('DOMContentLoaded', function(){
   if(fcJsps) fcJsps.addEventListener('change', function(){ loadJsps('', this.value); });
   var fcSeances=document.getElementById('filter-caserne-seances');
   if(fcSeances) fcSeances.addEventListener('change', function(){ loadSeancesFiltered(this.value); });
+  // Onglets planning
+  document.querySelectorAll('.plan-tab').forEach(function(btn){
+    btn.addEventListener('click', function(){ switchPlanTab(btn.dataset.plan); });
+  });
   var testSearch=document.getElementById('test-search');
   if(testSearch) testSearch.addEventListener('input', loadTestUsers);
   // Droits
