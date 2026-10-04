@@ -38,6 +38,7 @@ html,body{height:100%;background:#f0f2f5;font-family:-apple-system,BlinkMacSyste
 .form-ctrl{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:15px;background:#fff;color:var(--text);font-family:inherit;-webkit-appearance:none;transition:border-color 0.15s}
 .form-ctrl:focus{outline:none;border-color:var(--blue)}
 select.form-ctrl{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:34px}
+select.form-ctrl:disabled{background-color:var(--bg2);color:var(--text2)}
 textarea.form-ctrl{resize:none;line-height:1.5}
 
 /* BUTTONS */
@@ -60,7 +61,7 @@ textarea.form-ctrl{resize:none;line-height:1.5}
 /* DRAWER */
 #drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;opacity:0;pointer-events:none;transition:opacity 0.25s}
 #drawer-overlay.open{opacity:1;pointer-events:all}
-#drawer{position:fixed;top:0;left:0;width:280px;height:100vh;background:#fff;z-index:201;transform:translateX(-100%);transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;overflow:hidden;box-shadow:4px 0 24px rgba(0,0,0,0.15)}
+#drawer{position:fixed;top:0;left:0;width:280px;height:100vh;height:100dvh;background:#fff;z-index:201;transform:translateX(-100%);transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;overflow:hidden;box-shadow:4px 0 24px rgba(0,0,0,0.15)}
 #drawer.open{transform:translateX(0)}
 #drawer-head{background:var(--blue);padding:max(env(safe-area-inset-top),44px) 16px 16px}
 #drawer-avatar{width:48px;height:48px;background:rgba(255,255,255,0.2);border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;font-size:22px}
@@ -545,6 +546,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
       <div class="card" id="profil-parents" style="font-size:13px;color:var(--text2)">—</div>
       <div style="height:14px"></div>
       <button class="btn btn-ghost" id="btn-changepw"><span style="font-style:normal">🔒</span>Changer mon mot de passe</button>
+      <button class="btn btn-ghost" id="btn-profil-logout" style="margin-top:10px;color:var(--red);border-color:var(--red)"><span style="font-style:normal">←</span>Se déconnecter</button>
     </div>
   </div>
 
@@ -1734,6 +1736,26 @@ async function loadAdminMembres(){
   }).join('')}</div>`;
 }
 
+// Lie le champ Grade au rôle choisi : un moniteur ou un responsable
+// ne peut pas avoir un grade JSP1 à JSP4.
+function syncGradeWithRole(){
+  var roleEl=document.getElementById('nm-role');
+  var gradeEl=document.getElementById('nm-grade');
+  if(!roleEl||!gradeEl) return;
+  if(roleEl.value==='jsp'){
+    gradeEl.disabled=false;
+    if(gradeEl.value==='Moniteur') gradeEl.value='JSP1';
+  } else {
+    gradeEl.value='Moniteur';
+    gradeEl.disabled=true;
+  }
+}
+
+function openNewMembre(){
+  syncGradeWithRole();
+  openModal('m-new-membre');
+}
+
 async function createMembre(){
   const prenom=document.getElementById('nm-prenom').value.trim();
   const nom=document.getElementById('nm-nom').value.trim();
@@ -1743,11 +1765,13 @@ async function createMembre(){
   const {data:exist}=await db.from('utilisateurs').select('id').eq('matricule',mat).maybeSingle();
   if(exist){ showErr('nm-err','Ce matricule existe déjà.'); return; }
   const mdpHash=hash(mat+'2026');
+  const role=document.getElementById('nm-role').value;
+  const grade=role==='jsp' ? document.getElementById('nm-grade').value : 'Moniteur';
   const {error}=await db.from('utilisateurs').insert({
     matricule:mat, prenom, nom,
     caserne: isSuperAdmin() ? (document.getElementById('nm-caserne')?.value||null) : (userCaserne||null),
-    role:document.getElementById('nm-role').value,
-    grade:document.getElementById('nm-grade').value,
+    role:role,
+    grade:grade,
     section:document.getElementById('nm-section').value.trim()||null,
     date_naissance:document.getElementById('nm-ddn').value||null,
     date_entree:document.getElementById('nm-entree').value||null,
@@ -1838,6 +1862,8 @@ document.addEventListener('DOMContentLoaded', function(){
   document.getElementById('btn-login').addEventListener('click', doLogin);
   document.getElementById('l-pw').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
   document.getElementById('btn-drawer-logout').addEventListener('click', doLogout);
+  var btnProfilLogout=document.getElementById('btn-profil-logout');
+  if(btnProfilLogout) btnProfilLogout.addEventListener('click', doLogout);
   var btnReturn = document.getElementById('btn-return');
   if(btnReturn) btnReturn.addEventListener('click', stopSimulation);
 
@@ -1863,8 +1889,10 @@ document.addEventListener('DOMContentLoaded', function(){
   document.getElementById('btn-create-seance').addEventListener('click', createSeance);
   document.getElementById('btn-new-doc').addEventListener('click', ()=>openModal('m-new-doc'));
   document.getElementById('btn-create-doc').addEventListener('click', createDoc);
-  document.getElementById('btn-add-membre').addEventListener('click', ()=>openModal('m-new-membre'));
+  document.getElementById('btn-add-membre').addEventListener('click', openNewMembre);
   document.getElementById('btn-create-membre').addEventListener('click', createMembre);
+  var nmRoleEl=document.getElementById('nm-role');
+  if(nmRoleEl) nmRoleEl.addEventListener('change', syncGradeWithRole);
   document.getElementById('btn-add-brevet').addEventListener('click', ()=>openModal('m-new-brevet'));
   document.getElementById('btn-save-brevet').addEventListener('click', saveBrevet);
   document.getElementById('btn-save-appel').addEventListener('click', saveAppel);
