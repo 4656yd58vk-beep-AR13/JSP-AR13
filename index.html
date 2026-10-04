@@ -176,7 +176,8 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
 .err-box{font-size:13px;color:#991b1b;background:#fee2e2;padding:10px 12px;border-radius:var(--radius-sm);margin-bottom:12px;display:none;border-left:3px solid var(--red)}
 
 /* ACTION ROW */
-.action-row{display:flex;gap:8px;margin-top:8px}
+.action-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.btn-edit{flex:1;padding:12px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit}
 .btn-ok{flex:1;padding:12px;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit}
 .btn-ko{flex:1;padding:12px;background:#fff;color:var(--red);border:1.5px solid var(--red);border-radius:var(--radius-sm);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit}
 
@@ -539,12 +540,13 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
       <div class="ig">
         <div class="ig-item"><label>Section</label><span id="profil-section">—</span></div>
         <div class="ig-item"><label>Rôle</label><span id="profil-role">—</span></div>
-        <div class="ig-item"><label>Entrée JSP</label><span id="profil-entree">—</span></div>
+        <div class="ig-item" id="profil-entree-item"><label>Entrée JSP</label><span id="profil-entree">—</span></div>
         <div class="ig-item"><label>Date naissance</label><span id="profil-ddn">—</span></div>
       </div>
-      <div class="section-title">Coordonnées parents</div>
+      <div class="section-title" id="profil-parents-title">Coordonnées parents</div>
       <div class="card" id="profil-parents" style="font-size:13px;color:var(--text2)">—</div>
       <div style="height:14px"></div>
+      <button class="btn btn-blue" id="btn-profil-edit" style="display:none;margin-bottom:10px"><span style="font-style:normal">✏️</span>Modifier mes infos</button>
       <button class="btn btn-ghost" id="btn-changepw"><span style="font-style:normal">🔒</span>Changer mon mot de passe</button>
       <button class="btn btn-ghost" id="btn-profil-logout" style="margin-top:10px;color:var(--red);border-color:var(--red)"><span style="font-style:normal">←</span>Se déconnecter</button>
     </div>
@@ -682,7 +684,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-inner">
-      <div class="modal-title">Ajouter un membre</div>
+      <div class="modal-title" id="nm-title">Ajouter un membre</div>
       <div class="err-box" id="nm-err"></div>
       <div class="ig">
         <div class="ig-item form-group"><label class="form-label">Prénom *</label><input class="form-ctrl" id="nm-prenom"></div>
@@ -714,7 +716,8 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
       </div>
       <div class="form-group sa-only" id="nm-caserne-row" style="display:none">
         <label class="form-label">Caserne</label>
-        <input class="form-ctrl" id="nm-caserne" placeholder="Ex : SDIS 72">
+        <input class="form-ctrl" id="nm-caserne" list="nm-caserne-list" placeholder="Ex : CSP La Ferté-Bernard" autocomplete="off">
+        <datalist id="nm-caserne-list"></datalist>
       </div>
       <div class="ig">
       </div>
@@ -798,7 +801,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
         <div class="ig-item"><label>Naissance</label><span id="jd-ddn">—</span></div>
         <div class="ig-item"><label>Entrée JSP</label><span id="jd-entree">—</span></div>
       </div>
-      <div class="form-group"><label class="form-label">Contact parent</label><div id="jd-parent" style="font-size:13px;color:var(--text2)">—</div></div>
+      <div class="form-group" id="jd-parent-row"><label class="form-label">Contact parent</label><div id="jd-parent" style="font-size:13px;color:var(--text2)">—</div></div>
       <div class="form-group"><label class="form-label">Présences</label><div id="jd-presences" style="font-size:15px;font-weight:700;color:var(--blue)">—</div></div>
       <div class="form-group"><label class="form-label">Brevets</label><div id="jd-brevets"></div></div>
       <div class="form-group"><label class="form-label">Progression</label><div id="jd-progression"></div></div>
@@ -841,10 +844,28 @@ const MODULES_CFG = [
   {key:'test',     lbl:'Comptes test', tab:'sc-test',       ico:'🧪', sa:true},
 ];
 
+// Actions fines, configurables dans Droits & accès
+const ACTIONS_CFG = [
+  {key:'membres_ajouter',     lbl:'Ajouter des membres',      ico:'👤'},
+  {key:'membres_modifier',    lbl:'Modifier les membres',     ico:'✏️'},
+  {key:'mdp_reset',           lbl:'Réinitialiser les mots de passe', ico:'🔒'},
+  {key:'brevets',             lbl:'Attribuer des brevets',    ico:'🏅'},
+  {key:'seances_creer',       lbl:'Créer des séances',        ico:'📅'},
+  {key:'seances_annuler',     lbl:'Annuler des séances',      ico:'🚫'},
+  {key:'docs_ajouter',        lbl:'Ajouter des documents',    ico:'📁'},
+  {key:'progression_valider', lbl:'Valider la progression',   ico:'📊'},
+];
+
 const DROITS_DEFAUT = {
-  jsp:         {seances:true, docs:true, progression:true, appel:false, jsps:false, admin:false, test:false},
-  moniteur:    {seances:true, docs:true, progression:true, appel:true,  jsps:true,  admin:false, test:false},
-  responsable: {seances:true, docs:true, progression:true, appel:true,  jsps:true,  admin:true,  test:false},
+  jsp:         {seances:true, docs:true, progression:true, appel:false, jsps:false, admin:false, test:false,
+                membres_ajouter:false, membres_modifier:false, mdp_reset:false, brevets:false,
+                seances_creer:false, seances_annuler:false, docs_ajouter:false, progression_valider:false},
+  moniteur:    {seances:true, docs:true, progression:true, appel:true,  jsps:true,  admin:false, test:false,
+                membres_ajouter:false, membres_modifier:false, mdp_reset:false, brevets:false,
+                seances_creer:true, seances_annuler:false, docs_ajouter:true, progression_valider:true},
+  responsable: {seances:true, docs:true, progression:true, appel:true,  jsps:true,  admin:true,  test:false,
+                membres_ajouter:true, membres_modifier:true, mdp_reset:true, brevets:true,
+                seances_creer:true, seances_annuler:true, docs_ajouter:true, progression_valider:true},
 };
 
 function getDroitsUser(u){
@@ -886,7 +907,22 @@ function updateDrawerAccess(){
   });
   // Drawer items spéciaux
   document.querySelectorAll('.sa-only').forEach(el=>{
-    el.style.display = isSuperAdmin() ? 'flex' : 'none';
+    el.style.display = (isSuperAdmin() && !isSimulating()) ? 'flex' : 'none';
+  });
+}
+
+// Boutons d'action affichés selon les droits effectifs
+function updateActionAccess(){
+  if(!user) return;
+  var map = {
+    'btn-new-seance':'seances_creer',
+    'btn-new-doc':'docs_ajouter',
+    'btn-add-membre':'membres_ajouter',
+    'admin-btn-brevets':'brevets',
+  };
+  Object.keys(map).forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.style.display = canAccess(map[id]) ? 'flex' : 'none';
   });
 }
 
@@ -1026,9 +1062,10 @@ async function initApp(){
   const name=[user.prenom,user.nom].filter(Boolean).join(' ')||'Mat. '+user.matricule;
   document.getElementById('d-name').textContent=name;
   document.getElementById('d-role').textContent=ROLE_LABELS[user.role]||user.role;
-  // Afficher/masquer items selon droits effectifs
-  loadDroitsRoleOverrides();
+  // Afficher/masquer items selon droits effectifs (droits par rôle lus dans Supabase)
+  await loadDroitsRoleOverrides();
   updateDrawerAccess();
+  updateActionAccess();
   applyLogo();
   // Header
   userCaserne = user.caserne||null;
@@ -1207,6 +1244,8 @@ async function startSimulation(targetUser){
   document.querySelectorAll('.monitor-only').forEach(el=>el.style.display=isMonitor()?'flex':'none');
   document.querySelectorAll('.admin-only').forEach(el=>el.style.display=isAdmin()?'flex':'none');
   document.querySelectorAll('.sa-only').forEach(el=>el.style.display='none'); // jamais en simulation
+  updateDrawerAccess();
+  updateActionAccess();
   // Header
   var name=[user.prenom,user.nom].filter(Boolean).join(' ')||'Mat. '+user.matricule;
   document.getElementById('d-name').textContent=name;
@@ -1231,6 +1270,8 @@ async function stopSimulation(){
   document.querySelectorAll('.monitor-only').forEach(el=>el.style.display=isMonitor()?'flex':'none');
   document.querySelectorAll('.admin-only').forEach(el=>el.style.display=isAdmin()?'flex':'none');
   document.querySelectorAll('.sa-only').forEach(el=>el.style.display=isSuperAdmin()?'flex':'none');
+  updateDrawerAccess();
+  updateActionAccess();
   var name=[user.prenom,user.nom].filter(Boolean).join(' ')||'Mat. '+user.matricule;
   document.getElementById('d-name').textContent=name;
   document.getElementById('d-role').textContent='Super Admin';
@@ -1324,12 +1365,14 @@ async function openSeanceDetail(id){
   // Actions moniteur
   const actEl=document.getElementById('ms-actions');
   actEl.innerHTML='';
-  if(isMonitor()&&s.statut==='planifiee'){
-    const btn=document.createElement('button');
-    btn.className='btn btn-blue'; btn.innerHTML='<span style="font-style:normal">✅</span>Faire l\'appel pour cette séance';
-    btn.onclick=()=>{ closeModal('m-seance'); document.getElementById('appel-select-seance').value=id; switchTab('sc-appel'); loadAppelForSeance(id); };
-    actEl.appendChild(btn);
-    if(isAdmin()){
+  if(s.statut==='planifiee'){
+    if(canAccess('appel')){
+      const btn=document.createElement('button');
+      btn.className='btn btn-blue'; btn.innerHTML='<span style="font-style:normal">✅</span>Faire l\'appel pour cette séance';
+      btn.onclick=()=>{ closeModal('m-seance'); document.getElementById('appel-select-seance').value=id; switchTab('sc-appel'); loadAppelForSeance(id); };
+      actEl.appendChild(btn);
+    }
+    if(canAccess('seances_annuler')){
       const btn2=document.createElement('button');
       btn2.className='btn btn-ghost'; btn2.style.marginTop='8px'; btn2.innerHTML='<span style="font-style:normal">✕</span>Annuler la séance';
       btn2.onclick=()=>annulerSeance(id);
@@ -1340,12 +1383,14 @@ async function openSeanceDetail(id){
 }
 
 async function annulerSeance(id){
+  if(!canAccess('seances_annuler')){ toast('Action non autorisée'); return; }
   if(!confirm('Annuler cette séance ?')) return;
   await db.from('seances').update({statut:'annulee'}).eq('id',id);
   closeModal('m-seance'); toast('Séance annulée'); await loadAllSeances(); loadSeances();
 }
 
 async function createSeance(){
+  if(!canAccess('seances_creer')){ showErr('ns-err','Action non autorisée.'); return; }
   const titre=document.getElementById('ns-titre').value.trim();
   const date=document.getElementById('ns-date').value;
   if(!titre||!date){ showErr('ns-err','Titre et date obligatoires.'); return; }
@@ -1403,7 +1448,7 @@ async function openCoursDetail(id){
   // Actions moniteur — valider progression
   const actEl=document.getElementById('mc-actions-moniteur');
   actEl.innerHTML='';
-  if(isMonitor()){
+  if(canAccess('progression_valider')){
     const btn=document.createElement('button');
     btn.className='btn btn-ghost'; btn.style.marginTop='8px';
     btn.innerHTML='<span style="font-style:normal">✓</span>Valider la progression d\'un JSP';
@@ -1449,6 +1494,7 @@ function loadDocs(){
 }
 
 async function createDoc(){
+  if(!canAccess('docs_ajouter')){ showErr('nd-err','Action non autorisée.'); return; }
   const titre=document.getElementById('nd-titre').value.trim();
   const fichierInput=document.getElementById('nd-fichier');
   hideErr('nd-err');
@@ -1640,14 +1686,25 @@ async function openJspDetail(id){
       </div>`;
     }).join('');
   } else { progEl.innerHTML=`<span style="font-size:13px;color:var(--text2)">Aucune progression</span>`; }
+  // Champs propres aux JSP
+  var jdParentRow=document.getElementById('jd-parent-row');
+  if(jdParentRow) jdParentRow.style.display = j.role==='jsp' ? '' : 'none';
   // Actions
   const actEl=document.getElementById('jd-actions');
   actEl.innerHTML='';
-  const btnProg=document.createElement('button');
-  btnProg.className='btn-ok'; btnProg.innerHTML='<span style="font-style:normal">📊</span>Valider cours';
-  btnProg.onclick=()=>{ closeModal('m-jsp-detail'); openValiderProg(id, null); };
-  actEl.appendChild(btnProg);
-  if(isAdmin()){
+  if(canEditMembre(j)){
+    const btnEdit=document.createElement('button');
+    btnEdit.className='btn-edit'; btnEdit.innerHTML='<span style="font-style:normal">✏️</span>Modifier';
+    btnEdit.onclick=()=>openEditMembre(id);
+    actEl.appendChild(btnEdit);
+  }
+  if(j.role==='jsp'&&canAccess('progression_valider')){
+    const btnProg=document.createElement('button');
+    btnProg.className='btn-ok'; btnProg.innerHTML='<span style="font-style:normal">📊</span>Valider cours';
+    btnProg.onclick=()=>{ closeModal('m-jsp-detail'); openValiderProg(id, null); };
+    actEl.appendChild(btnProg);
+  }
+  if(canResetMdp(j)){
     const btnReset=document.createElement('button');
     btnReset.className='btn-ko'; btnReset.innerHTML='<span style="font-style:normal">🔒</span>Reset mdp';
     btnReset.onclick=()=>resetMdp(id, j.matricule);
@@ -1657,6 +1714,7 @@ async function openJspDetail(id){
 }
 
 async function resetMdp(id, mat){
+  if(!canResetMdp(findMembre(id))){ toast('Action non autorisée'); return; }
   if(!confirm(`Réinitialiser le mot de passe de ${mat} ?`)) return;
   await db.from('utilisateurs').update({mot_de_passe:hash(mat+'2026'),premiere_connexion:true}).eq('id',id);
   toast('Mot de passe réinitialisé — provisoire : '+mat+'2026');
@@ -1692,6 +1750,7 @@ function openValiderProg(jspId, coursId){
 }
 
 async function saveProgression(){
+  if(!canAccess('progression_valider')){ toast('Action non autorisée'); return; }
   const jspId=curProgJspId||document.getElementById('vp-jsp-sel')?.value;
   const coursId=curProgCoursId||document.getElementById('vp-cours-sel')?.value;
   if(!jspId||!coursId){ toast('Sélectionnez un JSP et un cours'); return; }
@@ -1751,8 +1810,76 @@ function syncGradeWithRole(){
   }
 }
 
-function openNewMembre(){
+// ── Ajout / modification d'un membre ──
+// Super admin : peut tout modifier.
+// Responsable : uniquement les membres de sa caserne (hors super admin).
+var editMembreId = null;
+
+// Règles fixes (non désactivables) : le super admin peut tout ;
+// les autres ne touchent jamais un super admin et restent dans leur caserne.
+function sameCaserne(j){ return !!user && !!user.caserne && !!j && j.caserne===user.caserne; }
+function canEditMembre(j){
+  if(!user||!j) return false;
+  if(user.super_admin) return true;
+  if(j.super_admin) return false;
+  return canAccess('membres_modifier') && sameCaserne(j);
+}
+function canResetMdp(j){
+  if(!user||!j) return false;
+  if(user.super_admin) return true;
+  if(j.super_admin) return false;
+  return canAccess('mdp_reset') && sameCaserne(j);
+}
+
+function findMembre(id){
+  return jsps.find(function(x){ return x.id===id; }) || (user && user.id===id ? user : null);
+}
+
+function setFieldVal(id, v){
+  var el=document.getElementById(id);
+  if(el) el.value = (v===null||v===undefined) ? '' : v;
+}
+
+function fillMembreForm(j){
+  hideErr('nm-err');
+  setFieldVal('nm-prenom', j?j.prenom:'');
+  setFieldVal('nm-nom', j?j.nom:'');
+  setFieldVal('nm-mat', j?j.matricule:'');
+  setFieldVal('nm-role', j?(j.role||'jsp'):'jsp');
+  setFieldVal('nm-grade', j?(j.grade||'JSP1'):'JSP1');
+  setFieldVal('nm-section', j?j.section:'');
+  setFieldVal('nm-caserne', j?j.caserne:'');
+  setFieldVal('nm-ddn', j?j.date_naissance:'');
+  setFieldVal('nm-entree', j?j.date_entree:'');
+  setFieldVal('nm-parent-nom', j?j.contact_parent_nom:'');
+  setFieldVal('nm-parent-tel', j?j.contact_parent_tel:'');
+  // Caserne : modifiable uniquement par le super admin
+  var casRow=document.getElementById('nm-caserne-row');
+  if(casRow) casRow.style.display = user.super_admin ? 'block' : 'none';
+  var dl=document.getElementById('nm-caserne-list');
+  if(dl){
+    var casernes=[...new Set(jsps.map(function(u){ return u.caserne; }).filter(Boolean))].sort();
+    dl.innerHTML=casernes.map(function(c){ return '<option value="'+c+'"></option>'; }).join('');
+  }
+  var t=document.getElementById('nm-title');
+  if(t) t.textContent = j ? 'Modifier le membre' : 'Ajouter un membre';
+  var b=document.getElementById('btn-create-membre');
+  if(b) b.innerHTML = j ? '<span style="font-style:normal">💾</span>Enregistrer' : '<span style="font-style:normal">👤+</span>Créer le compte';
   syncGradeWithRole();
+}
+
+function openNewMembre(){
+  editMembreId = null;
+  fillMembreForm(null);
+  openModal('m-new-membre');
+}
+
+function openEditMembre(id){
+  var j=findMembre(id);
+  if(!j||!canEditMembre(j)){ toast('Modification non autorisée'); return; }
+  editMembreId = id;
+  closeModal('m-jsp-detail');
+  fillMembreForm(j);
   openModal('m-new-membre');
 }
 
@@ -1762,26 +1889,57 @@ async function createMembre(){
   const mat=document.getElementById('nm-mat').value.trim();
   hideErr('nm-err');
   if(!prenom||!nom||!mat){ showErr('nm-err','Prénom, nom et matricule obligatoires.'); return; }
+  const orig = editMembreId ? findMembre(editMembreId) : null;
+  if(editMembreId && !canEditMembre(orig)){ showErr('nm-err','Modification non autorisée.'); return; }
+  if(!editMembreId && !canAccess('membres_ajouter')){ showErr('nm-err','Ajout non autorisé.'); return; }
   const {data:exist}=await db.from('utilisateurs').select('id').eq('matricule',mat).maybeSingle();
-  if(exist){ showErr('nm-err','Ce matricule existe déjà.'); return; }
-  const mdpHash=hash(mat+'2026');
+  if(exist && exist.id!==editMembreId){ showErr('nm-err','Ce matricule existe déjà.'); return; }
   const role=document.getElementById('nm-role').value;
   const grade=role==='jsp' ? document.getElementById('nm-grade').value : 'Moniteur';
-  const {error}=await db.from('utilisateurs').insert({
-    matricule:mat, prenom, nom,
-    caserne: isSuperAdmin() ? (document.getElementById('nm-caserne')?.value||null) : (userCaserne||null),
-    role:role,
-    grade:grade,
+  // Caserne : saisie libre pour le super admin, sinon celle du responsable
+  const caserne = user.super_admin
+    ? ((document.getElementById('nm-caserne')?.value||'').trim()||null)
+    : (orig ? orig.caserne : (userCaserne||null));
+  const fields={
+    matricule:mat, prenom, nom, caserne, role, grade,
     section:document.getElementById('nm-section').value.trim()||null,
     date_naissance:document.getElementById('nm-ddn').value||null,
     date_entree:document.getElementById('nm-entree').value||null,
     contact_parent_nom:document.getElementById('nm-parent-nom').value.trim()||null,
     contact_parent_tel:document.getElementById('nm-parent-tel').value.trim()||null,
-    mot_de_passe:mdpHash, premiere_connexion:true,
-  });
+  };
+  const btn=document.getElementById('btn-create-membre');
+  if(btn) btn.disabled=true;
+  let error;
+  if(editMembreId){
+    let q=db.from('utilisateurs').update(fields).eq('id',editMembreId);
+    if(!user.super_admin) q=q.eq('caserne',user.caserne); // sécurité : sa caserne uniquement
+    ({error}=await q);
+  } else {
+    ({error}=await db.from('utilisateurs').insert(Object.assign({}, fields, {mot_de_passe:hash(mat+'2026'), premiere_connexion:true})));
+  }
+  if(btn) btn.disabled=false;
   if(error){ showErr('nm-err','Erreur : '+error.message); return; }
-  closeModal('m-new-membre'); toast(`${prenom} ${nom} ajouté ✓ — mdp : ${mat}2026`);
-  await loadAllJsps(); loadAdminMembres();
+  closeModal('m-new-membre');
+  if(editMembreId){
+    // Si on s'est modifié soi-même, mettre à jour la session
+    if(user.id===editMembreId){
+      Object.assign(user, fields);
+      if(realUser && realUser.id===editMembreId) Object.assign(realUser, fields);
+      document.getElementById('d-name').textContent=[user.prenom,user.nom].filter(Boolean).join(' ')||'Mat. '+user.matricule;
+      var roleLbl = user.super_admin ? 'Super Admin' : (ROLE_LABELS[user.role]||user.role);
+      document.getElementById('h-sub').textContent=roleLbl+' · '+(user.caserne||'SDIS 72');
+    }
+    toast(`${prenom} ${nom} modifié ✓`);
+  } else {
+    toast(`${prenom} ${nom} ajouté ✓ — mdp : ${mat}2026`);
+  }
+  editMembreId=null;
+  await loadAllJsps();
+  var panel=document.getElementById('admin-membres');
+  if(panel && panel.style.display!=='none') loadAdminMembres();
+  var prof=document.getElementById('sc-profil');
+  if(prof && prof.classList.contains('active')) loadProfil();
 }
 
 // ══════════════════════════════════════════════════════════
@@ -1808,6 +1966,7 @@ async function loadAdminBrevets(){
 }
 
 async function saveBrevet(){
+  if(!canAccess('brevets')){ toast('Action non autorisée'); return; }
   const jspId=document.getElementById('nb-jsp').value;
   const intitule=document.getElementById('nb-intitule').value.trim();
   if(!jspId||!intitule){ toast('JSP et intitulé obligatoires'); return; }
@@ -1834,6 +1993,13 @@ function loadProfil(){
   document.getElementById('profil-entree').textContent=fmt(user.date_entree);
   document.getElementById('profil-ddn').textContent=fmt(user.date_naissance);
   document.getElementById('profil-parents').textContent=(user.contact_parent_nom||'—')+(user.contact_parent_tel?' · '+user.contact_parent_tel:'');
+  // Champs propres aux JSP
+  var isJsp = user.role==='jsp';
+  ['profil-entree-item','profil-parents-title','profil-parents'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.style.display = isJsp ? '' : 'none';
+  });
+  var btnEdit=document.getElementById('btn-profil-edit');
+  if(btnEdit) btnEdit.style.display = canEditMembre(user) ? 'flex' : 'none';
 }
 
 async function saveChangePw(){
@@ -1898,6 +2064,8 @@ document.addEventListener('DOMContentLoaded', function(){
   document.getElementById('btn-save-appel').addEventListener('click', saveAppel);
   document.getElementById('btn-save-prog').addEventListener('click', saveProgression);
   document.getElementById('btn-changepw').addEventListener('click', ()=>openModal('m-changepw'));
+  var btnProfilEdit=document.getElementById('btn-profil-edit');
+  if(btnProfilEdit) btnProfilEdit.addEventListener('click', ()=>openEditMembre(user.id));
   document.getElementById('btn-save-pw').addEventListener('click', saveChangePw);
 
   // Admin panels
@@ -1936,68 +2104,94 @@ document.addEventListener('DOMContentLoaded', function(){
       renderDroitsRoleGrid(btn.dataset.drole);
     });
   });
-  // Charger les overrides de rôle au démarrage
-  loadDroitsRoleOverrides();
 });
 
 // ══════════════════════════════════════════════════════════
 // DROITS & ACCÈS
 // ══════════════════════════════════════════════════════════
-var droitsRoleOverrides = {}; // droits par rôle sauvegardés en localStorage
+var droitsRoleOverrides = {}; // droits par rôle, enregistrés dans Supabase (table droits_roles)
 var curDroitsRole = 'jsp';
 var curDroitsUserId = null;
+var droitsTableOk = true;
 
-function loadDroitsRoleOverrides(){
-  try { droitsRoleOverrides = JSON.parse(localStorage.getItem('jsp_droits_roles')||'{}'); } catch(e){ droitsRoleOverrides={}; }
+async function loadDroitsRoleOverrides(){
+  try { localStorage.removeItem('jsp_droits_roles'); } catch(e){} // ancien stockage local
+  try {
+    var res = await db.from('droits_roles').select('role,droits');
+    if(res.error) throw res.error;
+    var o = {};
+    (res.data||[]).forEach(function(r){ o[r.role] = r.droits||{}; });
+    droitsRoleOverrides = o;
+    droitsTableOk = true;
+  } catch(e){
+    console.warn('Table droits_roles indisponible', e);
+    droitsRoleOverrides = {};
+    droitsTableOk = false;
+  }
 }
 
-function saveDroitsRoleOverrides(){
-  localStorage.setItem('jsp_droits_roles', JSON.stringify(droitsRoleOverrides));
+async function saveDroitsRoleOverrides(role, overrides){
+  return await db.from('droits_roles').upsert(
+    {role:role, droits:overrides, updated_at:new Date().toISOString()},
+    {onConflict:'role'}
+  );
 }
 
 function getDroitsDefautRole(role){
-  // Défauts de base + overrides sauvegardés
+  // Défauts de base + overrides enregistrés
   var base = Object.assign({}, DROITS_DEFAUT[role]||DROITS_DEFAUT.jsp);
   var overrides = droitsRoleOverrides[role]||{};
   return Object.assign(base, overrides);
 }
 
-function renderDroitsRoleGrid(role){
-  curDroitsRole = role;
-  var droits = getDroitsDefautRole(role);
-  var el = document.getElementById('droits-roles-grid');
-  if(!el) return;
-  // Modules accessibles pour ce rôle (pas les modules SA)
-  var modules = MODULES_CFG.filter(function(m){ return !m.sa; });
-  el.innerHTML = modules.map(function(m){
-    var checked = !!droits[m.key];
-    var disabled = (m.admin && role!=='responsable') || m.sa;
-    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">'+
-      '<div style="display:flex;align-items:center;gap:10px">'+
-        '<span style="font-size:18px">'+m.ico+'</span>'+
-        '<span style="font-size:14px;font-weight:600'+(disabled?';color:var(--text2)':'')+'">'+m.lbl+'</span>'+
-      '</div>'+
-      '<label class="toggle-switch">'+
-        '<input type="checkbox" class="droits-role-cb" data-key="'+m.key+'"'+(checked?' checked':'')+(disabled?' disabled':'')+'>'+
-        '<span class="toggle-slider"></span>'+
-      '</label>'+
-    '</div>';
-  }).join('');
+function droitsRowHtml(item, checked, cbClass){
+  return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">'+
+    '<div style="display:flex;align-items:center;gap:10px;min-width:0">'+
+      '<span style="font-size:18px">'+item.ico+'</span>'+
+      '<span style="font-size:14px;font-weight:600">'+item.lbl+'</span>'+
+    '</div>'+
+    '<label class="toggle-switch" style="flex-shrink:0">'+
+      '<input type="checkbox" class="'+cbClass+'" data-key="'+item.key+'"'+(checked?' checked':'')+'>'+
+      '<span class="toggle-slider"></span>'+
+    '</label>'+
+  '</div>';
 }
 
-function saveDroitsRole(){
+function droitsGridHtml(droits, cbClass){
+  var titleStyle = 'font-size:11px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;';
+  var modules = MODULES_CFG.filter(function(m){ return !m.sa; });
+  return '<div style="'+titleStyle+'margin:4px 0 2px">Modules visibles</div>'+
+    modules.map(function(m){ return droitsRowHtml(m, !!droits[m.key], cbClass); }).join('')+
+    '<div style="'+titleStyle+'margin:18px 0 2px">Actions autorisées</div>'+
+    ACTIONS_CFG.map(function(a){ return droitsRowHtml(a, !!droits[a.key], cbClass); }).join('')+
+    '<div style="font-size:12px;color:var(--text2);margin-top:12px;line-height:1.5">🔒 Règles fixes : seul le super admin peut changer une caserne ou toucher un autre super admin. Les autres membres n agissent que sur leur propre caserne.</div>';
+}
+
+function renderDroitsRoleGrid(role){
+  curDroitsRole = role;
+  var el = document.getElementById('droits-roles-grid');
+  if(!el) return;
+  var warn = droitsTableOk ? '' : '<div class="err-box" style="display:block">Table droits_roles introuvable dans Supabase. Lance le script SQL fourni, puis recharge la page.</div>';
+  el.innerHTML = warn + droitsGridHtml(getDroitsDefautRole(role), 'droits-role-cb');
+}
+
+async function saveDroitsRole(){
+  if(!user || !user.super_admin || isSimulating()){ toast('Réservé au super admin'); return; }
+  var base = DROITS_DEFAUT[curDroitsRole]||DROITS_DEFAUT.jsp;
   var overrides = {};
   document.querySelectorAll('.droits-role-cb').forEach(function(cb){
-    var base = DROITS_DEFAUT[curDroitsRole]||DROITS_DEFAUT.jsp;
     if(cb.checked !== !!base[cb.dataset.key]) overrides[cb.dataset.key] = cb.checked;
   });
-  if(!droitsRoleOverrides) droitsRoleOverrides={};
-  droitsRoleOverrides[curDroitsRole] = overrides;
-  saveDroitsRoleOverrides();
-  toast('Droits '+curDroitsRole+' sauvegardés ✓');
-  loadDroitsRoleOverrides();
+  var btn = document.getElementById('btn-save-droits-role');
+  if(btn) btn.disabled = true;
+  var res = await saveDroitsRoleOverrides(curDroitsRole, overrides);
+  if(btn) btn.disabled = false;
+  if(res.error){ toast('Erreur : '+res.error.message); return; }
+  await loadDroitsRoleOverrides();
+  renderDroitsRoleGrid(curDroitsRole);
   updateDrawerAccess();
-  applyLogo();
+  updateActionAccess();
+  toast('Droits '+(ROLE_LABELS[curDroitsRole]||curDroitsRole)+' enregistrés ✓');
 }
 
 async function loadDroitsUserSelect(){
@@ -2013,27 +2207,14 @@ async function loadDroitsUserSelect(){
 
 async function loadDroitsUser(uid){
   curDroitsUserId = uid;
-  if(!uid){ document.getElementById('droits-user-grid').style.display='none'; return; }
+  var grid = document.getElementById('droits-user-grid');
+  if(!uid){ if(grid) grid.style.display='none'; return; }
   var u = jsps.find(function(j){ return j.id===uid; });
-  if(!u) return;
-  document.getElementById('droits-user-grid').style.display='block';
-  var droitsEffectifs = getDroitsUser(u);
-  var modules = MODULES_CFG.filter(function(m){ return !m.sa; });
+  if(!u || !grid) return;
+  grid.style.display='block';
   document.getElementById('droits-user-modules').innerHTML =
-    '<div style="font-size:12px;color:var(--text2);margin-bottom:10px">Rôle : <strong>'+(ROLE_LABELS[u.role]||u.role)+'</strong> — Les cases cochées indiquent les accès effectifs.</div>'+
-    modules.map(function(m){
-      var checked = !!droitsEffectifs[m.key];
-      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">'+
-        '<div style="display:flex;align-items:center;gap:10px">'+
-          '<span style="font-size:18px">'+m.ico+'</span>'+
-          '<span style="font-size:14px;font-weight:600">'+m.lbl+'</span>'+
-        '</div>'+
-        '<label class="toggle-switch">'+
-          '<input type="checkbox" class="droits-user-cb" data-key="'+m.key+'"'+(checked?' checked':'')+'>'+
-          '<span class="toggle-slider"></span>'+
-        '</label>'+
-      '</div>';
-    }).join('');
+    '<div style="font-size:12px;color:var(--text2);margin-bottom:10px">Rôle : <strong>'+(ROLE_LABELS[u.role]||u.role)+'</strong> — les cases cochées indiquent les accès effectifs.</div>'+
+    droitsGridHtml(getDroitsUser(u), 'droits-user-cb');
 }
 
 async function saveDroitsUser(){
@@ -2063,10 +2244,12 @@ async function resetDroitsUser(){
   toast('Droits réinitialisés aux défauts du rôle');
 }
 
-function initDroitsPanel(){
-  loadDroitsRoleOverrides();
+async function initDroitsPanel(){
+  await loadDroitsRoleOverrides();
+  document.querySelectorAll('[data-drole]').forEach(function(b){ b.classList.toggle('active', b.dataset.drole==='jsp'); });
   renderDroitsRoleGrid('jsp');
   loadDroitsUserSelect();
+  var g = document.getElementById('droits-user-grid'); if(g) g.style.display='none';
 }
 
 // ══════════════════════════════════════════════════════════
