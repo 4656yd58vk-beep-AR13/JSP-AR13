@@ -205,6 +205,20 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
 .btn-ko{flex:1;padding:12px;background:#fff;color:var(--red);border:1.5px solid var(--red);border-radius:var(--radius-sm);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit}
 
 /* STAT GRID */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.kpi{background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px}
+.kpi strong{display:block;font-size:26px;font-weight:800;line-height:1.1;color:var(--text)}
+.kpi span{font-size:11px;color:var(--text2);font-weight:600}
+.kpi.warn{border-color:var(--amber);background:var(--amber-light)}
+.kpi.warn strong{color:#92400e}
+.hbar{display:grid;grid-template-columns:64px 1fr 44px;align-items:center;gap:8px;padding:5px 0;font-size:12px}
+.hbar .track{height:10px;background:var(--bg2);border-radius:5px;overflow:hidden}
+.hbar .fill{height:100%;background:var(--blue);border-radius:0 4px 4px 0}
+.hbar .v{text-align:right;font-weight:700;color:var(--text)}
+.hbar .l{color:var(--text2);text-transform:capitalize}
+.meter{height:6px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-top:5px;max-width:160px}
+.meter > div{height:100%;background:var(--blue)}
+.dep-actif{width:100%;margin-top:10px;padding:8px 10px;border-radius:10px;border:none;font-size:13px;font-weight:600;font-family:inherit;color:var(--blue-dark);background:#fff}
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px}
 .stat-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
 .stat-num{font-size:30px;font-weight:800;line-height:1}
@@ -313,6 +327,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
       <div id="drawer-avatar"><span class="app-logo" style="font-size:22px">🛡️</span></div>
       <div style="color:#fff;font-weight:800;font-size:16px" id="d-name">JSP LFB</div>
       <div style="color:rgba(255,255,255,0.7);font-size:12px;margin-top:2px" id="d-role">—</div>
+      <select class="dep-actif" id="d-dep-actif" aria-label="Département affiché" style="display:none"></select>
     </div>
     <div id="drawer-scroll">
       <div class="drawer-section">Modules</div>
@@ -325,6 +340,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
       <div class="drawer-section" id="menu-admin-title">Encadrement</div>
       <button class="drawer-item monitor-only" data-tab="sc-appel" style="display:none"><span style="font-style:normal">✅</span><span>Faire l'appel</span></button>
       <button class="drawer-item monitor-only" data-tab="sc-jsps" style="display:none"><span style="font-style:normal">👥</span><span>Mes JSP</span></button>
+      <button class="drawer-item" data-tab="sc-bilans" style="display:none"><span style="font-style:normal">📈</span><span>Bilans</span></button>
       <button class="drawer-item admin-only" data-tab="sc-admin" style="display:none"><span style="font-style:normal">⚙️</span><span>Administration</span></button>
       <div class="drawer-sep"></div>
       <div class="drawer-section">Compte</div>
@@ -474,6 +490,31 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
     </div>
   </div>
 
+  <!-- ── BILANS ── -->
+  <div class="screen" id="sc-bilans">
+    <div class="section">
+      <div class="chips" style="margin-bottom:10px">
+        <button class="chip" data-periode="mois">Ce mois</button>
+        <button class="chip active" data-periode="3mois">3 derniers mois</button>
+        <button class="chip" data-periode="annee">Année JSP</button>
+        <button class="chip" data-periode="perso">Dates…</button>
+      </div>
+      <div class="ig" id="bil-dates" style="display:none">
+        <div class="ig-item form-group"><label class="form-label" for="bil-debut">Du</label><input class="form-ctrl" type="date" id="bil-debut"></div>
+        <div class="ig-item form-group"><label class="form-label" for="bil-fin">Au</label><input class="form-ctrl" type="date" id="bil-fin"></div>
+      </div>
+      <div class="form-group" id="bil-caserne-row" style="display:none">
+        <select class="form-ctrl" id="bil-caserne" aria-label="Caserne"></select>
+      </div>
+      <div class="hint" id="bil-periode-lib">—</div>
+      <div id="bil-contenu"><div class="loader"><span style="font-style:normal">⟳</span>Chargement…</div></div>
+      <div style="display:flex;gap:8px;margin-top:6px" id="bil-actions">
+        <button class="btn btn-ghost" id="btn-bil-csv" style="flex:1">📊 Excel</button>
+        <button class="btn btn-ghost" id="btn-bil-print" style="flex:1">🖨️ PDF</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ── MES JSP (moniteur+) ── -->
   <div class="screen" id="sc-jsps">
     <div class="section">
@@ -483,6 +524,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
           <select class="form-ctrl" id="filter-caserne-jsps" style="display:none;width:150px;font-size:12px;padding:6px 10px">
             <option value="">Toutes casernes</option>
           </select>
+          <button class="btn btn-ghost btn-sm" id="btn-export-jsps" aria-label="Exporter la liste">📊</button>
           <button class="btn btn-blue btn-sm" id="btn-add-jsp" style="display:none"><span style="font-style:normal">+</span>Ajouter</button>
         </div>
       </div>
@@ -528,7 +570,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
           <div class="row-info"><div class="row-name">Départements & casernes</div><div class="row-detail">Ajouter, renommer, supprimer</div></div>
           <span style="font-style:normal;color:var(--text2)">›</span>
         </div>
-        <div class="row" id="admin-btn-logo" onclick="openModal('m-logo')">
+        <div class="row" id="admin-btn-logo" style="display:none" onclick="openLogoModal()">
           <div class="row-icon" style="background:#fff7ed;font-size:22px">🖼️</div>
           <div class="row-info"><div class="row-name">Logo de la caserne</div><div class="row-detail">Personnaliser l'icône de l'app</div></div>
           <span style="font-style:normal;color:var(--text2)">›</span>
@@ -567,7 +609,17 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
           </div>
         </div>
         <div class="hint" id="membres-hint">Membres actifs. « Archivés » affiche les membres partis : leur historique est conservé.</div>
+        <input class="form-ctrl" id="am-search" placeholder="🔍 Nom, prénom ou matricule…" style="margin-bottom:8px">
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <select class="form-ctrl" id="am-role" aria-label="Rôle" style="flex:1;font-size:13px">
+            <option value="">Tous les rôles</option><option value="jsp">JSP</option><option value="moniteur">Moniteurs</option>
+            <option value="responsable">Responsables</option><option value="resp_dep">Resp. départementaux</option>
+          </select>
+          <select class="form-ctrl" id="am-caserne" aria-label="Caserne" style="flex:1;font-size:13px;display:none"></select>
+        </div>
+        <div class="hint" id="am-total" style="margin-bottom:8px"></div>
         <div id="l-admin-membres"><div class="loader"><span style="font-style:normal">⟳</span>Chargement…</div></div>
+        <button class="btn btn-ghost" id="btn-am-plus" style="display:none;margin-top:10px">Afficher plus</button>
       </div>
     </div>
 
@@ -579,8 +631,13 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
           <div class="section-title" style="margin-bottom:0">Droits & accès</div>
         </div>
         <!-- Droits par rôle -->
-        <div class="section-title">Par rôle (défaut)</div>
+        <div class="section-title">Par rôle</div>
         <div class="card" style="padding:14px;margin-bottom:14px" id="droits-roles-panel">
+          <div class="form-group">
+            <label class="form-label" for="droits-portee">S'applique à</label>
+            <select class="form-ctrl" id="droits-portee"></select>
+            <div class="hint" id="droits-portee-hint" style="margin:6px 0 0"></div>
+          </div>
           <div class="chips" style="margin-bottom:14px">
             <button class="chip active" data-drole="jsp">JSP</button>
             <button class="chip" data-drole="moniteur">Moniteur</button>
@@ -1018,10 +1075,14 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
         <div style="font-size:12px;color:var(--text2)">Aperçu du logo actuel</div>
       </div>
       <div class="err-box" id="logo-err"></div>
+      <div class="form-group" id="logo-caserne-row" style="display:none">
+        <label class="form-label" for="logo-caserne">Caserne</label>
+        <select class="form-ctrl" id="logo-caserne"></select>
+      </div>
       <div class="form-group">
-        <label class="form-label">Choisir une image</label>
-        <input class="form-ctrl" type="file" id="logo-file" accept="image/png,image/jpeg,image/svg+xml,image/webp">
-        <div style="font-size:11px;color:var(--text2);margin-top:4px">PNG, JPG ou SVG — max 2 Mo — carré recommandé</div>
+        <label class="form-label" for="logo-file">Choisir une image</label>
+        <input class="form-ctrl" type="file" id="logo-file" accept="image/png,image/jpeg,image/webp">
+        <div style="font-size:11px;color:var(--text2);margin-top:4px">PNG, JPG ou WebP — carré recommandé. Le logo est visible par tous les membres de la caserne, sur tous les appareils.</div>
       </div>
       <div style="display:flex;gap:8px;margin-top:4px">
         <button class="btn btn-ghost btn-sm" id="btn-reset-logo" style="flex:1">↩ Réinitialiser</button>
@@ -1176,6 +1237,7 @@ const MODULES_CFG = [
   {key:'progression', lbl:'Ma progression', tab:'sc-progression', ico:'📊', sub:'Mon suivi'},
   {key:'appel',       lbl:'Faire l\'appel', tab:'sc-appel',       ico:'✅', sub:'Présences'},
   {key:'jsps',        lbl:'Mes JSP',        tab:'sc-jsps',        ico:'👥', sub:'Suivi individuel'},
+  {key:'bilans',      lbl:'Bilans',         tab:'sc-bilans',      ico:'📈', sub:'Présences et exports'},
   {key:'admin',       lbl:'Administration', tab:'sc-admin',       ico:'⚙️', sub:'Gestion'},
   {key:'test',        lbl:'Comptes test',   tab:'sc-test',        ico:'🧪', sub:'Simulation', sa:true},
 ];
@@ -1192,26 +1254,30 @@ const ACTIONS_CFG = [
 ];
 // ⚠️ Les actions sont aussi définies côté serveur (fonction jsp_droit) : garder les deux alignées.
 const DROITS_DEFAUT = {
-  jsp:         {seances:true, cours:true, docs:true, progression:true,  appel:false, jsps:false, admin:false, test:false,
+  jsp:         {seances:true, cours:true, docs:true, progression:true,  appel:false, jsps:false, bilans:false, admin:false, test:false,
                 membres_ajouter:false, membres_modifier:false, mdp_reset:false, brevets:false,
                 seances_creer:false, seances_annuler:false, cours_gerer:false, docs_ajouter:false, progression_valider:false},
-  moniteur:    {seances:true, cours:true, docs:true, progression:false, appel:true,  jsps:true,  admin:false, test:false,
+  moniteur:    {seances:true, cours:true, docs:true, progression:false, appel:true,  jsps:true,  bilans:true, admin:false, test:false,
                 membres_ajouter:false, membres_modifier:false, mdp_reset:false, brevets:false,
                 seances_creer:true, seances_annuler:false, cours_gerer:false, docs_ajouter:true, progression_valider:true},
-  responsable: {seances:true, cours:true, docs:true, progression:false, appel:true,  jsps:true,  admin:true,  test:false,
+  responsable: {seances:true, cours:true, docs:true, progression:false, appel:true,  jsps:true,  bilans:true, admin:true,  test:false,
                 membres_ajouter:true, membres_modifier:true, mdp_reset:true, brevets:true,
                 seances_creer:true, seances_annuler:true, cours_gerer:true, docs_ajouter:true, progression_valider:true},
-  resp_dep:    {seances:true, cours:true, docs:true, progression:false, appel:true,  jsps:true,  admin:true,  test:false,
+  resp_dep:    {seances:true, cours:true, docs:true, progression:false, appel:true,  jsps:true,  bilans:true, admin:true,  test:false,
                 membres_ajouter:true, membres_modifier:true, mdp_reset:true, brevets:true,
                 seances_creer:true, seances_annuler:true, cours_gerer:true, docs_ajouter:true, progression_valider:true},
 };
-var droitsRoleOverrides = {};
+var droitsRoleOverrides = {};      // national : {role: {...}}
+var droitsDepOverrides = {};       // département : {departement_id: {role: {...}}}
 var droitsTableOk = true;
 
-function getDroitsDefautRole(role){
-  return Object.assign({}, DROITS_DEFAUT[role]||DROITS_DEFAUT.jsp, droitsRoleOverrides[role]||{});
+// Droits d'un rôle : défaut < réglage national < réglage du département (si depId)
+function getDroitsDefautRole(role, depId){
+  var d=Object.assign({}, DROITS_DEFAUT[role]||DROITS_DEFAUT.jsp, droitsRoleOverrides[role]||{});
+  if(depId && droitsDepOverrides[depId] && droitsDepOverrides[depId][role]) Object.assign(d, droitsDepOverrides[depId][role]);
+  return d;
 }
-function getDroitsUser(u){ return Object.assign(getDroitsDefautRole(u.role), u.droits||{}); }
+function getDroitsUser(u){ return Object.assign(getDroitsDefautRole(u.role, u.departement_id), u.droits||{}); }
 // Seule et unique question « a-t-il le droit ? » côté interface
 function canAccess(key){
   if(!user) return false;
@@ -1330,7 +1396,7 @@ async function loadReferentiels(){
 }
 // Casernes que le compte peut choisir (super admin : toutes ; resp. départ. : son département)
 function casernesGerables(){
-  if(isSuperAdmin() && !isSimulating()) return casernesList;
+  if(isSuperAdmin() && !isSimulating()){ var da=depActif(); return da ? casernesList.filter(function(c){ return c.departement_id===da; }) : casernesList; }
   if(user.role==='resp_dep' || (isSimulating() && user.role==='resp_dep')) return casernesList.filter(function(c){ return c.departement_id===user.departement_id; });
   return casernesList.filter(function(c){ return c.id===user.caserne_id; });
 }
@@ -1380,7 +1446,8 @@ function canEditMembre(t){
 function canResetMdp(t){ return !!t && t.id!==(user&&user.id) && peutGerer(t) && canAccess('mdp_reset'); }
 function canArchive(t){ return !!t && t.id!==(user&&user.id) && peutGerer(t) && canAccess('membres_modifier'); }
 function findMembre(id){
-  return jsps.find(function(x){ return x.id===id; }) || archivesList.find(function(x){ return x.id===id; }) || (user && user.id===id ? user : null);
+  return jsps.find(function(x){ return x.id===id; }) || archivesList.find(function(x){ return x.id===id; }) ||
+    (adminCache[id]||null) || (user && user.id===id ? user : null);
 }
 
 // ── Portée d'un contenu (« Pour qui ? »)
@@ -1423,7 +1490,7 @@ function showPage(id){
 const TAB_TITLES = {
   'sc-home':'Accueil','sc-seances':'Séances','sc-cours':'Cours','sc-docs':'Documents',
   'sc-progression':'Ma progression','sc-appel':'Faire l\'appel','sc-jsps':'Mes JSP',
-  'sc-admin':'Administration','sc-profil':'Mon profil','sc-test':'Comptes test','sc-confidentialite':'Confidentialité',
+  'sc-admin':'Administration','sc-profil':'Mon profil','sc-test':'Comptes test','sc-confidentialite':'Confidentialité','sc-bilans':'Bilans',
 };
 function switchTab(tabId){
   // Écran non autorisé : retour à l'accueil
@@ -1446,6 +1513,7 @@ function switchTab(tabId){
   if(tabId==='sc-admin') showAdminPanel(null);
   if(tabId==='sc-profil') loadProfil();
   if(tabId==='sc-confidentialite') renderConfidentialite();
+  if(tabId==='sc-bilans') initBilans();
   if(tabId==='sc-test'){ loadTestCasernes(); loadTestUsers(); }
 }
 function openDrawer(){ $('drawer').classList.add('open'); $('drawer-overlay').classList.add('open'); }
@@ -1459,7 +1527,9 @@ function updateMenu(){
     var b=document.querySelector('.drawer-item[data-tab="'+m.tab+'"]');
     if(b) b.style.display = (m.sa ? saReel : canAccess(m.key)) ? 'flex' : 'none';
   });
-  show('menu-admin-title', ['appel','jsps','admin'].some(canAccess) || saReel, 'block');
+  show('menu-admin-title', ['appel','jsps','bilans','admin'].some(canAccess) || saReel, 'block');
+  show('admin-btn-logo', rang(user)>=3, 'flex');
+  renderDepActif();
   document.querySelectorAll('.sa-only').forEach(function(el){ el.style.display = saReel ? 'flex' : 'none'; });
   var actions = {
     'btn-new-seance':'seances_creer', 'btn-new-doc':'docs_ajouter', 'btn-new-cours':'cours_gerer',
@@ -1596,7 +1666,7 @@ async function reloadAll(){
 // Séances, cours et documents du périmètre, en un seul appel
 async function loadDonnees(){
   try{
-    var d=await rpc('jsp_donnees')||{};
+    var d=await rpc('jsp_donnees',{p_departement:depActif()})||{};
     seances=d.seances||[]; cours=d.cours||[]; docs=d.documents||[];
   }catch(e){ seances=[]; cours=[]; docs=[]; toast('Données indisponibles : '+e.message); }
   // En simulation : ce que verrait le compte simulé
@@ -1609,7 +1679,7 @@ async function loadDonnees(){
 }
 async function loadAllJsps(){
   var all=[];
-  try{ all=await rpc('jsp_membres')||[]; }
+  try{ all=await rpc('jsp_membres',{p_departement:depActif()})||[]; }
   catch(e){ console.warn(e); }
   if(isSimulating() && !user.super_admin) all=all.filter(function(j){ return voitMembre(user,j); });
   jsps=all;
@@ -1751,6 +1821,8 @@ async function openSeanceDetail(id){
   function addBtn(cls, html, fn, top){ var b=document.createElement('button'); b.className='btn '+cls; if(top) b.style.marginTop='8px'; b.innerHTML=html; b.onclick=fn; actEl.appendChild(b); }
   if(s.statut!=='annulee' && s.date_seance<=today() && gereContenuOuCaserne(s))
     addBtn('btn-blue','✅ '+(s.statut==='terminee'?'Revoir l\'appel':'Faire l\'appel'), function(){ closeModal('m-seance'); ouvrirAppel(id); });
+  if(s.statut!=='annulee' && gereContenuOuCaserne(s))
+    addBtn('btn-ghost','🖨️ Feuille d\'appel à imprimer', function(){ imprimerFeuilleAppel(id); }, true);
   if(canAccess('seances_creer') && gereContenu(s) && s.statut==='planifiee')
     addBtn('btn-ghost','✏️ Modifier', function(){ closeModal('m-seance'); openSeanceForm(s); }, true);
   if(canAccess('seances_annuler') && gereContenu(s)){
@@ -2573,21 +2645,35 @@ async function loadArchives(){
   try{ var all=await rpc('jsp_membres',{p_archives:true})||[]; archivesList=all.filter(function(j){ return j.actif===false; }); }
   catch(e){ archivesList=[]; toast(e.message); }
 }
-async function loadAdminMembres(){
+async function loadAdminMembres(suite){
   var el=$('l-admin-membres');
-  el.innerHTML='<div class="loader"><span style="font-style:normal">⟳</span>Chargement…</div>';
-  $('btn-toggle-archives').textContent = showArchives ? 'Actifs' : 'Archivés';
-  $('membres-hint').textContent = showArchives ? 'Membres archivés (partis). Ouvre une fiche pour réactiver le compte.'
-    : 'Membres actifs. « Archivés » affiche les membres partis : leur historique est conservé.';
-  if(showArchives) await loadArchives(); else await loadAllJsps();
-  var list = showArchives ? archivesList : jsps;
-  if(!list.length){ el.innerHTML=emptyState('👥', showArchives?'Aucun membre archivé':'Aucun membre'); return; }
+  if(!suite){
+    amOffset=0; adminListe=[];
+    el.innerHTML='<div class="loader"><span style="font-style:normal">⟳</span>Chargement…</div>';
+    $('btn-toggle-archives').textContent = showArchives ? 'Actifs' : 'Archivés';
+    $('membres-hint').textContent = showArchives ? 'Membres archivés (partis). Ouvre une fiche pour réactiver ou effacer le compte.'
+      : 'Membres actifs. « Archivés » affiche les membres partis : leur historique est conservé.';
+    var multi=(isSuperAdmin() && !isSimulating()) || user.role==='resp_dep', sel=$('am-caserne');
+    if(multi && sel.style.display==='none'){ sel.innerHTML=caserneSelectHtml(casernesGerables(), null, 'Toutes casernes'); }
+    show('am-caserne', multi, 'block');
+  }
+  var r;
+  try{
+    r=await rpc('jsp_membres_recherche',{ p_q:val('am-search')||null, p_caserne:val('am-caserne')||null,
+      p_departement:depActif(), p_role:val('am-role')||null, p_archives:showArchives, p_limite:AM_PAGE, p_decalage:amOffset });
+  }catch(e){ el.innerHTML=emptyState('⚠️',e.message); return; }
+  if(isSimulating() && !user.super_admin) r.items=r.items.filter(function(j){ return voitMembre(user,j); });
+  r.items.forEach(function(j){ adminCache[j.id]=j; });
+  adminListe=adminListe.concat(r.items); amOffset+=AM_PAGE;
+  $('am-total').textContent = r.total ? (r.total+' membre'+(r.total>1?'s':'')+(adminListe.length<r.total?' · '+adminListe.length+' affichés':'')) : '';
+  show('btn-am-plus', adminListe.length<r.total, 'flex');
+  if(!adminListe.length){ el.innerHTML=emptyState('👥', val('am-search')?'Aucun résultat':(showArchives?'Aucun membre archivé':'Aucun membre')); return; }
   var roleCls={jsp:'badge-blue',moniteur:'badge-amber',responsable:'badge-red',resp_dep:'badge-purple'};
-  var multi = new Set(list.map(function(j){ return j.caserne_id||j.departement_id; })).size>1;
-  el.innerHTML='<div class="card" style="padding:0 14px">'+list.map(function(j){
+  var multiC = new Set(adminListe.map(function(j){ return j.caserne_id||j.departement_id; })).size>1;
+  el.innerHTML='<div class="card" style="padding:0 14px">'+adminListe.map(function(j){
     return '<div class="row" onclick="openJspDetail(\''+esc(j.id)+'\')"><div class="row-info">'+
       '<div class="row-name">'+esc(fullName(j))+'</div>'+
-      '<div class="row-detail">Mat. '+esc(j.matricule)+(multi?' · '+esc(j.caserne||depLabel(j.departement_id)):'')+(j.actif===false&&j.archive_le?' · parti le '+fmt(j.archive_le):'')+'</div></div>'+
+      '<div class="row-detail">Mat. '+esc(j.matricule)+(multiC?' · '+esc(j.caserne||depLabel(j.departement_id)):'')+(j.actif===false&&j.archive_le?' · parti le '+fmt(j.archive_le):'')+'</div></div>'+
       '<span class="badge '+(j.super_admin?'badge-gray':(roleCls[j.role]||'badge-gray'))+'">'+esc(roleLabel(j))+'</span></div>';
   }).join('')+'</div>';
 }
@@ -2795,6 +2881,11 @@ async function loadDroitsRoleOverrides(){
     var o={}; (res.data||[]).forEach(function(r){ o[r.role]=r.droits||{}; });
     droitsRoleOverrides=o; droitsTableOk=true;
   }catch(e){ droitsRoleOverrides={}; droitsTableOk=false; }
+  try{
+    var rd=await db.from('droits_departements').select('departement_id,role,droits');
+    var od={}; if(!rd.error) (rd.data||[]).forEach(function(r){ (od[r.departement_id]=od[r.departement_id]||{})[r.role]=r.droits||{}; });
+    droitsDepOverrides=od;
+  }catch(e){ droitsDepOverrides={}; }
 }
 function droitsRowHtml(item, checked, cls){
   return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">'+
@@ -2811,16 +2902,27 @@ function droitsGridHtml(droits, cls){
 }
 function renderDroitsRoleGrid(role){
   curDroitsRole=role;
-  $('droits-roles-grid').innerHTML=(droitsTableOk?'':'<div class="err-box" style="display:block">Table droits_roles introuvable.</div>')+droitsGridHtml(getDroitsDefautRole(role),'droits-role-cb');
+  var dep=val('droits-portee')||null, d=dep?depById(dep):null;
+  var perso = dep && droitsDepOverrides[dep] && droitsDepOverrides[dep][role] && Object.keys(droitsDepOverrides[dep][role]).length;
+  $('droits-portee-hint').textContent = dep
+    ? (perso ? 'Réglage propre au '+d.code+' · '+d.nom+'. Remets les cases comme au national pour revenir au réglage national.'
+             : 'Ce département suit le réglage national. Modifie une case pour le personnaliser.')
+    : 'Réglage appliqué à tous les départements qui n\'ont pas de réglage propre.';
+  $('droits-roles-grid').innerHTML=(droitsTableOk?'':'<div class="err-box" style="display:block">Table droits_roles introuvable.</div>')+droitsGridHtml(getDroitsDefautRole(role, dep),'droits-role-cb');
 }
 async function saveDroitsRole(){
   if(!isSuperAdmin() || isSimulating()){ toast('Réservé au super admin'); return; }
-  var base=DROITS_DEFAUT[curDroitsRole]||DROITS_DEFAUT.jsp, o={};
+  var dep=val('droits-portee')||null;
+  // On n'enregistre que les différences avec le niveau du dessus
+  var base = dep ? getDroitsDefautRole(curDroitsRole, null) : (DROITS_DEFAUT[curDroitsRole]||DROITS_DEFAUT.jsp), o={};
   document.querySelectorAll('.droits-role-cb').forEach(function(cb){ if(cb.checked!==!!base[cb.dataset.key]) o[cb.dataset.key]=cb.checked; });
   await busy($('btn-save-droits-role'), async function(){
-    try{ await rpc('jsp_set_droits_role',{p_role:curDroitsRole, p_droits:o}); }catch(e){ toast(e.message); return; }
+    try{
+      if(dep) await rpc('jsp_set_droits_departement',{p_departement:dep, p_role:curDroitsRole, p_droits:o});
+      else await rpc('jsp_set_droits_role',{p_role:curDroitsRole, p_droits:o});
+    }catch(e){ toast(e.message); return; }
     await loadDroitsRoleOverrides(); renderDroitsRoleGrid(curDroitsRole); updateMenu();
-    toast('Droits « '+(ROLE_LABELS[curDroitsRole]||curDroitsRole)+' » enregistrés ✓');
+    toast('Droits « '+(ROLE_LABELS[curDroitsRole]||curDroitsRole)+' » enregistrés ✓'+(dep?' ('+depById(dep).code+')':''));
   });
 }
 function loadDroitsUserSelect(){
@@ -2837,7 +2939,7 @@ function loadDroitsUser(uid){
 }
 async function saveDroitsUser(){
   var u=jsps.find(function(j){ return j.id===curDroitsUserId; }); if(!u) return;
-  var base=getDroitsDefautRole(u.role), o={};
+  var base=getDroitsDefautRole(u.role, u.departement_id), o={};
   document.querySelectorAll('.droits-user-cb').forEach(function(cb){ if(!!cb.checked!==!!base[cb.dataset.key]) o[cb.dataset.key]=cb.checked; });
   try{ await rpc('jsp_set_droits_user',{p_id:String(u.id), p_droits:o}); }catch(e){ toast(e.message); return; }
   u.droits = Object.keys(o).length ? o : null;
@@ -2850,34 +2952,92 @@ async function resetDroitsUser(){
 }
 async function initDroitsPanel(){
   await loadDroitsRoleOverrides();
+  $('droits-portee').innerHTML='<option value="">🇫🇷 National (par défaut)</option>'+departementsList.map(function(d){
+    return '<option value="'+esc(d.id)+'">🗺️ '+esc(d.code+' · '+d.nom)+'</option>';
+  }).join('');
   document.querySelectorAll('[data-drole]').forEach(function(b){ b.classList.toggle('active', b.dataset.drole==='jsp'); });
   renderDroitsRoleGrid('jsp'); loadDroitsUserSelect(); show('droits-user-grid',false);
 }
 
-// ── Logo (par caserne, sur cet appareil)
-function logoKey(){ return LOGO_KEY+(user&&(user.caserne_id||user.departement_id)||'default'); }
-function applyLogo(){
-  var logo=null; try{ logo=localStorage.getItem(logoKey()); }catch(e){}
+// ── Logo de la caserne (stocké en ligne, visible sur tous les appareils)
+var logoCache = {};
+async function applyLogo(){
+  var cid = user && user.caserne_id, logo = null;
+  if(cid){
+    if(!(cid in logoCache)){
+      try{ var r=await db.from('casernes').select('logo').eq('id', cid); logoCache[cid]=(r.data&&r.data[0]&&r.data[0].logo)||null; }
+      catch(e){ logoCache[cid]=null; }
+    }
+    logo=logoCache[cid];
+  }
+  if(!user || user.caserne_id!==cid) return;   // l'utilisateur a changé entre-temps
   document.querySelectorAll('.app-logo').forEach(function(el){
     if(logo){ el.innerHTML=''; var img=document.createElement('img'); img.src=logo; img.alt=''; img.style.cssText='width:100%;height:100%;object-fit:contain;border-radius:inherit'; el.appendChild(img); }
     else el.textContent='🛡️';
   });
-  var pv=$('logo-preview');
-  if(pv){ pv.innerHTML=''; if(logo){ var i=document.createElement('img'); i.src=logo; i.alt='Logo'; i.style.cssText='width:80px;height:80px;object-fit:contain;border-radius:14px'; pv.appendChild(i); } else pv.textContent='🛡️'; }
 }
-function saveLogo(){
-  var file=$('logo-file').files[0]; hideErr('logo-err');
+async function previewLogo(){
+  var cid=val('logo-caserne') || (user&&user.caserne_id), pv=$('logo-preview'), logo=null;
+  if(cid){
+    if(!(cid in logoCache)){ try{ var r=await db.from('casernes').select('logo').eq('id', cid); logoCache[cid]=(r.data&&r.data[0]&&r.data[0].logo)||null; }catch(e){ logoCache[cid]=null; } }
+    logo=logoCache[cid];
+  }
+  pv.innerHTML='';
+  if(logo){ var i=document.createElement('img'); i.src=logo; i.alt='Logo actuel'; i.style.cssText='width:80px;height:80px;object-fit:contain;border-radius:14px'; pv.appendChild(i); }
+  else pv.textContent='🛡️';
+}
+function openLogoModal(){
+  hideErr('logo-err'); setVal('logo-file','');
+  var list=casernesGerables(), multi=list.length>1 || !user.caserne_id;
+  show('logo-caserne-row', multi, 'block');
+  $('logo-caserne').innerHTML=caserneSelectHtml(list, user.caserne_id, null);
+  previewLogo();
+  openModal('m-logo');
+}
+// Réduit l'image à 256 px maximum pour qu'elle reste légère
+function reduireImage(file){
+  return new Promise(function(resolve, reject){
+    var fr=new FileReader();
+    fr.onerror=function(){ reject(new Error('Lecture de l\'image impossible.')); };
+    fr.onload=function(){
+      var img=new Image();
+      img.onerror=function(){ reject(new Error('Image illisible. Essaie un PNG ou un JPG.')); };
+      img.onload=function(){
+        try{
+          var t=256, k=Math.min(1, t/Math.max(img.width, img.height));
+          var c=document.createElement('canvas'); c.width=Math.max(1,Math.round(img.width*k)); c.height=Math.max(1,Math.round(img.height*k));
+          var ctx=c.getContext('2d'); if(!ctx) throw new Error('canvas');
+          ctx.drawImage(img,0,0,c.width,c.height);
+          resolve(c.toDataURL('image/png'));
+        }catch(e){ if(String(fr.result).length<=280000) resolve(fr.result); else reject(new Error('Image trop lourde : choisis une image plus petite.')); }
+      };
+      img.src=fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+async function saveLogo(){
+  hideErr('logo-err');
+  var file=$('logo-file').files[0], cid=val('logo-caserne') || user.caserne_id;
+  if(!cid){ showErr('logo-err','Choisis la caserne.'); return; }
   if(!file){ showErr('logo-err','Choisis une image.'); return; }
-  if(file.size>2*1024*1024){ showErr('logo-err','Image trop lourde (2 Mo maximum).'); return; }
-  var r=new FileReader();
-  r.onload=function(e){
-    try{ localStorage.setItem(logoKey(), e.target.result); }
-    catch(err){ showErr('logo-err','Image trop lourde pour cet appareil. Essaie une image plus petite.'); return; }
-    applyLogo(); closeModal('m-logo'); toast('Logo mis à jour ✓');
-  };
-  r.readAsDataURL(file);
+  if(!/^image\/(png|jpeg|webp)$/.test(file.type)){ showErr('logo-err','Format accepté : PNG, JPG ou WebP.'); return; }
+  await busy($('btn-save-logo'), async function(){
+    var data;
+    try{ data=await reduireImage(file); }catch(e){ showErr('logo-err', e.message); return; }
+    try{ await rpc('jsp_caserne_logo',{p_caserne:cid, p_logo:data}); }catch(e){ showErr('logo-err', e.message); return; }
+    logoCache[cid]=data; applyLogo(); closeModal('m-logo'); toast('Logo mis à jour ✓');
+  });
 }
-function resetLogo(){ try{ localStorage.removeItem(logoKey()); }catch(e){} applyLogo(); closeModal('m-logo'); toast('Logo réinitialisé'); }
+async function resetLogo(){
+  var cid=val('logo-caserne') || user.caserne_id; if(!cid) return;
+  try{ await rpc('jsp_caserne_logo',{p_caserne:cid, p_logo:null}); }catch(e){ showErr('logo-err', e.message); return; }
+  logoCache[cid]=null; applyLogo(); closeModal('m-logo'); toast('Logo réinitialisé');
+}
+
+
+
+
 
 // ══════════════════════════════════════════════════════════
 // PROFIL
@@ -3088,6 +3248,257 @@ document.addEventListener('DOMContentLoaded', function(){
   on('btn-rgpd-appliquer','click', appliquerConservation);
 
   resumeSession();
+});
+
+
+// ══════════════════════════════════════════════════════════
+// ÉTAPE 4 — DÉPARTEMENT AFFICHÉ (super admin)
+// ══════════════════════════════════════════════════════════
+var DEP_ACTIF_KEY = 'jsp_dep_actif';
+var adminCache = {}, adminListe = [], amOffset = 0, AM_PAGE = 50, amTimer = null;
+// null = tous les départements
+function depActif(){
+  if(!user || !isSuperAdmin() || isSimulating()) return null;
+  var v=null; try{ v=localStorage.getItem(DEP_ACTIF_KEY); }catch(e){}
+  if(v===null) v=user.departement_id||'';
+  if(!v) return null;
+  return departementsList.some(function(d){ return d.id===v; }) ? v : null;
+}
+function renderDepActif(){
+  var sel=$('d-dep-actif'); if(!sel) return;
+  var visible = isSuperAdmin() && !isSimulating() && departementsList.length>1;
+  sel.style.display = visible ? 'block' : 'none';
+  if(!visible) return;
+  var cur=depActif()||'';
+  sel.innerHTML='<option value="">🇫🇷 Tous les départements</option>'+departementsList.map(function(d){
+    return '<option value="'+esc(d.id)+'"'+(d.id===cur?' selected':'')+'>🗺️ '+esc(d.code+' · '+d.nom)+'</option>';
+  }).join('');
+  $('h-sub').textContent='Super admin · '+(cur ? depLabel(cur) : 'Tous les départements');
+}
+async function changerDepActif(){
+  try{ localStorage.setItem(DEP_ACTIF_KEY, val('d-dep-actif')); }catch(e){}
+  closeDrawer();
+  var actif=document.querySelector('.screen.active'), tab=actif ? actif.id : 'sc-home';
+  $('am-caserne').style.display='none';
+  updateMenu();
+  await reloadAll();
+  switchTab(tab);
+  toast('Affichage : '+(depActif() ? depLabel(depActif()) : 'tous les départements'));
+}
+
+// ══════════════════════════════════════════════════════════
+// EXPORTS : outils communs
+// ══════════════════════════════════════════════════════════
+// Fichier CSV lisible directement par Excel (séparateur « ; », accents conservés)
+function exporterCsv(nom, entetes, lignes){
+  var cell=function(v){ v=(v===null||v===undefined)?'':String(v); return /[";\n\r]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; };
+  var txt=[entetes].concat(lignes).map(function(l){ return l.map(cell).join(';'); }).join('\r\n');
+  telecharger(nom, '﻿'+txt, 'text/csv;charset=utf-8');
+  toast('Fichier téléchargé ✓ (s\'ouvre avec Excel)');
+}
+function nomFichier(base){
+  return (base+'-'+today()).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9-]+/g,'-').replace(/-+/g,'-')+'.csv';
+}
+const PRINT_CSS = 'body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:900px;margin:24px auto;padding:0 16px;color:#111;font-size:12px}'+
+  'h1{font-size:19px;margin:0 0 4px}h2{font-size:14px;margin:22px 0 6px;border-bottom:2px solid #1a56a0;padding-bottom:3px}'+
+  '.m{color:#555;font-size:11px;margin:0 0 12px}table{width:100%;border-collapse:collapse}'+
+  'th,td{text-align:left;padding:6px;border-bottom:1px solid #ccc;vertical-align:top}th{background:#f3f4f6;font-size:10px;text-transform:uppercase;letter-spacing:.04em}'+
+  '.n{text-align:right;white-space:nowrap}.k{display:flex;gap:10px;flex-wrap:wrap}.k div{border:1px solid #ccc;border-radius:8px;padding:8px 12px;min-width:110px}'+
+  '.k strong{display:block;font-size:20px}.box{display:inline-block;width:16px;height:16px;border:1.5px solid #333;border-radius:3px}'+
+  '.sig td{height:30px}.alerte{font-weight:700}@media print{button{display:none}h2{break-after:avoid}tr{break-inside:avoid}}';
+function pageImprimable(titre, corps){
+  return '<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(titre)+'</title><style>'+PRINT_CSS+'</style></head><body>'+
+    '<button onclick="print()" style="float:right;padding:8px 14px;font-size:13px">Imprimer / PDF</button>'+corps+
+    '<p class="m" style="margin-top:20px">Document généré le '+esc(new Date().toLocaleString('fr-FR'))+' par '+esc(fullName(realUser||user))+'. Contient des données personnelles : à conserver de façon sécurisée.</p></body></html>';
+}
+// La fenêtre est ouverte tout de suite (sinon les téléphones la bloquent), puis remplie
+async function imprimer(nom, genererHtml){
+  var w=null; try{ w=window.open('', '_blank'); }catch(e){}
+  if(w){ try{ w.document.write('<p style="font-family:sans-serif;padding:20px">Préparation du document…</p>'); }catch(e){} }
+  var html;
+  try{ html=await genererHtml(); }
+  catch(e){ if(w) w.close(); toast(e.message); return; }
+  if(w){ w.document.open(); w.document.write(html); w.document.close(); }
+  else { telecharger(nom, html, 'text/html'); toast('Fichier téléchargé : ouvre-le puis imprime-le'); }
+}
+
+// ── Liste des JSP (Mes JSP)
+function exporterJsps(){
+  var fc=$('filter-caserne-jsps'), casF = fc && fc.style.display!=='none' ? fc.value : '';
+  var l=jsps.filter(function(j){ return j.role==='jsp' && (!casF || j.caserne_id===casF); });
+  if(!l.length){ toast('Aucun JSP à exporter'); return; }
+  exporterCsv(nomFichier('liste-jsp'), ['Nom','Prénom','Matricule','Niveau','Caserne','Section','Date de naissance','Entrée JSP','Représentant légal','Téléphone'],
+    l.map(function(j){ return [j.nom, j.prenom, j.matricule, j.grade, j.caserne, j.section, j.date_naissance?fmt(j.date_naissance):'',
+      j.date_entree?fmt(j.date_entree):'', j.contact_parent_nom, j.contact_parent_tel]; }));
+}
+
+// ── Feuille d'appel (à imprimer avant la séance)
+function imprimerFeuilleAppel(id){
+  var s=seances.find(function(x){ return x.id===id; }); if(!s) return;
+  imprimer('feuille-appel.html', async function(){
+    var d=await rpc('jsp_appel_charger',{p_seance:id});
+    var lignes=d.jsps.map(function(j,i){
+      var dejaNote = Object.prototype.hasOwnProperty.call(d.presences, j.id) ? (d.presences[j.id]?'Présent':'Absent') : '';
+      return '<tr class="sig"><td class="n">'+(i+1)+'</td><td><strong>'+esc(j.nom||'')+'</strong> '+esc(j.prenom||'')+'</td><td>'+esc(j.grade||'')+'</td>'+
+        '<td>'+(dejaNote?esc(dejaNote):'<span class="box"></span>')+'</td><td></td></tr>';
+    }).join('');
+    return pageImprimable('Feuille d\'appel', '<h1>Feuille d\'appel — '+esc(s.titre)+'</h1>'+
+      '<p class="m">'+esc(fmtDate(s.date_seance))+(s.heure_debut?' · '+esc(s.heure_debut.slice(0,5))+(s.heure_fin?' → '+esc(s.heure_fin.slice(0,5)):''):'')+
+      (s.lieu?' · '+esc(s.lieu):'')+' · '+esc(s.caserne||placeLabel(s))+(s.niveaux?' · Niveaux : '+esc(s.niveaux.split(',').join(', ')):'')+'</p>'+
+      '<table><tr><th class="n">#</th><th>JSP</th><th>Niveau</th><th>Présent</th><th>Observations</th></tr>'+(lignes||'<tr><td colspan="5">Aucun JSP concerné</td></tr>')+'</table>'+
+      '<p style="margin-top:28px">Encadrant : ______________________________ &nbsp; Signature : ____________________</p>');
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+// BILANS DE PRÉSENCE
+// ══════════════════════════════════════════════════════════
+var bilanPeriode='3mois', bilanData=null;
+function isoDate(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function bornesPeriode(){
+  var t=new Date(), fin=isoDate(t), debut;
+  if(bilanPeriode==='mois') debut=isoDate(new Date(t.getFullYear(), t.getMonth(), 1));
+  else if(bilanPeriode==='3mois') debut=isoDate(new Date(t.getFullYear(), t.getMonth()-3, t.getDate()+1));
+  else if(bilanPeriode==='annee') debut=isoDate(new Date(t.getMonth()>=8 ? t.getFullYear() : t.getFullYear()-1, 8, 1)); // 1er septembre
+  else { debut=val('bil-debut'); fin=val('bil-fin'); }
+  return {debut:debut, fin:fin};
+}
+// Périmètre du bilan, y compris en simulation (le serveur voit avec le jeton du super admin)
+function perimetreBilan(){
+  var cas=val('bil-caserne')||null, dep=depActif();
+  if(isSimulating() && !user.super_admin){
+    if(user.role==='resp_dep') dep=user.departement_id;
+    else { cas=user.caserne_id; dep=null; }
+  }
+  return {p_caserne:cas, p_departement:dep};
+}
+function initBilans(){
+  var multi=(isSuperAdmin() && !isSimulating()) || user.role==='resp_dep';
+  show('bil-caserne-row', multi, 'block');
+  if(multi) $('bil-caserne').innerHTML=caserneSelectHtml(casernesGerables(), val('bil-caserne')||null, 'Toutes les casernes');
+  if(!val('bil-debut')){ var b=(function(){ var p=bilanPeriode; bilanPeriode='3mois'; var r=bornesPeriode(); bilanPeriode=p; return r; })(); setVal('bil-debut', b.debut); setVal('bil-fin', b.fin); }
+  document.querySelectorAll('[data-periode]').forEach(function(c){ c.classList.toggle('active', c.dataset.periode===bilanPeriode); });
+  show('bil-dates', bilanPeriode==='perso', 'grid');
+  chargerBilan();
+}
+async function chargerBilan(){
+  var b=bornesPeriode(), el=$('bil-contenu');
+  if(!b.debut || !b.fin){ el.innerHTML=emptyState('📅','Choisis les deux dates'); return; }
+  $('bil-periode-lib').textContent='Du '+fmt(b.debut)+' au '+fmt(b.fin)+' · seules les séances dont l\'appel est enregistré sont comptées.';
+  el.innerHTML='<div class="loader"><span style="font-style:normal">⟳</span>Calcul du bilan…</div>';
+  try{ bilanData=await rpc('jsp_bilan', Object.assign({p_debut:b.debut, p_fin:b.fin}, perimetreBilan())); }
+  catch(e){ bilanData=null; el.innerHTML=emptyState('⚠️', e.message); show('bil-actions', false); return; }
+  renderBilan();
+}
+function libelleMois(m){ return parseDay(m+'-01').toLocaleDateString('fr-FR',{month:'short', year:'2-digit'}); }
+function renderBilan(){
+  var d=bilanData, t=d.totaux, el=$('bil-contenu');
+  show('bil-actions', d.jsps.length>0, 'flex');
+  var kpi='<div class="kpi-grid">'+
+    '<div class="kpi"><strong>'+(t.taux===null?'—':t.taux+' %')+'</strong><span>Taux de présence</span></div>'+
+    '<div class="kpi"><strong>'+t.seances+'</strong><span>Séance'+(t.seances>1?'s':'')+' avec appel</span></div>'+
+    '<div class="kpi"><strong>'+t.jsp+'</strong><span>JSP suivi'+(t.jsp>1?'s':'')+'</span></div>'+
+    '<div class="kpi'+(t.alertes?' warn':'')+'"><strong>'+(t.alertes?'⚠️ ':'')+t.alertes+'</strong><span>À relancer (3 absences de suite)</span></div></div>';
+  if(!t.seances){
+    el.innerHTML=kpi+emptyState('📈','Aucun appel sur cette période','Le bilan se remplit à chaque appel enregistré.');
+    return;
+  }
+  var mois='<div class="section-title">Présence par mois</div><div class="card" style="padding:8px 14px;margin-bottom:16px">'+
+    d.mois.map(function(m){
+      var v=m.taux===null?0:m.taux;
+      return '<div class="hbar" title="'+esc(libelleMois(m.mois)+' : '+m.presences+' présences sur '+m.appels+' ('+m.seances+' séance'+(m.seances>1?'s':'')+')')+'">'+
+        '<span class="l">'+esc(libelleMois(m.mois))+'</span><div class="track"><div class="fill" style="width:'+v+'%"></div></div>'+
+        '<span class="v">'+(m.taux===null?'—':m.taux+' %')+'</span></div>';
+    }).join('')+'</div>';
+  var alertes=d.jsps.filter(function(j){ return j.serie_absences>=3; });
+  var bloqAlertes = alertes.length ? '<div class="section-title">⚠️ À relancer</div><div class="card" style="padding:0 14px;margin-bottom:16px;border-color:var(--amber)">'+
+    alertes.map(function(j){
+      return '<div class="row" onclick="ouvrirFicheBilan(\''+esc(j.id)+'\')"><div class="row-icon" style="background:var(--amber-light)">⚠️</div>'+
+        '<div class="row-info"><div class="row-name">'+esc(fullName(j))+'</div><div class="row-detail">'+j.serie_absences+' absences de suite · '+
+        (j.derniere_presence?'dernière présence le '+fmt(j.derniere_presence):'aucune présence sur la période')+'</div></div><span style="color:var(--text2)">›</span></div>';
+    }).join('')+'</div>' : '';
+  var multi=new Set(d.jsps.map(function(j){ return j.caserne; })).size>1;
+  var liste='<div class="section-title">Par JSP <span style="text-transform:none;letter-spacing:0;font-weight:600">(du plus faible au plus assidu)</span></div><div class="card" style="padding:0 14px;margin-bottom:16px">'+
+    d.jsps.map(function(j){
+      var n=j.presents+j.absents, faible=j.taux!==null && j.taux<50 && n>=4;
+      var badge = j.taux===null ? '<span class="badge badge-gray">Pas d\'appel</span>'
+        : '<span class="badge '+(faible?'badge-red':j.taux>=80?'badge-green':'badge-amber')+'">'+(faible?'▼ ':'')+j.taux+' %</span>';
+      return '<div class="row" onclick="ouvrirFicheBilan(\''+esc(j.id)+'\')"><div class="row-info">'+
+        '<div class="row-name">'+esc(fullName(j))+'</div>'+
+        '<div class="row-detail">'+j.presents+' présence'+(j.presents>1?'s':'')+' sur '+n+' · '+esc(j.grade||'')+(multi&&j.caserne?' · '+esc(j.caserne):'')+'</div>'+
+        (j.taux===null?'':'<div class="meter" aria-hidden="true"><div style="width:'+j.taux+'%"></div></div>')+
+        '</div>'+badge+'</div>';
+    }).join('')+'</div>';
+  var sea='<div class="section-title">Par séance</div><div class="card" style="padding:0 14px">'+
+    d.seances.slice(0,30).map(function(s){
+      var tx=s.appels?Math.round(100*s.presents/s.appels):null;
+      return '<div class="row" style="cursor:default"><div class="row-info"><div class="row-name">'+esc(s.titre)+'</div>'+
+        '<div class="row-detail">'+fmtShort(s.date_seance)+(multi&&s.caserne?' · '+esc(s.caserne):'')+'</div></div>'+
+        '<span class="v" style="font-size:13px;font-weight:700">'+s.presents+'/'+s.appels+(tx===null?'':' · '+tx+' %')+'</span></div>';
+    }).join('')+'</div>'+(d.seances.length>30?'<div class="hint" style="margin-top:6px">30 dernières séances affichées. L\'export contient tout.</div>':'');
+  el.innerHTML=kpi+bloqAlertes+mois+liste+sea;
+}
+function ouvrirFicheBilan(id){
+  if(findMembre(id)) openJspDetail(id);
+  else toast('Fiche non disponible dans cet affichage');
+}
+function perimetreLibelle(){
+  var c=val('bil-caserne'); if(c) return casLabel(c, true);
+  if(isSimulating() && !user.super_admin) return user.caserne || depLabel(user.departement_id);
+  if(user.role==='resp_dep') return depLabel(user.departement_id);
+  if(isSuperAdmin()) return depActif() ? depLabel(depActif()) : 'Tous les départements';
+  return user.caserne||'';
+}
+function exporterBilanCsv(){
+  if(!bilanData) return;
+  var p=bilanData.periode;
+  exporterCsv(nomFichier('bilan-presences-'+p.debut+'-au-'+p.fin),
+    ['Nom','Prénom','Matricule','Niveau','Caserne','Présences','Absences','Taux (%)','Absences de suite','Dernière présence','Brevets','Cours validés'],
+    bilanData.jsps.map(function(j){ return [j.nom, j.prenom, j.matricule, j.grade, j.caserne, j.presents, j.absents, j.taux===null?'':j.taux,
+      j.serie_absences, j.derniere_presence?fmt(j.derniere_presence):'', j.brevets, j.cours_valides]; }));
+}
+function imprimerBilan(){
+  if(!bilanData) return;
+  var d=bilanData, t=d.totaux;
+  imprimer('bilan-presences.html', async function(){
+    return pageImprimable('Bilan de présence',
+      '<h1>Bilan de présence JSP</h1><p class="m">'+esc(perimetreLibelle())+' · du '+esc(fmt(d.periode.debut))+' au '+esc(fmt(d.periode.fin))+'</p>'+
+      '<div class="k"><div><strong>'+(t.taux===null?'—':t.taux+' %')+'</strong>Taux de présence</div><div><strong>'+t.seances+'</strong>Séances avec appel</div>'+
+      '<div><strong>'+t.jsp+'</strong>JSP suivis</div><div><strong>'+t.alertes+'</strong>À relancer</div></div>'+
+      '<h2>Par mois</h2><table><tr><th>Mois</th><th class="n">Séances</th><th class="n">Présences</th><th class="n">Taux</th></tr>'+
+      d.mois.map(function(m){ return '<tr><td>'+esc(parseDay(m.mois+'-01').toLocaleDateString('fr-FR',{month:'long',year:'numeric'}))+'</td><td class="n">'+m.seances+'</td><td class="n">'+m.presences+' / '+m.appels+'</td><td class="n">'+(m.taux===null?'—':m.taux+' %')+'</td></tr>'; }).join('')+'</table>'+
+      '<h2>Par JSP</h2><table><tr><th>JSP</th><th>Niveau</th><th>Caserne</th><th class="n">Présences</th><th class="n">Taux</th><th>Suivi</th></tr>'+
+      d.jsps.map(function(j){ var n=j.presents+j.absents; return '<tr><td>'+esc((j.nom||'')+' '+(j.prenom||''))+'</td><td>'+esc(j.grade||'')+'</td><td>'+esc(j.caserne||'')+'</td><td class="n">'+j.presents+' / '+n+'</td><td class="n">'+(j.taux===null?'—':j.taux+' %')+'</td><td'+(j.serie_absences>=3?' class="alerte">⚠ '+j.serie_absences+' absences de suite':'>')+'</td></tr>'; }).join('')+'</table>'+
+      '<h2>Par séance</h2><table><tr><th>Date</th><th>Séance</th><th>Caserne</th><th class="n">Présents</th></tr>'+
+      d.seances.map(function(s){ return '<tr><td>'+esc(fmt(s.date_seance))+'</td><td>'+esc(s.titre)+'</td><td>'+esc(s.caserne||'Commune')+'</td><td class="n">'+s.presents+' / '+s.appels+'</td></tr>'; }).join('')+'</table>');
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+// ÉVÉNEMENTS DE L'ÉTAPE 4
+// ══════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('[data-periode]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      bilanPeriode=btn.dataset.periode;
+      document.querySelectorAll('[data-periode]').forEach(function(b){ b.classList.toggle('active', b===btn); });
+      show('bil-dates', bilanPeriode==='perso', 'grid');
+      chargerBilan();
+    });
+  });
+  on('bil-debut','change', chargerBilan);
+  on('bil-fin','change', chargerBilan);
+  on('bil-caserne','change', chargerBilan);
+  on('btn-bil-csv','click', exporterBilanCsv);
+  on('btn-bil-print','click', imprimerBilan);
+  on('btn-export-jsps','click', exporterJsps);
+  on('am-search','input', function(){ clearTimeout(amTimer); amTimer=setTimeout(function(){ loadAdminMembres(); }, 300); });
+  on('am-role','change', function(){ loadAdminMembres(); });
+  on('am-caserne','change', function(){ loadAdminMembres(); });
+  on('btn-am-plus','click', function(){ loadAdminMembres(true); });
+  on('d-dep-actif','change', changerDepActif);
+  on('droits-portee','change', function(){ renderDroitsRoleGrid(curDroitsRole); });
+  on('logo-caserne','change', previewLogo);
 });
 
 </script>
