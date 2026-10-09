@@ -35,7 +35,10 @@ html,body{height:100%;background:#f0f2f5;font-family:-apple-system,BlinkMacSyste
 /* FORMS */
 .form-group{margin-bottom:14px}
 .form-label{font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:5px}
-.form-ctrl{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:15px;background:#fff;color:var(--text);font-family:inherit;-webkit-appearance:none;transition:border-color 0.15s}
+.form-ctrl{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:15px;background:#fff;color:var(--text);font-family:inherit;-webkit-appearance:none;transition:border-color 0.15s;min-width:0}
+/* Dates : même hauteur que les autres champs et valeur alignée à gauche (iPhone) */
+input[type=date].form-ctrl{min-height:45px;display:block}
+input[type=date].form-ctrl::-webkit-date-and-time-value{text-align:left}
 .form-ctrl:focus{outline:none;border-color:var(--blue)}
 select.form-ctrl{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:34px}
 select.form-ctrl:disabled{background-color:var(--bg2);color:var(--text2)}
@@ -61,8 +64,8 @@ textarea.form-ctrl{resize:none;line-height:1.5}
 /* DRAWER */
 #drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;opacity:0;pointer-events:none;transition:opacity 0.25s}
 #drawer-overlay.open{opacity:1;pointer-events:all}
-#drawer{position:fixed;top:0;left:0;width:280px;height:100vh;height:100dvh;background:#fff;z-index:201;transform:translateX(-100%);transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;overflow:hidden;box-shadow:4px 0 24px rgba(0,0,0,0.15)}
-#drawer.open{transform:translateX(0)}
+#drawer{position:fixed;top:0;left:0;width:280px;height:100vh;height:100dvh;background:#fff;z-index:201;transform:translateX(-100%);transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;overflow:hidden}
+#drawer.open{transform:translateX(0);box-shadow:4px 0 24px rgba(0,0,0,0.15)}
 #drawer-head{background:var(--blue);padding:max(env(safe-area-inset-top),44px) 16px 16px}
 #drawer-avatar{width:48px;height:48px;background:rgba(255,255,255,0.2);border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;font-size:22px}
 #drawer-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0;padding:8px 0}
@@ -108,7 +111,7 @@ textarea.form-ctrl{resize:none;line-height:1.5}
 
 /* LISTE ROWS */
 .row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1.5px solid var(--border);cursor:pointer}
-.row:last-child{border-bottom:none}
+.row:last-child,.row.row-fin{border-bottom:none}
 .row:active{opacity:0.7}
 .row-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
 .row-info{flex:1;min-width:0}
@@ -156,8 +159,8 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
 .modal{background:#fff;border-radius:20px 20px 0 0;padding:0 16px max(env(safe-area-inset-bottom),24px);width:100%;max-width:430px;max-height:92vh;overflow-y:auto}
 .modal-handle{width:38px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0}
 .modal-inner{padding:18px 0}
-.modal-title{font-size:17px;font-weight:800;color:var(--text);margin-bottom:3px}
-.modal-sub{font-size:13px;color:var(--text2);margin-bottom:18px}
+.modal-title{font-size:17px;font-weight:800;color:var(--text);margin-bottom:16px}
+.modal-sub{font-size:13px;color:var(--text2);margin-bottom:18px;margin-top:-13px}
 
 /* TOAST */
 .toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#1f2937;color:#fff;padding:12px 22px;border-radius:30px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity 0.25s;pointer-events:none;white-space:normal;max-width:88vw;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,0.25)}
@@ -200,6 +203,8 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
 
 /* ACTION ROW */
 .action-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.action-row>button{flex:1 1 calc(50% - 4px);min-height:48px;line-height:1.25}
+.btn-neutre{flex:1;padding:12px;background:var(--bg2);color:var(--text);border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit}
 .btn-edit{flex:1;padding:12px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit}
 .btn-ok{flex:1;padding:12px;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit}
 .btn-ko{flex:1;padding:12px;background:#fff;color:var(--red);border:1.5px solid var(--red);border-radius:var(--radius-sm);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit}
@@ -242,7 +247,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
 .brevet{background:var(--purple-light);color:var(--purple);font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;display:inline-block;margin:3px}
 
 /* INFO GRID */
-.ig{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.ig{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin-bottom:14px}
 .ig-item label{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:3px}
 .ig-item span{font-size:14px;font-weight:600;color:var(--text)}
 
@@ -519,12 +524,12 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
   <div class="screen" id="sc-jsps">
     <div class="section">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px">
-        <div class="section-title" style="margin-bottom:0">JSP de ma section</div>
+        <div class="section-title" style="margin-bottom:0" id="jsps-titre">JSP de ma caserne</div>
         <div style="display:flex;gap:6px;align-items:center">
           <select class="form-ctrl" id="filter-caserne-jsps" style="display:none;width:150px;font-size:12px;padding:6px 10px">
             <option value="">Toutes casernes</option>
           </select>
-          <button class="btn btn-ghost btn-sm" id="btn-export-jsps" aria-label="Exporter la liste">📊</button>
+          <button class="btn btn-ghost btn-sm" id="btn-export-jsps" aria-label="Exporter la liste en Excel">📊 Excel</button>
           <button class="btn btn-blue btn-sm" id="btn-add-jsp" style="display:none"><span style="font-style:normal">+</span>Ajouter</button>
         </div>
       </div>
@@ -562,7 +567,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
         </div>
         <div class="row sa-only" id="admin-btn-droits" style="display:none" onclick="showAdminPanel('admin-droits')">
           <div class="row-icon" style="background:#f0fdf4;font-size:22px">🔐</div>
-          <div class="row-info"><div class="row-name">Droits & acces</div><div class="row-detail">Gerer les droits par role et utilisateur</div></div>
+          <div class="row-info"><div class="row-name">Droits & accès</div><div class="row-detail">Gérer les droits par rôle et par personne</div></div>
           <span style="font-style:normal;color:var(--text2)">›</span>
         </div>
         <div class="row" id="admin-btn-casernes" style="display:none" onclick="showAdminPanel('admin-casernes')">
@@ -592,7 +597,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
         </div>
         <div class="row sa-only" id="admin-btn-test" style="display:none" onclick="switchTab('sc-test')">
           <div class="row-icon" style="background:#fdf4ff;font-size:22px">🧪</div>
-          <div class="row-info"><div class="row-name">Comptes test</div><div class="row-detail">Simuler un role ou un utilisateur</div></div>
+          <div class="row-info"><div class="row-name">Comptes test</div><div class="row-detail">Simuler un rôle ou un utilisateur</div></div>
           <span style="font-style:normal;color:var(--text2)">›</span>
         </div>
       </div>
@@ -612,8 +617,8 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
         <input class="form-ctrl" id="am-search" placeholder="🔍 Nom, prénom ou matricule…" style="margin-bottom:8px">
         <div style="display:flex;gap:8px;margin-bottom:12px">
           <select class="form-ctrl" id="am-role" aria-label="Rôle" style="flex:1;font-size:13px">
-            <option value="">Tous les rôles</option><option value="jsp">JSP</option><option value="moniteur">Moniteurs</option>
-            <option value="responsable">Responsables</option><option value="resp_dep">Resp. départementaux</option>
+            <option value="">Tous les rôles</option><option value="jsp">JSP</option><option value="moniteur">Animateurs</option>
+            <option value="responsable">Responsables JSP</option><option value="resp_dep">Administrateurs</option>
           </select>
           <select class="form-ctrl" id="am-caserne" aria-label="Caserne" style="flex:1;font-size:13px;display:none"></select>
         </div>
@@ -640,9 +645,9 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
           </div>
           <div class="chips" style="margin-bottom:14px">
             <button class="chip active" data-drole="jsp">JSP</button>
-            <button class="chip" data-drole="moniteur">Moniteur</button>
-            <button class="chip" data-drole="responsable">Responsable</button>
-            <button class="chip" data-drole="resp_dep">Resp. départ.</button>
+            <button class="chip" data-drole="moniteur">Animateur</button>
+            <button class="chip" data-drole="responsable">Responsable JSP</button>
+            <button class="chip" data-drole="resp_dep">Administrateur</button>
           </div>
           <div id="droits-roles-grid"></div>
           <div style="height:10px"></div>
@@ -770,16 +775,16 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
           <div style="font-size:12px;color:var(--text2)">Vue basique — séances, cours, progression personnelle</div>
         </div>
         <div class="card" style="cursor:pointer;border-left:4px solid var(--amber)" onclick="simulateRole('moniteur')">
-          <div style="font-size:20px;margin-bottom:4px">📋 <strong>Moniteur</strong></div>
+          <div style="font-size:20px;margin-bottom:4px">📋 <strong>Animateur</strong></div>
           <div style="font-size:12px;color:var(--text2)">Faire l'appel, valider progression, voir les JSP</div>
-        </div>
-        <div class="card" style="cursor:pointer;border-left:4px solid var(--purple)" onclick="simulateRole('resp_dep')">
-          <div style="font-size:20px;margin-bottom:4px">🗺️ <strong>Responsable départemental</strong></div>
-          <div style="font-size:12px;color:var(--text2)">Toutes les casernes du département de la caserne choisie</div>
         </div>
         <div class="card" style="cursor:pointer;border-left:4px solid var(--green)" onclick="simulateRole('responsable')">
           <div style="font-size:20px;margin-bottom:4px">⚙️ <strong>Responsable JSP</strong></div>
           <div style="font-size:12px;color:var(--text2)">Administration complète d'une caserne</div>
+        </div>
+        <div class="card" style="cursor:pointer;border-left:4px solid var(--purple)" onclick="simulateRole('resp_dep')">
+          <div style="font-size:20px;margin-bottom:4px">🗺️ <strong>Administrateur</strong></div>
+          <div style="font-size:12px;color:var(--text2)">Toutes les casernes du département de la caserne choisie</div>
         </div>
       </div>
       <div style="height:16px"></div>
@@ -809,7 +814,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
         <div class="ig-item"><label>Section</label><span id="profil-section">—</span></div>
         <div class="ig-item"><label>Rôle</label><span id="profil-role">—</span></div>
         <div class="ig-item" id="profil-entree-item"><label>Entrée JSP</label><span id="profil-entree">—</span></div>
-        <div class="ig-item"><label>Date naissance</label><span id="profil-ddn">—</span></div>
+        <div class="ig-item"><label>Date de naissance</label><span id="profil-ddn">—</span></div>
       </div>
       <div class="section-title" id="profil-parents-title">Coordonnées parents</div>
       <div class="card" id="profil-parents" style="font-size:13px;color:var(--text2)">—</div>
@@ -917,7 +922,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
         </div>
         <div style="font-size:11px;color:var(--text2);margin-top:6px">Laisser vide = tous niveaux</div>
       </div>
-      <div class="form-group"><label class="form-label">Mots-cles / matiere</label><input class="form-ctrl" id="ns-tags" placeholder="Ex : secourisme, PLS, RCP..."></div>
+      <div class="form-group"><label class="form-label">Mots-clés / matière</label><input class="form-ctrl" id="ns-tags" placeholder="Ex : secourisme, PLS, RCP..."></div>
       <div class="form-group"><label class="form-label">Description</label><textarea class="form-ctrl" id="ns-desc" rows="2" placeholder="Objectifs, contenu..."></textarea></div>
       <button class="btn btn-blue" id="btn-create-seance">📅 Planifier</button>
     </div>
@@ -1009,9 +1014,9 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
           <label class="form-label">Rôle</label>
           <select class="form-ctrl" id="nm-role">
             <option value="jsp">JSP</option>
-            <option value="moniteur">Moniteur</option>
-            <option value="responsable">Responsable de section</option>
-            <option value="resp_dep">Responsable départemental</option>
+            <option value="moniteur">Animateur</option>
+            <option value="responsable">Responsable JSP</option>
+            <option value="resp_dep">Administrateur</option>
           </select>
         </div>
       </div>
@@ -1023,7 +1028,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
             <option value="JSP2">JSP 2</option>
             <option value="JSP3">JSP 3</option>
             <option value="JSP4">JSP 4</option>
-            <option value="Moniteur">Moniteur</option>
+            <option value="Moniteur">Encadrant</option>
           </select>
         </div>
         <div class="ig-item form-group"><label class="form-label">Section</label><input class="form-ctrl" id="nm-section" placeholder="Ex : Section A"></div>
@@ -1037,8 +1042,8 @@ input:checked+.toggle-slider:before{transform:translateX(20px)}
         <select class="form-ctrl" id="nm-caserne"><option value="">— Choisir —</option></select>
       </div>
       <div class="ig">
-        <div class="ig-item form-group"><label class="form-label">Date naissance</label><input class="form-ctrl" type="date" id="nm-ddn"></div>
-        <div class="ig-item form-group"><label class="form-label">Date entrée</label><input class="form-ctrl" type="date" id="nm-entree"></div>
+        <div class="ig-item form-group"><label class="form-label">Date de naissance</label><input class="form-ctrl" type="date" id="nm-ddn"></div>
+        <div class="ig-item form-group"><label class="form-label">Date d'entrée</label><input class="form-ctrl" type="date" id="nm-entree"></div>
       </div>
       <div class="form-group"><label class="form-label">Contact parent (nom)</label><input class="form-ctrl" id="nm-parent-nom"></div>
       <div class="form-group"><label class="form-label">Contact parent (tél)</label><input class="form-ctrl" id="nm-parent-tel" type="tel"></div>
@@ -1224,7 +1229,7 @@ const db = supabase.createClient(SUPA_URL, SUPA_KEY);
 // ══════════════════════════════════════════════════════════
 // RÔLES, MODULES, DROITS
 // ══════════════════════════════════════════════════════════
-const ROLE_LABELS = { jsp:'JSP', moniteur:'Moniteur', responsable:'Responsable de section', resp_dep:'Responsable départemental' };
+const ROLE_LABELS = { jsp:'JSP', moniteur:'Animateur', responsable:'Responsable JSP', resp_dep:'Administrateur' };
 const RANG_ROLE = { jsp:1, moniteur:2, responsable:3, resp_dep:4 };
 function rangRole(r){ return RANG_ROLE[r]||1; }
 function rang(u){ return !u ? 0 : (u.super_admin ? 5 : rangRole(u.role)); }
@@ -1516,6 +1521,8 @@ function switchTab(tabId){
   if(tabId==='sc-bilans') initBilans();
   if(tabId==='sc-test'){ loadTestCasernes(); loadTestUsers(); }
 }
+// Retire le trait sous la dernière ligne visible (les lignes masquées comptent pour :last-child)
+function finirListe(el){ if(!el) return; var vis=[].filter.call(el.children,function(r){ return r.classList.contains('row') && r.style.display!=='none'; }); vis.forEach(function(r,i){ r.classList.toggle('row-fin', i===vis.length-1); }); }
 function openDrawer(){ $('drawer').classList.add('open'); $('drawer-overlay').classList.add('open'); }
 function closeDrawer(){ $('drawer').classList.remove('open'); $('drawer-overlay').classList.remove('open'); }
 
@@ -1529,6 +1536,7 @@ function updateMenu(){
   });
   show('menu-admin-title', ['appel','jsps','bilans','admin'].some(canAccess) || saReel, 'block');
   show('admin-btn-logo', rang(user)>=3, 'flex');
+  show('btn-export-jsps', rang(user)>=3, 'flex');
   renderDepActif();
   document.querySelectorAll('.sa-only').forEach(function(el){ el.style.display = saReel ? 'flex' : 'none'; });
   var actions = {
@@ -1539,6 +1547,7 @@ function updateMenu(){
   show('admin-btn-casernes', saReel || user.role==='resp_dep', 'flex');
   show('admin-btn-import', canAccess('membres_ajouter'), 'flex');
   show('admin-btn-journal', rang(user)>=3 && !isSimulating(), 'flex');
+  finirListe($('admin-btn-membres') && $('admin-btn-membres').parentNode);
   // Filtres par caserne : utiles dès qu'on voit plusieurs casernes
   var multi = saReel || user.role==='resp_dep';
   show('filter-caserne-jsps', multi, 'block');
@@ -2188,7 +2197,7 @@ function confidHtml(court){
   return h+'<h3>Quelles données ?</h3><ul><li>Identité : nom, prénom, matricule, date de naissance, caserne, section, niveau.</li>'+
       '<li>Contact du représentant légal (pour les JSP mineurs).</li><li>Présences aux séances, progression dans les cours, brevets obtenus.</li>'+
       '<li>Journal technique des actions (connexions, modifications), sans copie des valeurs personnelles.</li></ul>'+
-    '<h3>Qui y a accès ?</h3><p>Uniquement l\'encadrement de ta caserne (moniteurs, responsable) et le responsable départemental. Un JSP ne voit que ses propres données. Rien n\'est vendu ni transmis à des tiers.</p>'+
+    '<h3>Qui y a accès ?</h3><p>Uniquement l\'encadrement de ta caserne (animateurs, responsable JSP) et l\'administrateur départemental. Un JSP ne voit que ses propres données. Rien n\'est vendu ni transmis à des tiers.</p>'+
     '<h3>Combien de temps ?</h3><p>Pendant ta présence à la section. Après ton départ, ton compte est archivé puis anonymisé au bout de '+esc(ans)+' an'+(ans>1?'s':'')+'. Le journal des actions est effacé au bout de '+esc(mois)+' mois.</p>'+
     '<h3>Tes droits</h3><ul><li><strong>Accès</strong> : « Mon profil » → « Télécharger mes données ».</li>'+
       '<li><strong>Rectification</strong> : demande à ton responsable de corriger une information.</li>'+
@@ -2230,7 +2239,7 @@ function nomFichierExport(ext){
 }
 function telecharger(nom, contenu, type){
   var a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([contenu],{type:type}));
+  a.href=URL.createObjectURL(contenu instanceof Blob ? contenu : new Blob([contenu],{type:type}));
   a.download=nom; document.body.appendChild(a); a.click();
   setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
@@ -2317,7 +2326,7 @@ const OBJETS = { utilisateurs:'le membre', seances:'la séance', presences:'une 
   brevets:'le brevet', documents:'le document', cours:'le cours', casernes:'la caserne', departements:'le département' };
 const CHAMPS = { prenom:'prénom', nom:'nom', matricule:'matricule', role:'rôle', grade:'niveau', section:'section',
   caserne_id:'caserne', date_naissance:'date de naissance', date_entree:'date d\'entrée', contact_parent_nom:'représentant légal',
-  contact_parent_tel:'téléphone', actif:'statut actif', archive_le:'archivage', droits:'droits', premiere_connexion:'1re connexion',
+  contact_parent_tel:'téléphone', actif:'statut actif', archive_le:'archivage', droits:'droits', premiere_connexion:'1re connexion', mdp:'mot de passe',
   info_rgpd_le:'lecture RGPD', statut:'statut', titre:'titre', date_seance:'date', present:'présence', note:'note', niveaux:'niveaux' };
 function journalPhrase(j, sansActeur){
   var qui=sansActeur?'':'<strong>'+esc(j.acteur_nom||'Système')+'</strong> ';
@@ -2326,7 +2335,7 @@ function journalPhrase(j, sansActeur){
   var champs=(j.details&&j.details.champs)||[];
   switch(j.action){
     case 'connexion': return qui+'s\'est connecté(e)';
-    case 'export': return qui+'a exporté les données de'+lib;
+    case 'export': return qui+(j.objet==='export' ? 'a exporté'+lib : 'a exporté les données de'+lib);
     case 'anonymisation': return qui+'a effacé définitivement un membre';
     case 'insert':
       if(j.objet==='presences') return qui+'a noté '+(j.details.present?'une présence':'une absence');
@@ -2334,6 +2343,13 @@ function journalPhrase(j, sansActeur){
     case 'delete': return qui+'a supprimé '+quoi+lib;
     case 'update':
       if(j.objet==='presences') return qui+'a corrigé une présence';
+      // Mot de passe : « mdp » (étape 5) ou ancienne trace « 1re connexion » seule
+      if(j.objet==='utilisateurs' && (champs.indexOf('mdp')>=0 || (champs.length===1 && champs[0]==='premiere_connexion'))){
+        var autres=champs.filter(function(c){ return c!=='mdp' && c!=='premiere_connexion'; });
+        var soi=j.acteur_id && String(j.acteur_id)===String(j.objet_id);
+        return qui+(soi ? 'a changé son mot de passe' : 'a donné un nouveau mot de passe provisoire à'+lib)+
+          (autres.length?' <span style="color:var(--text2)">(et '+esc(autres.map(function(c){ return CHAMPS[c]||c; }).join(', '))+')</span>':'');
+      }
       return qui+'a modifié '+quoi+lib+(champs.length?' <span style="color:var(--text2)">('+esc(champs.map(function(c){ return CHAMPS[c]||c; }).join(', '))+')</span>':'');
   }
   return qui+esc(j.action)+' '+quoi+lib;
@@ -2488,15 +2504,18 @@ async function lancerImport(){
 }
 function telechargerMdpImport(){
   var l=window._importCrees||[];
-  telecharger('mots-de-passe-provisoires-'+today()+'.csv', '\uFEFF'+'nom;prenom;matricule;mot_de_passe_provisoire\n'+
-    l.map(function(c){ return [c.nom,c.prenom,c.matricule,c.mdp_provisoire].map(function(v){ return '"'+String(v||'').replace(/"/g,'""')+'"'; }).join(';'); }).join('\n'),
-    'text/csv;charset=utf-8');
+  exporterTableur('mots-de-passe-provisoires-'+today()+'.xlsx', 'Mots de passe', ['Nom','Prénom','Matricule','Mot de passe provisoire'],
+    l.map(function(c){ return [c.nom, c.prenom, c.matricule, c.mdp_provisoire]; }));
+  rpc('jsp_trace_export',{p_quoi:'mots de passe provisoires de l\'import', p_nb:l.length}).catch(function(){});
 }
 
 // ══════════════════════════════════════════════════════════
 // MES JSP
 // ══════════════════════════════════════════════════════════
 function loadJsps(){
+  var tt=$('jsps-titre');
+  if(tt) tt.textContent = (isSuperAdmin() && !isSimulating()) ? (depActif() ? 'JSP du '+depLabel(depActif()) : 'Tous les JSP')
+    : (user.role==='resp_dep' ? 'JSP du département' : 'JSP de ma caserne');
   var search=val('jsps-search').toLowerCase();
   var fc=$('filter-caserne-jsps'), casF = fc && fc.style.display!=='none' ? fc.value : '';
   var list=jsps.filter(function(j){
@@ -2536,7 +2555,7 @@ async function openJspDetail(id){
   }
   if(j.anonymise_le){ actEl.innerHTML='<div class="hint">Données effacées le '+fmt(j.anonymise_le)+'.</div>'; }
   else {
-    if(peutGerer(j) && !isSimulating()) add('btn-ghost btn-sm','📥 Données (RGPD)', function(){ ouvrirExport(id); });
+    if(peutGerer(j) && !isSimulating()) add('btn-neutre','📥 Données (RGPD)', function(){ ouvrirExport(id); });
     if(canArchive(j)) add('btn-ko', j.actif===false ? '↩ Réactiver' : '📦 Archiver (départ)', function(){ archiverMembre(id, j.actif===false); });
     if(canArchive(j) && j.actif===false && !isSimulating()) add('btn-ko','🧹 Effacer définitivement', function(){ effacerMembre(id); });
   }
@@ -3053,7 +3072,7 @@ function loadProfil(){
   $('profil-parents').textContent=(user.contact_parent_nom||'—')+(user.contact_parent_tel?' · '+user.contact_parent_tel:'');
   var isJsp=user.role==='jsp';
   ['profil-entree-item','profil-parents-title','profil-parents'].forEach(function(id){ show(id, isJsp); });
-  show('btn-profil-edit', canEditMembre(user), 'flex');
+  show('btn-profil-edit', canEditMembre(user) && String(user.id).indexOf('virtual-')!==0, 'flex');
 }
 async function saveChangePw(){
   hideErr('cpw-err');
@@ -3290,14 +3309,73 @@ async function changerDepActif(){
 // EXPORTS : outils communs
 // ══════════════════════════════════════════════════════════
 // Fichier CSV lisible directement par Excel (séparateur « ; », accents conservés)
-function exporterCsv(nom, entetes, lignes){
-  var cell=function(v){ v=(v===null||v===undefined)?'':String(v); return /[";\n\r]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; };
-  var txt=[entetes].concat(lignes).map(function(l){ return l.map(cell).join(';'); }).join('\r\n');
-  telecharger(nom, '﻿'+txt, 'text/csv;charset=utf-8');
-  toast('Fichier téléchargé ✓ (s\'ouvre avec Excel)');
+// Fabrique un vrai fichier Excel (.xlsx) sans bibliothèque externe.
+// Les textes restent des textes (0 de tête des téléphones conservé, aucune formule possible).
+function octetsUtf8(t){
+  if(typeof TextEncoder!=='undefined') return new TextEncoder().encode(t);
+  var b=unescape(encodeURIComponent(t)), a=new Uint8Array(b.length);
+  for(var i=0;i<b.length;i++) a[i]=b.charCodeAt(i);
+  return a;
 }
-function nomFichier(base){
-  return (base+'-'+today()).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9-]+/g,'-').replace(/-+/g,'-')+'.csv';
+var CRC_TABLE=null;
+function crc32(a){
+  if(!CRC_TABLE){ CRC_TABLE=[]; for(var n=0;n<256;n++){ var c=n; for(var k=0;k<8;k++) c=c&1?0xEDB88320^(c>>>1):c>>>1; CRC_TABLE.push(c>>>0); } }
+  var crc=0xFFFFFFFF; for(var i=0;i<a.length;i++) crc=CRC_TABLE[(crc^a[i])&0xFF]^(crc>>>8);
+  return (crc^0xFFFFFFFF)>>>0;
+}
+// Archive ZIP « stockée » (sans compression) : suffisante pour un fichier Excel
+function zipStocke(fichiers){
+  var morceaux=[], central=[], pos=0, d=new Date();
+  var heure=(d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1), jour=((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate();
+  fichiers.forEach(function(f){
+    var nom=octetsUtf8(f.nom), data=octetsUtf8(f.contenu), crc=crc32(data);
+    var h=new DataView(new ArrayBuffer(30));
+    h.setUint32(0,0x04034b50,true); h.setUint16(4,20,true); h.setUint16(6,0x0800,true); h.setUint16(8,0,true);
+    h.setUint16(10,heure,true); h.setUint16(12,jour,true); h.setUint32(14,crc,true);
+    h.setUint32(18,data.length,true); h.setUint32(22,data.length,true); h.setUint16(26,nom.length,true); h.setUint16(28,0,true);
+    var c=new DataView(new ArrayBuffer(46));
+    c.setUint32(0,0x02014b50,true); c.setUint16(4,20,true); c.setUint16(6,20,true); c.setUint16(8,0x0800,true); c.setUint16(10,0,true);
+    c.setUint16(12,heure,true); c.setUint16(14,jour,true); c.setUint32(16,crc,true); c.setUint32(20,data.length,true); c.setUint32(24,data.length,true);
+    c.setUint16(28,nom.length,true); c.setUint32(42,pos,true);
+    morceaux.push(new Uint8Array(h.buffer), nom, data);
+    central.push(new Uint8Array(c.buffer), nom);
+    pos+=30+nom.length+data.length;
+  });
+  var tailleCentral=central.reduce(function(t,a){ return t+a.length; },0);
+  var e=new DataView(new ArrayBuffer(22));
+  e.setUint32(0,0x06054b50,true); e.setUint16(8,fichiers.length,true); e.setUint16(10,fichiers.length,true);
+  e.setUint32(12,tailleCentral,true); e.setUint32(16,pos,true);
+  return morceaux.concat(central,[new Uint8Array(e.buffer)]);
+}
+function xmlTexte(v){ return String(v).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function colonneExcel(i){ var s=''; i++; while(i>0){ var m=(i-1)%26; s=String.fromCharCode(65+m)+s; i=Math.floor((i-1)/26); } return s; }
+function exporterTableur(nom, feuille, entetes, lignes){
+  var toutes=[entetes].concat(lignes);
+  var largeurs=entetes.map(function(_,c){ return Math.min(50, Math.max(8, toutes.reduce(function(m,l){ return Math.max(m, String(l[c]==null?'':l[c]).length); },0)+2)); });
+  var rows=toutes.map(function(l,r){
+    return '<row r="'+(r+1)+'">'+l.map(function(v,c){
+      var ref=colonneExcel(c)+(r+1);
+      if(v===null||v===undefined||v==='') return '';
+      if(typeof v==='number' && isFinite(v)) return '<c r="'+ref+'"'+(r===0?' s="1"':'')+'><v>'+v+'</v></c>';
+      return '<c r="'+ref+'" t="inlineStr"'+(r===0?' s="1"':'')+'><is><t xml:space="preserve">'+xmlTexte(v)+'</t></is></c>';
+    }).join('')+'</row>';
+  }).join('');
+  var NS='http://schemas.openxmlformats.org/', ent='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+  var nomFeuille=xmlTexte(String(feuille||'Feuille 1').replace(/[\[\]:*?\/\\]/g,' ').slice(0,31));
+  var parts=zipStocke([
+    {nom:'[Content_Types].xml', contenu:ent+'<Types xmlns="'+NS+'package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>'},
+    {nom:'_rels/.rels', contenu:ent+'<Relationships xmlns="'+NS+'package/2006/relationships"><Relationship Id="rId1" Type="'+NS+'officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'},
+    {nom:'xl/workbook.xml', contenu:ent+'<workbook xmlns="'+NS+'spreadsheetml/2006/main" xmlns:r="'+NS+'officeDocument/2006/relationships"><sheets><sheet name="'+nomFeuille+'" sheetId="1" r:id="rId1"/></sheets></workbook>'},
+    {nom:'xl/_rels/workbook.xml.rels', contenu:ent+'<Relationships xmlns="'+NS+'package/2006/relationships"><Relationship Id="rId1" Type="'+NS+'officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="'+NS+'officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'},
+    {nom:'xl/styles.xml', contenu:ent+'<styleSheet xmlns="'+NS+'spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>'},
+    {nom:'xl/worksheets/sheet1.xml', contenu:ent+'<worksheet xmlns="'+NS+'spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>'+
+      largeurs.map(function(l,i){ return '<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+l+'" customWidth="1"/>'; }).join('')+'</cols><sheetData>'+rows+'</sheetData></worksheet>'}
+  ]);
+  telecharger(nom, new Blob(parts,{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  toast('Fichier Excel téléchargé ✓');
+}
+function nomFichier(base, ext){
+  return (base+'-'+today()).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9-]+/g,'-').replace(/-+/g,'-')+'.'+(ext||'xlsx');
 }
 const PRINT_CSS = 'body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:900px;margin:24px auto;padding:0 16px;color:#111;font-size:12px}'+
   'h1{font-size:19px;margin:0 0 4px}h2{font-size:14px;margin:22px 0 6px;border-bottom:2px solid #1a56a0;padding-bottom:3px}'+
@@ -3327,7 +3405,8 @@ function exporterJsps(){
   var fc=$('filter-caserne-jsps'), casF = fc && fc.style.display!=='none' ? fc.value : '';
   var l=jsps.filter(function(j){ return j.role==='jsp' && (!casF || j.caserne_id===casF); });
   if(!l.length){ toast('Aucun JSP à exporter'); return; }
-  exporterCsv(nomFichier('liste-jsp'), ['Nom','Prénom','Matricule','Niveau','Caserne','Section','Date de naissance','Entrée JSP','Représentant légal','Téléphone'],
+  rpc('jsp_trace_export',{p_quoi:'liste des JSP', p_nb:l.length}).catch(function(){});
+  exporterTableur(nomFichier('liste-jsp'), 'JSP', ['Nom','Prénom','Matricule','Niveau','Caserne','Section','Date de naissance','Entrée JSP','Représentant légal','Téléphone'],
     l.map(function(j){ return [j.nom, j.prenom, j.matricule, j.grade, j.caserne, j.section, j.date_naissance?fmt(j.date_naissance):'',
       j.date_entree?fmt(j.date_entree):'', j.contact_parent_nom, j.contact_parent_tel]; }));
 }
@@ -3414,7 +3493,7 @@ function renderBilan(){
   var bloqAlertes = alertes.length ? '<div class="section-title">⚠️ À relancer</div><div class="card" style="padding:0 14px;margin-bottom:16px;border-color:var(--amber)">'+
     alertes.map(function(j){
       return '<div class="row" onclick="ouvrirFicheBilan(\''+esc(j.id)+'\')"><div class="row-icon" style="background:var(--amber-light)">⚠️</div>'+
-        '<div class="row-info"><div class="row-name">'+esc(fullName(j))+'</div><div class="row-detail">'+j.serie_absences+' absences de suite · '+
+        '<div class="row-info"><div class="row-name">'+esc(fullName(j))+'</div><div class="row-detail" style="white-space:normal">'+j.serie_absences+' absences de suite · '+
         (j.derniere_presence?'dernière présence le '+fmt(j.derniere_presence):'aucune présence sur la période')+'</div></div><span style="color:var(--text2)">›</span></div>';
     }).join('')+'</div>' : '';
   var multi=new Set(d.jsps.map(function(j){ return j.caserne; })).size>1;
@@ -3452,7 +3531,8 @@ function perimetreLibelle(){
 function exporterBilanCsv(){
   if(!bilanData) return;
   var p=bilanData.periode;
-  exporterCsv(nomFichier('bilan-presences-'+p.debut+'-au-'+p.fin),
+  rpc('jsp_trace_export',{p_quoi:'bilan de présence '+p.debut+' au '+p.fin, p_nb:bilanData.jsps.length}).catch(function(){});
+  exporterTableur(nomFichier('bilan-presences-'+p.debut+'-au-'+p.fin), 'Bilan', 
     ['Nom','Prénom','Matricule','Niveau','Caserne','Présences','Absences','Taux (%)','Absences de suite','Dernière présence','Brevets','Cours validés'],
     bilanData.jsps.map(function(j){ return [j.nom, j.prenom, j.matricule, j.grade, j.caserne, j.presents, j.absents, j.taux===null?'':j.taux,
       j.serie_absences, j.derniere_presence?fmt(j.derniere_presence):'', j.brevets, j.cours_valides]; }));
@@ -3460,6 +3540,7 @@ function exporterBilanCsv(){
 function imprimerBilan(){
   if(!bilanData) return;
   var d=bilanData, t=d.totaux;
+  rpc('jsp_trace_export',{p_quoi:'bilan de présence (impression) '+d.periode.debut+' au '+d.periode.fin, p_nb:d.jsps.length}).catch(function(){});
   imprimer('bilan-presences.html', async function(){
     return pageImprimable('Bilan de présence',
       '<h1>Bilan de présence JSP</h1><p class="m">'+esc(perimetreLibelle())+' · du '+esc(fmt(d.periode.debut))+' au '+esc(fmt(d.periode.fin))+'</p>'+
